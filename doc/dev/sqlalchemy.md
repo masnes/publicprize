@@ -3,7 +3,7 @@ Python SQLAlchemy
 
 SQLAlchemy allows defining models and their relationships which then
 directly map to a database schema which can be automatically
-generated. For example, three models:
+generated. For example, three models::
 
 class Budget(db.Model):
     month_year = db.Column(db.Date, primary_key=True)
