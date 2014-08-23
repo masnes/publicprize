@@ -1,3 +1,0 @@
-{% extends 'layouts/base.html' %}
-
-{% set project_title = 'Page Not Found' %}
