@@ -1,0 +1,48 @@
+{
+  "Contest": [
+    {
+      "biv_id": 1,
+      "display_name": "Espirit Venture Prize 2014",
+
+      "Contestant": [
+	{
+	  "biv_id": 1,
+	  "display_name": "Culture Kitchen",
+	  "youtube_code": "TvhOWfIoutU",
+	  "slideshow_code": "18074260",
+	  "contestant_desc": "Culture Kitchen brings real authentic ethnic cuisines and the story behind the food to food lovers through our online platform. At www.culturekitchensf.com we bring you the recipes, cooking knowledge and ingredients to actually cook at home. These are the coveted recipes that get passed down from generation to generation. We connect you with the grandmothers from around the world you wish you had and now the ingredients and knowledge to cook like them at home.",
+
+	  "Founder": [
+	    {
+	      "biv_id": 1,
+	      "display_name": "Abby Sturges",
+	      "founder_avatar": "abby-sturges.jpg",
+	      "founder_desc": "Product Manager @Tastemade. Founder/COO @Culture Kitchen, @500 Startups, @Designer Fund. MFA Design @Stanford University. BFA Industrial Design @CMU University."
+	    },
+	    {
+	      "biv_id": 2,
+	      "display_name": "Jennifer Lopez",
+	      "founder_avatar": "jennifer-lopez.jpg",
+	      "founder_desc": "Founder @Culture Kitchen. MFA Product Design @Stanford University. First DFund class at 500 Startups. @Dartmouth College 2008. Jewelry Designer and Metalsmith. "
+	    }
+	  ]
+	},
+	{
+	  "biv_id": 2,
+	  "display_name": "gazeMetrix",
+	  "youtube_code": "IltOrITTJBo",
+	  "slideshow_code": "18075112",
+	  "contestant_desc": "gazeMetrix empowers brands with insight into when and where their brand was photographed across social media in real-time. Using proprietary computer vision and machine learning algorithms, gazeMetrix accurately analyzes user-created photos on Instagram and identifies when a brand is featured. Brands discover their latest photos instantly. We automatically pick up the 'most popular pictures' and they can share them on their fan page/ Pinterest boards or twitter streams.",
+
+	  "Founder": []
+	}
+      ]
+    },
+    {
+      "biv_id": 2,
+      "display_name": "Empty Contest",
+
+      "Contestant": []
+    }
+  ]
+}
