@@ -35,6 +35,7 @@ def create_test_data():
                     contestant_desc=contestant['contestant_desc'],
                 )
             )
+            _add_owner(contest, contestant);
 
             for founder in contestant['Founder']:
                 db.session.add(
@@ -45,6 +46,8 @@ def create_test_data():
                         founder_desc=founder['founder_desc']
                     )
                 )
+                _add_owner(contest, founder);
+                _add_owner(contestant, founder);
 
     db.session.commit()
 
@@ -59,8 +62,13 @@ def drop_db():
     if prompt_bool("Drop database?"):
         db.drop_all()
 
-def _add_parent(parent, child):
-    db.session.add(child)
+def _add_owner(parent, child):
+    db.session.add(
+        publicprize.auth.model.BivAccess(
+            source_biv_id=parent['biv_id'],
+            target_biv_id=child['biv_id']
+        )
+    )
 
 if __name__ == "__main__":
     manager.run()
