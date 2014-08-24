@@ -1,24 +1,23 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
+import flask.ext.script as fes
 import json
-from flask.ext.script import Manager, prompt_bool
-from publicprize import app
-from publicprize import db
+import publicprize as pp
 import publicprize.auth.model
 import publicprize.contest.model
 
-manager = Manager(app)
+_manager = fes.Manager(pp.app)
 
-@manager.command
+@_manager.command
 def create_db():
-    db.create_all();
+    pp.db.create_all();
 
-@manager.command
+@_manager.command
 def create_test_data():
     data = json.load(open('data/test_data.json', 'r'))
 
     for contest in data['Contest']:
-        db.session.add(
+        pp.db.session.add(
             publicprize.contest.model.Contest(
                 biv_id=contest['biv_id'],
                 display_name=contest['display_name']
@@ -26,7 +25,7 @@ def create_test_data():
         )
 
         for contestant in contest['Contestant']:
-            db.session.add(
+            pp.db.session.add(
                 publicprize.contest.model.Contestant(
                     biv_id=contestant['biv_id'],
                     display_name=contestant['display_name'],
@@ -38,7 +37,7 @@ def create_test_data():
             _add_owner(contest, contestant);
 
             for founder in contestant['Founder']:
-                db.session.add(
+                pp.db.session.add(
                     publicprize.contest.model.Founder(
                         biv_id=founder['biv_id'],
                         display_name=founder['display_name'],
@@ -49,21 +48,21 @@ def create_test_data():
                 _add_owner(contest, founder);
                 _add_owner(contestant, founder);
 
-    db.session.commit()
+    pp.db.session.commit()
 
-@manager.command
+@_manager.command
 def create_test_db():
     drop_db();
     create_db();
     create_test_data();
     
-@manager.command
+@_manager.command
 def drop_db():
-    if prompt_bool("Drop database?"):
-        db.drop_all()
+    if fes.prompt_bool("Drop database?"):
+        pp.db.drop_all()
 
 def _add_owner(parent, child):
-    db.session.add(
+    pp.db.session.add(
         publicprize.auth.model.BivAccess(
             source_biv_id=parent['biv_id'],
             target_biv_id=child['biv_id']
@@ -71,4 +70,4 @@ def _add_owner(parent, child):
     )
 
 if __name__ == "__main__":
-    manager.run()
+    _manager.run()
