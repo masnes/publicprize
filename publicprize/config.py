@@ -5,6 +5,8 @@ class BaseConfig(object):
 
 class DevConfig(BaseConfig):
     DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/pp.db'
+    SQLALCHEMY_ECHO = True
 
 class ProdConfig(BaseConfig):
     # TODO(pjm): read from file
