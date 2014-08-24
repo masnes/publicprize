@@ -2,11 +2,10 @@
 
 import flask
 from publicprize import app
-
 @app.route("/")
 @app.route("/index.html")
 def home_page():
-    return flask.render_template("index.html")
+    return flask.render_template("site_root/index.html")
 
 @app.route('/<biv_id>/contestants')
 def contestants(biv_id):
