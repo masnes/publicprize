@@ -39,10 +39,13 @@ class Model(object):
         cls.query.filter_by(biv_id=biv_id).first_or_404()
 
 def _init():
+    global _ACTION_PREFIX
+    global _BIV_ID_PREFIX
     global _DEFAULT_ACTION_NAME
     global _DEFAULT_BIV_URI
     global _ERROR_BIV_URI
     global _app
+    global _biv_alias_to_biv_id
     global _biv_type_to_model_class
     global _biv_type_to_task_class
     global db
@@ -51,16 +54,22 @@ def _init():
     _app.config.from_object(ppc.DevConfig)
     db = fesa.SQLAlchemy(_app)
 
+    _BIV_ID_PREFIX = '='
+    _ACTION_METHOD_PREFIX = 'action_'
     _DEFAULT_BIV_URI = 'index'
     _ERROR_BIV_URI = 'error'
     _DEFAULT_ACTION_NAME = _DEFAULT_BIV_URI
     _biv_type_to_task_class= {}
     _biv_type_to_model_class= {}
+    _biv_alias_to_biv_id = {
+        _DEFAULT_BIV_URI: '1004',
+        _ERROR_BIV_URI: '2004',
+        # flask serves /static implicitly so need to shadow here
+        'static': '3004'}
 
 _init()
 
 def _load_biv_obj(biv_type, biv_id):
-    print(_biv_type_to_model_class)
     if not biv_type in _biv_type_to_model_class:
         raise ValueError(biv_type + ": unknown biv_type")
     return _biv_type_to_model_class[biv_type].load_biv_obj(biv_id)
@@ -68,34 +77,28 @@ def _load_biv_obj(biv_type, biv_id):
 def _lookup_action(biv_type, name):
     if len(name) == 0:
         name = _DEFAULT_ACTION_NAME
-    tc = _biv_type_to_task_class[biv_type]
+    task = _biv_type_to_task_class[biv_type]
     name = re.sub('\W', '_', name)
-    n = 'action_' + name
-    if not hasattr(tc, n):
-        raise ValueError(n + ': action not found')
-    m = getattr(tc, n)
+    name = _ACTION_METHOD_PREFIX + name
+
+    if not hasattr(task, name):
+        raise ValueError(name + ': action not found')
+    m = getattr(task, name)
     if not inspect.isfunction(m):
-        raise ValueError(n + ': action not a method')
+        raise ValueError(name + ': action not a method')
     return m
 
 def _lookup_biv_id(biv_uri):
     if len(biv_uri) == 0:
         biv_uri = _DEFAULT_BIV_URI
-    m = re.match('^=(\d+)$', biv_uri)
+    m = re.match('^' + _BIV_ID_PREFIX + '(\d+)$', biv_uri)
     if m:
         return m.group(1)
-    #TODO: will want a static look aside for error lookups at a minimum
-    #      but will want db lookups in biv_uri_alias_t
-    d = {
-        _DEFAULT_BIV_URI: '1004',
-        _ERROR_BIV_URI: '2004',
-        # flask serves /static implicitly so need to shadow here
-        'static': '3004',
-    };
-    if biv_uri in d:
-        return d[biv_uri]
 
-    # Testing not found
+    if biv_uri in _biv_alias_to_biv_id:
+        return _biv_alias_to_biv_id[biv_uri]
+
+    # Test not found action, but want better exception
     flask.abort(404)
 
     #TODO: wrap better
@@ -126,4 +129,3 @@ def _route_404(e):
 @_app.route("/")
 def _route_root():
     return _route('')
-
