@@ -1,0 +1,54 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}
+- {{ contest.display_name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="col-sm-7 pp-main">
+    <div>
+        {% if contest.logo_type %}
+    	    <img class="pp-logo hidden-xs" src="logo" alt="{{ contest.display_name }}">
+	{% endif %}
+        <div class="pp-heading">
+            <h1>{{ contest.display_name }}</h1>
+            <p class="lead pp-description pp-nowrap clearfix">{{ contest.tag_line }}</p>
+    	</div>
+    </div>
+</div>
+
+<div class="col-sm-4 col-sm-offset-1 pp-sidebar">
+    <div class="sidebar-module sidebar-module-inset pp-summary">
+    	<h3>Prize Info...</h3>
+    </div>
+</div>
+
+<div class="col-sm-12">
+    {% macro option(value, text, count=0) -%}
+    	<option value="{{ value }}"
+      	    {%- if selected == value %} selected="selected"{% endif -%}>
+	    {{- text -}}
+	    {% if count %}{{ " (" ~ count ~ ")" }}{% endif -%}
+	</option>
+    {%- endmacro -%}
+    <select class="pp-menu-xs form-control visible-xs" onchange="window.location = this.options[this.selectedIndex].value;">
+      	{{ option('contestants', 'Contestants', contest.contestant_count()) }}
+	{{ option('donors', 'Donors', contest.donor_count()) }}
+	{{ option('about', 'About') }}
+	{{ option('how-to-enter', 'How to Enter') }}
+    </select>
+    {% macro menu_link(value, text, count=0) -%}
+    	<a href="{{ value }}" class="btn btn-default pp-button {% if selected == value %}pp-selected-button{% endif %}">{{ text }}
+	    {%- if count %} <span class="badge">{{ count }}</span>{% endif -%}
+	</a>
+    {%- endmacro -%}
+    <div class="btn-group pp-menu hidden-xs">
+        {{ menu_link('contestants', 'Contestants', contest.contestant_count()) }}
+	{{ menu_link('donors', 'Donors', contest.donor_count()) }}
+	{{ menu_link('about', 'About') }}
+	{{ menu_link('how-to-enter', 'How to Enter') }}
+  </div>
+</div>	
+
+{% endblock %}
