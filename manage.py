@@ -7,6 +7,8 @@ from publicprize.controller import db
 import publicprize.auth.model
 import publicprize.contest.model
 
+# Needs to be explicit
+ppc.init()
 _manager = fes.Manager(ppc.app())
 
 @_manager.command
