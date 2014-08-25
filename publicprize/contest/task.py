@@ -1,5 +1,6 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 import flask
+import io
 import publicprize.controller as ppc
 
 class Contest(ppc.Task):
@@ -12,11 +13,10 @@ class Contest(ppc.Task):
     def action_how_to_enter(biv_obj):
         return Contest._render_template(biv_obj, 'how-to-enter')
     def action_logo(biv_obj):
-        # TODO(pjm): see if an easier way - also use logo_type
-        response = flask.make_response(biv_obj.contest_logo)
-        response.headers['Content-Type'] = 'image/gif'
-        response.headers['Content-DIsposition'] = 'attachment; filename=logo.gif'
-        return response
+        return flask.send_file(
+            io.BytesIO(biv_obj.contest_logo),
+            'image/' + biv_obj.logo_type
+        )
     def _render_template(biv_obj, name):
         return flask.render_template(
             "contest/" + name + ".html",
