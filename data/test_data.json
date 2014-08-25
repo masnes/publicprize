@@ -6,7 +6,7 @@
 
       "Contestant": [
 	{
-	  "biv_id": 2002,
+	  "biv_id": 1002,
 	  "display_name": "Culture Kitchen",
 	  "youtube_code": "TvhOWfIoutU",
 	  "slideshow_code": "18074260",
@@ -14,13 +14,13 @@
 
 	  "Founder": [
 	    {
-	      "biv_id": 3003,
+	      "biv_id": 1003,
 	      "display_name": "Abby Sturges",
 	      "founder_avatar": "abby-sturges.jpg",
 	      "founder_desc": "Product Manager @Tastemade. Founder/COO @Culture Kitchen, @500 Startups, @Designer Fund. MFA Design @Stanford University. BFA Industrial Design @CMU University."
 	    },
 	    {
-	      "biv_id": 3003,
+	      "biv_id": 2003,
 	      "display_name": "Jennifer Lopez",
 	      "founder_avatar": "jennifer-lopez.jpg",
 	      "founder_desc": "Founder @Culture Kitchen. MFA Product Design @Stanford University. First DFund class at 500 Startups. @Dartmouth College 2008. Jewelry Designer and Metalsmith. "
