@@ -13,7 +13,7 @@ _manager = fes.Manager(ppc.app())
 
 @_manager.command
 def create_db():
-    db.create_all();
+    db.create_all()
 
 @_manager.command
 def create_test_data():
@@ -21,10 +21,7 @@ def create_test_data():
 
     for contest in data['Contest']:
         db.session.add(
-            publicprize.contest.model.Contest(
-                biv_id=contest['biv_id'],
-                display_name=contest['display_name']
-            )
+            _create_contest(contest)
         )
 
         for contestant in contest['Contestant']:
@@ -37,7 +34,7 @@ def create_test_data():
                     contestant_desc=contestant['contestant_desc'],
                 )
             )
-            _add_owner(contest, contestant);
+            _add_owner(contest, contestant)
 
             for founder in contestant['Founder']:
                 db.session.add(
@@ -48,16 +45,16 @@ def create_test_data():
                         founder_desc=founder['founder_desc']
                     )
                 )
-                _add_owner(contest, founder);
-                _add_owner(contestant, founder);
+                _add_owner(contest, founder)
+                _add_owner(contestant, founder)
 
     db.session.commit()
 
 @_manager.command
 def create_test_db():
-    drop_db();
-    create_db();
-    create_test_data();
+    drop_db()
+    create_db()
+    create_test_data()
     
 @_manager.command
 def drop_db():
@@ -71,6 +68,19 @@ def _add_owner(parent, child):
             target_biv_id=child['biv_id']
         )
     )
+
+def _create_contest(contest):
+    model = publicprize.contest.model.Contest(
+        biv_id=contest['biv_id'],
+        display_name=contest['display_name'],
+        tag_line=contest['tag_line']
+    )
+    if 'logo_filename' in contest:
+        f = open(contest['logo_filename'], 'rb')
+        model.contest_logo = f.read()
+        model.logo_type = contest['logo_type']
+        f.close()
+    return model
 
 if __name__ == "__main__":
     _manager.run()
