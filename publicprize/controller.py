@@ -105,32 +105,3 @@ def _parse_path(path):
 class Task(object):
     def __init__(self):
         pass
-
-"""
-
-@_app.route("/")
-@_app.route("/index.html")
-def home_page():
-    return flask.render_template("site_root/index.html")
-
-@_app.route('/<biv_id>/contestants')
-def contestants(biv_id):
-    return flask.render_template("contest/contestants.html")
-
-@_app.route('/<biv_id>/donors')
-def donors(biv_id):
-    return flask.render_template("contest/donors.html")
-
-@_app.route('/<biv_id>/about')
-def about(biv_id):
-    return flask.render_template("contest/about.html")
-
-@_app.route('/<biv_id>/how-to-enter')
-def how_to_enter(biv_id):
-    return flask.render_template("contest/how-to-enter.html")
-
-@_app.errorhandler(404)
-def page_not_found(e):
-    return flask.render_template('error/not-found.html'), 404
-"""
-
