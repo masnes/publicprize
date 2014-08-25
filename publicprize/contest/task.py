@@ -5,6 +5,10 @@ import publicprize.controller as ppc
 class Contest(ppc.Task):
     def action_contestants(biv_obj):
         return flask.render_template("contest/contestants.html")
+    def action_about(biv_obj):
+        return flask.render_template("contest/about.html")
+    def action_donors(biv_obj):
+        return flask.render_template("contest/donors.html")
 
 class Contestant(ppc.Task):
     pass
