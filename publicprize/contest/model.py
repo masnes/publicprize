@@ -10,7 +10,7 @@
 
 #from publicprize.app import db
 
-from publicprize import db
+from publicprize.controller import db
 
 
 # TODO(pjm): change biv_ids to Numeric(18) with sequence
@@ -32,5 +32,3 @@ class Founder(db.Model):
     display_name = db.Column(db.String(100))
     founder_avatar = db.Column(db.String(500))
     founder_desc = db.Column(db.String)
-
-    
