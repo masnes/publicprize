@@ -36,7 +36,7 @@ class Model(object):
 
     @classmethod
     def load_biv_obj(cls, biv_id):
-        cls.query.filter_by(biv_id=biv_id).first_or_404()
+        return cls.query.filter_by(biv_id=biv_id).first_or_404()
 
 def _init():
     global _ACTION_METHOD_PREFIX
