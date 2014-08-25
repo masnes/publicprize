@@ -11,18 +11,16 @@
 #from publicprize.app import db
 
 from publicprize.controller import db
+import publicprize.controller as ppc
 
 # TODO(pjm): change biv_ids to Numeric(18) with sequence
 
-class Contest(db.Model):
+class Contest(db.Model, ppc.Model):
     BIV_TYPE = '001'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100))
 
-    def load_biv(biv_id):
-        return None
-
-class Contestant(db.Model):
+class Contestant(db.Model, ppc.Model):
     BIV_TYPE = '002'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100))
@@ -34,7 +32,7 @@ class Contestant(db.Model):
     def load_biv(biv_id):
         return None
 
-class Founder(db.Model):
+class Founder(db.Model, ppc.Model):
     BIV_TYPE = '003'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100))
