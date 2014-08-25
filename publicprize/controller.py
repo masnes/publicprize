@@ -39,7 +39,7 @@ class Model(object):
         cls.query.filter_by(biv_id=biv_id).first_or_404()
 
 def _init():
-    global _ACTION_PREFIX
+    global _ACTION_METHOD_PREFIX
     global _BIV_ID_PREFIX
     global _DEFAULT_ACTION_NAME
     global _DEFAULT_BIV_URI
