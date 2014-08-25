@@ -1,15 +1,5 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
-#from publicprize import db
-#import angular_flask.core
-
-#db = angular_flask.core.db
-
-#import publicprize.app
-#db = publicprize.app.db
-
-#from publicprize.app import db
-
 from publicprize.controller import db
 import publicprize.controller as ppc
 
