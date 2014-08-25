@@ -3,6 +3,9 @@
     {
       "biv_id": 1001,
       "display_name": "Espirit Venture Prize 2014",
+      "tag_line": "Join us October 23, 2014",
+      "logo_filename": "data/esprit-logo.gif",
+      "logo_type": "gif",
 
       "Contestant": [
 	{
@@ -41,6 +44,7 @@
     {
       "biv_id": 2001,
       "display_name": "Empty Contest",
+      "tag_line": "",
       "Contestant": []
     }
   ]
