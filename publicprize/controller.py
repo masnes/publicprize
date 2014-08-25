@@ -18,8 +18,6 @@ def init():
     Must be done externally, because of circular import from
     components.
     """
-    global _biv_type_to_model_class
-    global _biv_type_to_task_class
     for pkg in ['general', 'contest']:
         p = 'publicprize.' + pkg + '.';
         m = importlib.import_module(p + 'model')
@@ -41,13 +39,13 @@ class Model(object):
         cls.query.filter_by(biv_id=biv_id).first_or_404()
 
 def _init():
-    global _app
-    global db
-    global _biv_type_to_task_class
-    global _biv_type_to_model_class
+    global _DEFAULT_ACTION_NAME
     global _DEFAULT_BIV_URI
     global _ERROR_BIV_URI
-    global _DEFAULT_ACTION_NAME
+    global _app
+    global _biv_type_to_model_class
+    global _biv_type_to_task_class
+    global db
 
     _app = flask.Flask(__name__, template_folder=".")
     _app.config.from_object(ppc.DevConfig)
