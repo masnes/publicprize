@@ -46,6 +46,9 @@ class Model(object):
         assert inspect.isclass(self.__default_task_class)
         return self.__default_task_class
 
+    def format_uri(self, path):
+        return '/' + biv.id_to_uri(self.biv_id) + '/' + path
+
 _ACTION_METHOD_PREFIX = 'action_'
 _DEFAULT_ACTION_NAME = 'index'
 _TASK_MODULE = 'task'
