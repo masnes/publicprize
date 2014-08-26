@@ -19,9 +19,9 @@ Contestants
     <div class="col-sm-7 pull-left">
     	<iframe style="width:100%" src="//www.youtube.com/embed/{{ contestant.youtube_code }}?controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
     </div>
-    <h3 class="media-heading"><a href="contestant?t={{ contestant.biv_id }}">{{ contestant.display_name }}</a></h3>
+    <h3 class="media-heading"><a href="{{ contestant.format_uri('contestant') }}">{{ contestant.display_name }}</a></h3>
     <p>{{ contestant.contestant_desc }}
-    	<a href="contestant?t={{ contestant.biv_id }}" class="pp-read-more">[learn more]</a>
+    	<a href="{{ contestant.format_uri('contestant') }}" class="pp-read-more">[learn more]</a>
     </p>
 </div>
 <hr>
