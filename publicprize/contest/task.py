@@ -21,6 +21,8 @@ class Contest(ppc.Task):
         return Contest._render_template(biv_obj, 'donors')
     def action_how_to_enter(biv_obj):
         return Contest._render_template(biv_obj, 'how-to-enter')
+    def action_index(biv_obj):
+        return Contest.action_contestants(biv_obj)
     def action_logo(biv_obj):
         return flask.send_file(
             io.BytesIO(biv_obj.contest_logo),
@@ -47,6 +49,8 @@ class Contestant(ppc.Task):
                 pam.BivAccess.target_biv_id == pcm.Founder.biv_id
             ).all()
         )
+    def action_index(biv_obj):
+        return Contestant.action_contestant(biv_obj)
     
 class Founder(ppc.Task):
     def action_founder_avatar(biv_obj):
