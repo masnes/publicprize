@@ -10,6 +10,7 @@ class Contest(db.Model, ppc.Model):
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False)
     tag_line = db.Column(db.String(500))
+    # TODO(pjm): move logo and founder_avatar to separate model BivImage
     contest_logo = db.Column(db.LargeBinary)
     logo_type = db.Column(db.Enum('gif', 'png', 'jpeg'))
 
@@ -34,5 +35,6 @@ class Founder(db.Model, ppc.Model):
     BIV_TYPE = '003'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False)
-    founder_avatar = db.Column(db.String(500))
     founder_desc = db.Column(db.String)
+    founder_avatar = db.Column(db.LargeBinary)
+    avatar_type = db.Column(db.Enum('gif', 'png', 'jpeg'))
