@@ -1,12 +1,13 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
-import publicprize.biv_uri as ppbu
+from publicprize import biv
+from publicprize import config
 import flask
 import flask.ext.sqlalchemy as fesa
 import importlib
 import inspect
-import publicprize.config as ppc
 import re
+import sys
 
 db = None
 
@@ -19,14 +20,10 @@ def init():
     Must be done externally, because of circular import from
     components.
     """
-    for pkg in ['general', 'contest']:
-        p = 'publicprize.' + pkg + '.';
-        m = importlib.import_module(p + 'model')
-        t = importlib.import_module(p + 'task')
-        for cn, c in inspect.getmembers(m, inspect.isclass):
-            if issubclass(c, Model):
-                _biv_id_marker_to_model_class[c.BIV_ID_MARKER] = c
-                _biv_id_marker_to_task_class[c.BIV_ID_MARKER] = getattr(t, cn)
+    for cn in ['general', 'contest']:
+        cm = 'publicprize.' + cn + '.';
+        importlib.import_module(cm + _MODEL_MODULE)
+        importlib.import_module(cm + _TASK_MODULE)
         
 class Task(object):
 
@@ -39,91 +36,51 @@ class Model(object):
     def load_biv_obj(cls, biv_id):
         return cls.query.filter_by(biv_id=biv_id).first_or_404()
 
-def _init():
-    global _ACTION_METHOD_PREFIX
-    global _DEFAULT_ACTION_NAME
-    global _DEFAULT_BIV_URI
-    global _ERROR_BIV_URI
-    global _app
-    global _biv_alias_to_biv_id
-    global _biv_id_marker_to_model_class
-    global _biv_id_marker_to_task_class
-    global db
+    @property
+    def task_class(self):
+        if hasattr(self, '__default_task_class'):
+            return self.__default_task_class
+        mn = self.__module__
+        m = sys.modules[re.sub(_MODEL_MODULE_RE, _TASK_MODULE, mn)]
+        self.__default_task_class = getattr(m, self.__class__.__name__)
+        assert inspect.isclass(self.__default_task_class)
+        return self.__default_task_class
 
-    _app = flask.Flask(__name__, template_folder=".")
-    _app.config.from_object(ppc.DevConfig)
-    db = fesa.SQLAlchemy(_app)
+_ACTION_METHOD_PREFIX = 'action_'
+_DEFAULT_ACTION_NAME = 'index'
+_TASK_MODULE = 'task'
+_MODEL_MODULE = 'model'
+_MODEL_MODULE_RE = r'(?<=\.)' + _MODEL_MODULE + r'$'
+_app = flask.Flask(__name__, template_folder='.')
+_app.config.from_object(config.DevConfig)
+db = fesa.SQLAlchemy(_app)
 
-    _ACTION_METHOD_PREFIX = 'action_'
-    _DEFAULT_BIV_URI = 'index'
-    _ERROR_BIV_URI = 'error'
-    _DEFAULT_ACTION_NAME = _DEFAULT_BIV_URI
-    _biv_id_marker_to_task_class= {}
-    _biv_id_marker_to_model_class= {}
-    _biv_alias_to_biv_id = {
-        #TODO: get from general module
-        _DEFAULT_BIV_URI: '1001',
-        _ERROR_BIV_URI: '2001',
-        # flask serves /static implicitly so need to shadow here
-        'static': '3001'}
-
-_init()
-
-def _load_biv_obj(biv_id_marker, biv_id):
-    if not biv_id_marker in _biv_id_marker_to_model_class:
-        raise ValueError(biv_id_marker + ": unknown biv_id_marker")
-    return _biv_id_marker_to_model_class[biv_id_marker].load_biv_obj(biv_id)
-
-def _lookup_action(biv_id_marker, name):
+def _dispatch_action(name, biv_obj):
     if len(name) == 0:
         name = _DEFAULT_ACTION_NAME
-    task = _biv_id_marker_to_task_class[biv_id_marker]
     name = re.sub('\W', '_', name)
     name = _ACTION_METHOD_PREFIX + name
-
-    if not hasattr(task, name):
-        raise ValueError(name + ': action not found')
-    m = getattr(task, name)
-    if not inspect.isfunction(m):
+    f = getattr(biv_obj.task_class, name)
+    if not inspect.isfunction(f):
         raise ValueError(name + ': action not a method')
-    return m
-
-def _lookup_biv_id(biv_uri):
-    if len(biv_uri) == 0:
-        biv_uri = _DEFAULT_BIV_URI
-    elif ppbu.is_encoded(biv_uri):
-        return ppbu.to_biv_id(biv_uri)
-
-    if biv_uri in _biv_alias_to_biv_id:
-        return _biv_alias_to_biv_id[biv_uri]
-
-    # Test not found action, but want better exception
-    flask.abort(404)
-
-    #TODO: wrap better
-    raise ValueError(biv_uri + ': invalid syntax')
+    return f(biv_obj)
 
 def _parse_path(path):
     parts = path.split('/', 2)
-    biv_uri = parts[0] if len(parts) >= 1 else _DEFAULT_BIV_URI
+    biv_uri = parts[0] if len(parts) >= 1 else biv.URI_FOR_NONE
     action = parts[1] if len(parts) >= 2 else _DEFAULT_ACTION_NAME
     path_info = parts[2] if len(parts) >= 3 else None
-    biv_id = _lookup_biv_id(biv_uri)
-    return biv_id, action, path_info
+    return biv.load_obj(biv_uri), action, path_info
 
 @_app.route("/<path:path>")
 def _route(path):
     # request_context
-    biv_id, action, path_info = _parse_path(path)
-    # assign path_info, etc. to request_context
-    biv_id_marker = biv_id[-3:]
-    biv_obj = _load_biv_obj(biv_id_marker, biv_id)
-    action_method = _lookup_action(biv_id_marker, action)
-    return action_method(biv_obj)
+    biv_obj, action, path_info = _parse_path(path)
+    return _dispatch_action(action, biv_obj)
 
 @_app.errorhandler(404)
 def _route_404(e):
-    return _route(_ERROR_BIV_URI + '/' + 'not-found')
+    return _route(biv.URI_FOR_ERROR + '/' + 'not-found')
 
 @_app.route("/")
 def _route_root():
