@@ -5,3 +5,32 @@ Contestants
 {{ super() }}
 {% endblock %}
 
+{% block content %}
+{{ super() }}
+<div class="col-sm-7 pp-main">
+
+<div class="row">
+    <div class="pp-vote-main col-sm-7 col-sm-offset-5"><button type="button" class="pp-donate btn btn-primary btn-lg btn-block">Vote</button></div>
+</div>
+
+{% for contestant in contestants %}
+
+<div class="pp-contestant-entry">
+    <div class="col-sm-7 pull-left">
+    	<iframe style="width:100%" src="//www.youtube.com/embed/{{ contestant.youtube_code }}?controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <h3 class="media-heading"><a href="contestant?t={{ contestant.biv_id }}">{{ contestant.display_name }}</a></h3>
+    <p>{{ contestant.contestant_desc }}
+    	<a href="contestant?t={{ contestant.biv_id }}" class="pp-read-more">[learn more]</a>
+    </p>
+</div>
+<hr>
+    
+{% endfor %}
+
+<div class="row">
+    <div class="pp-vote-main col-sm-7 col-sm-offset-5"><button type="button" class="pp-donate btn btn-primary btn-lg btn-block">Vote</button></div>
+</div>
+
+</div>
+{% endblock %}
