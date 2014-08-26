@@ -41,7 +41,6 @@ def create_test_data():
                 db.session.add(
                     _create_founder(founder)
                 )
-                _add_owner(contest, founder)
                 _add_owner(contestant, founder)
 
     db.session.commit()
