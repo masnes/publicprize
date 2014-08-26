@@ -9,7 +9,7 @@
 <div class="col-sm-7 pp-main">
     <div>
         {% if contest.logo_type %}
-    	    <img class="pp-logo hidden-xs" src="logo" alt="{{ contest.display_name }}">
+    	    <img class="pp-logo hidden-xs" src="{{ contest.format_uri('logo') }}" alt="{{ contest.display_name }}">
 	{% endif %}
         <div class="pp-heading">
             <h1>{{ contest.display_name }}</h1>
@@ -26,7 +26,7 @@
 
 <div class="col-sm-12">
     {% macro option(value, text, count=0) -%}
-    	<option value="{{ value }}"
+    	<option value="{{ contest.format_uri(value) }}"
       	    {%- if selected == value %} selected="selected"{% endif -%}>
 	    {{- text -}}
 	    {% if count %}{{ " (" ~ count ~ ")" }}{% endif -%}
@@ -39,7 +39,7 @@
 	{{ option('how-to-enter', 'How to Enter') }}
     </select>
     {% macro menu_link(value, text, count=0) -%}
-    	<a href="{{ value }}" class="btn btn-default pp-button {% if selected == value %}pp-selected-button{% endif %}">{{ text }}
+    	<a href="{{ contest.format_uri(value) }}" class="btn btn-default pp-button {% if selected == value %}pp-selected-button{% endif %}">{{ text }}
 	    {%- if count %} <span class="badge">{{ count }}</span>{% endif -%}
 	</a>
     {%- endmacro -%}
