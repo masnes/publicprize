@@ -3,7 +3,7 @@
 import publicprize.controller as ppc
 
 class General(ppc.Model):
-    BIV_TYPE = '004'
+    BIV_ID_MARKER = '001'
 
     def load_biv_obj(biv_id):
         return General()

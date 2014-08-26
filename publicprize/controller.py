@@ -24,8 +24,8 @@ def init():
         t = importlib.import_module(p + 'task')
         for cn, c in inspect.getmembers(m, inspect.isclass):
             if issubclass(c, Model):
-                _biv_type_to_model_class[c.BIV_TYPE] = c
-                _biv_type_to_task_class[c.BIV_TYPE] = getattr(t, cn)
+                _biv_id_marker_to_model_class[c.BIV_ID_MARKER] = c
+                _biv_id_marker_to_task_class[c.BIV_ID_MARKER] = getattr(t, cn)
         
 class Task(object):
 
@@ -46,8 +46,8 @@ def _init():
     global _ERROR_BIV_URI
     global _app
     global _biv_alias_to_biv_id
-    global _biv_type_to_model_class
-    global _biv_type_to_task_class
+    global _biv_id_marker_to_model_class
+    global _biv_id_marker_to_task_class
     global db
 
     _app = flask.Flask(__name__, template_folder=".")
@@ -59,25 +59,25 @@ def _init():
     _DEFAULT_BIV_URI = 'index'
     _ERROR_BIV_URI = 'error'
     _DEFAULT_ACTION_NAME = _DEFAULT_BIV_URI
-    _biv_type_to_task_class= {}
-    _biv_type_to_model_class= {}
+    _biv_id_marker_to_task_class= {}
+    _biv_id_marker_to_model_class= {}
     _biv_alias_to_biv_id = {
-        _DEFAULT_BIV_URI: '1004',
-        _ERROR_BIV_URI: '2004',
+        _DEFAULT_BIV_URI: '1001',
+        _ERROR_BIV_URI: '2001',
         # flask serves /static implicitly so need to shadow here
-        'static': '3004'}
+        'static': '3001'}
 
 _init()
 
-def _load_biv_obj(biv_type, biv_id):
-    if not biv_type in _biv_type_to_model_class:
-        raise ValueError(biv_type + ": unknown biv_type")
-    return _biv_type_to_model_class[biv_type].load_biv_obj(biv_id)
+def _load_biv_obj(biv_id_marker, biv_id):
+    if not biv_id_marker in _biv_id_marker_to_model_class:
+        raise ValueError(biv_id_marker + ": unknown biv_id_marker")
+    return _biv_id_marker_to_model_class[biv_id_marker].load_biv_obj(biv_id)
 
-def _lookup_action(biv_type, name):
+def _lookup_action(biv_id_marker, name):
     if len(name) == 0:
         name = _DEFAULT_ACTION_NAME
-    task = _biv_type_to_task_class[biv_type]
+    task = _biv_id_marker_to_task_class[biv_id_marker]
     name = re.sub('\W', '_', name)
     name = _ACTION_METHOD_PREFIX + name
 
@@ -117,9 +117,9 @@ def _route(path):
     # request_context
     biv_id, action, path_info = _parse_path(path)
     # assign path_info, etc. to request_context
-    biv_type = biv_id[-3:]
-    biv_obj = _load_biv_obj(biv_type, biv_id)
-    action_method = _lookup_action(biv_type, action)
+    biv_id_marker = biv_id[-3:]
+    biv_obj = _load_biv_obj(biv_id_marker, biv_id)
+    action_method = _lookup_action(biv_id_marker, action)
     return action_method(biv_obj)
 
 @_app.errorhandler(404)

@@ -6,7 +6,7 @@ import publicprize.controller as ppc
 # TODO(pjm): change biv_ids to Numeric(18) with sequence
 
 class Contest(db.Model, ppc.Model):
-    BIV_TYPE = '001'
+    BIV_ID_MARKER = '002'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False)
     tag_line = db.Column(db.String(500))
@@ -22,7 +22,7 @@ class Contest(db.Model, ppc.Model):
         return 802
 
 class Contestant(db.Model, ppc.Model):
-    BIV_TYPE = '002'
+    BIV_ID_MARKER = '003'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False)
     youtube_code = db.Column(db.String(500))
@@ -31,7 +31,7 @@ class Contestant(db.Model, ppc.Model):
     tax_id = db.Column(db.Integer)
 
 class Founder(db.Model, ppc.Model):
-    BIV_TYPE = '003'
+    BIV_ID_MARKER = '004'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False)
     founder_avatar = db.Column(db.String(500))
