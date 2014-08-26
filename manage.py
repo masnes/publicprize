@@ -27,6 +27,7 @@ def create_test_data():
         for contestant in contest['Contestant']:
             db.session.add(
                 publicprize.contest.model.Contestant(
+                    # TODO(pjm): there must be a way to do this in a map()
                     biv_id=contestant['biv_id'],
                     display_name=contestant['display_name'],
                     youtube_code=contestant['youtube_code'],
@@ -38,12 +39,7 @@ def create_test_data():
 
             for founder in contestant['Founder']:
                 db.session.add(
-                    publicprize.contest.model.Founder(
-                        biv_id=founder['biv_id'],
-                        display_name=founder['display_name'],
-                        founder_avatar=founder['founder_avatar'],
-                        founder_desc=founder['founder_desc']
-                    )
+                    _create_founder(founder)
                 )
                 _add_owner(contest, founder)
                 _add_owner(contestant, founder)
@@ -82,5 +78,19 @@ def _create_contest(contest):
         f.close()
     return model
 
+# TODO(pjm): normalize up binary fields, combine with _create_contest()
+def _create_founder(founder):
+    model = publicprize.contest.model.Founder(
+        biv_id=founder['biv_id'],
+        display_name=founder['display_name'],
+        founder_desc=founder['founder_desc']
+    )
+    if 'avatar_filename' in founder:
+        f = open(founder['avatar_filename'], 'rb')
+        model.founder_avatar = f.read()
+        model.avatar_type = founder['avatar_type']
+        f.close()
+    return model
+    
 if __name__ == "__main__":
     _manager.run()
