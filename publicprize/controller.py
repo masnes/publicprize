@@ -1,11 +1,12 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
+import publicprize.biv_uri as ppbu
 import flask
 import flask.ext.sqlalchemy as fesa
+import importlib
 import inspect
 import publicprize.config as ppc
 import re
-import importlib
 
 db = None
 
@@ -40,7 +41,6 @@ class Model(object):
 
 def _init():
     global _ACTION_METHOD_PREFIX
-    global _BIV_ID_PREFIX
     global _DEFAULT_ACTION_NAME
     global _DEFAULT_BIV_URI
     global _ERROR_BIV_URI
@@ -54,7 +54,6 @@ def _init():
     _app.config.from_object(ppc.DevConfig)
     db = fesa.SQLAlchemy(_app)
 
-    _BIV_ID_PREFIX = '='
     _ACTION_METHOD_PREFIX = 'action_'
     _DEFAULT_BIV_URI = 'index'
     _ERROR_BIV_URI = 'error'
@@ -62,6 +61,7 @@ def _init():
     _biv_id_marker_to_task_class= {}
     _biv_id_marker_to_model_class= {}
     _biv_alias_to_biv_id = {
+        #TODO: get from general module
         _DEFAULT_BIV_URI: '1001',
         _ERROR_BIV_URI: '2001',
         # flask serves /static implicitly so need to shadow here
@@ -91,9 +91,8 @@ def _lookup_action(biv_id_marker, name):
 def _lookup_biv_id(biv_uri):
     if len(biv_uri) == 0:
         biv_uri = _DEFAULT_BIV_URI
-    m = re.match('^' + _BIV_ID_PREFIX + '(\d+)$', biv_uri)
-    if m:
-        return m.group(1)
+    elif ppbu.is_encoded(biv_uri):
+        return ppbu.to_biv_id(biv_uri)
 
     if biv_uri in _biv_alias_to_biv_id:
         return _biv_alias_to_biv_id[biv_uri]
