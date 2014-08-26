@@ -1,0 +1,55 @@
+{% extends 'contest/contest.html' %}
+
+{% block title %}
+{{ contestant.display_name }}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="col-sm-7 pp-main">
+
+<div class="pp-contestant">
+    <div class="row">
+    	<div class="pp-vote-detail col-sm-7 col-sm-offset-5"><button type="button" class="pp-donate btn btn-primary btn-lg btn-block">Vote for {{ contestant.display_name }}</button></div>
+    </div>
+    <div class="pp-title">{{ contestant.display_name }}</div>
+    <div class="pp-pitch">
+    	<div class="embed-responsive embed-responsive-16by9">
+    	    <iframe class="embed-responsive-item"
+	    src="//www.youtube.com/embed/{{ contestant.youtube_code }}" frameborder="0" allowfullscreen></iframe>
+    	</div>
+    </div>
+    <div class="pp-abstract">
+    	<h3 class="pp-heading">Summary</h3>
+    	<p>
+   	    {{ contestant.contestant_desc }}
+    	</p>
+    </div>
+    <div class="pp-slides">
+    	<div class="embed-responsive embed-responsive-4by3">
+    	    <iframe class="embed-responsive-item"
+	    	src="//www.slideshare.net/slideshow/embed_code/{{ contestant.slideshow_code }}"
+	    	frameborder="0" marginwidth="0" marginheight="0" scrolling="no" allowfullscreen></iframe>
+    	</div>
+    </div>
+    <div class="pp-founders">
+    	<h3 class="pp-heading">Founders</h3>
+
+    	{% for founder in founders %}
+
+    	    <div class="pp-item">
+    	    	<img class="pp-thumb" src="founder_avatar?t={{ founder.biv_id }}" alt="{{ founder.display_name }}"/>
+    	    	<span class="pp-name">{{ founder.display_name }}</span>
+    	    	<span class="pp-desc">{{ founder.founder_desc }}</span>
+    	    </div>
+
+    	{% endfor %}
+
+    </div>
+    <div class="row">
+    	<div class="pp-vote-detail col-sm-7 col-sm-offset-5"><button type="button" class="pp-donate btn btn-primary btn-lg btn-block">Vote for {{ contestant.display_name }}</button></div>
+    </div>
+</div>
+</div>
+{% endblock %}
