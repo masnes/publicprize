@@ -1,8 +1,9 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
-import flask
-import publicprize.controller as ppc
 
-class General(ppc.Task):
+from publicprize import controller
+import flask
+
+class General(controller.Task):
     def action_index(biv_obj):
         return flask.render_template("general/index.html")
     
