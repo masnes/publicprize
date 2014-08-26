@@ -7,7 +7,7 @@ class General(ppc.Model):
 
     def __init__(self, biv_id):
         super().__init__()
-        self._biv_id = biv_id
+        self.biv_id = biv_id
 
     def load_biv_obj(biv_id):
         return General(biv_id)
