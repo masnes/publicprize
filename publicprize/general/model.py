@@ -1,9 +1,9 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
-from .. import biv
-from .. import controller as ppc
+from publicprize import biv
+from publicprize import controller
 
-class General(ppc.Model):
+class General(controller.Model):
 
     def __init__(self, biv_id):
         super().__init__()
