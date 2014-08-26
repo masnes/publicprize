@@ -29,7 +29,7 @@
       	  <a class="pp-nav-logo" href="/"><img src="/static/img/logo.gif" alt="PUBLIC PRIZE"></a>
       	  <div class="pp-nav-menu pull-right">
             <a class="pp-nav-item" href="#">Sign up</a>
-            <a class="pp-nav-item" href="#">Log in</a>
+            <a class="pp-nav-item" data-toggle="modal" data-target="#loginModal" href="#">Log in</a>
       	  </div>
     	</nav>
       </div>
@@ -50,6 +50,21 @@
         </div>
       </div>
       {% endblock %}
+    </div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog">
+    	<div class="modal-dialog">
+      	    <div class="modal-content">
+      	    	<div class="modal-header">
+	            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+	            <h4 class="modal-title" id="myModalLabel">Log in</h4>
+	      	</div>
+            	<div class="pp-login-body modal-body">
+{#- TODO(pjm): hard-coded general name #}		  
+		    <a href="/index/facebook-login" class="btn btn-primary btn-lg btn-block"><img src="/static/img/facebook.png" alt="Facebook"> Log in with Facebook</a>
+            	</div>
+      	    </div>
+    	</div>
     </div>
 
     {% block scripts %}
