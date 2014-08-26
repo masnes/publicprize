@@ -39,7 +39,7 @@
     	{% for founder in founders %}
 
     	    <div class="pp-item">
-    	    	<img class="pp-thumb" src="founder_avatar?t={{ founder.biv_id }}" alt="{{ founder.display_name }}"/>
+    	    	<img class="pp-thumb" src="{{ founder.format_uri('founder_avatar') }}" alt="{{ founder.display_name }}"/>
     	    	<span class="pp-name">{{ founder.display_name }}</span>
     	    	<span class="pp-desc">{{ founder.founder_desc }}</span>
     	    </div>
