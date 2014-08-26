@@ -23,7 +23,6 @@ class Contest(db.Model, controller.Model):
         return 802
 
 class Contestant(db.Model, controller.Model):
-    BIV_ID_MARKER = '003'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False)
     youtube_code = db.Column(db.String(500))
@@ -32,15 +31,12 @@ class Contestant(db.Model, controller.Model):
     tax_id = db.Column(db.Integer)
 
 class Founder(db.Model, controller.Model):
-    BIV_ID_MARKER = '004'
     biv_id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False)
     founder_desc = db.Column(db.String)
     founder_avatar = db.Column(db.LargeBinary)
     avatar_type = db.Column(db.Enum('gif', 'png', 'jpeg'))
 
-biv.register_marker(2, Contest)
-biv.register_marker(3, Contestant)
-biv.register_marker(4, Founder)
-
-    
+Contest.BIV_MARKER = biv.register_marker(2, Contest)
+Contestant.BIV_MARKER = biv.register_marker(3, Contestant)
+Founder.BIV_MARKER = biv.register_marker(4, Founder)

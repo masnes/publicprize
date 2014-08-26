@@ -12,7 +12,7 @@ class General(ppc.Model):
     def load_biv_obj(biv_id):
         return General(biv_id)
 
-_BIV_MARKER = biv.register_marker(1, General)
-biv.register_alias(biv.URI_FOR_NONE, _BIV_MARKER.to_id(1))
-biv.register_alias(biv.URI_FOR_ERROR, _BIV_MARKER.to_id(2))
-biv.register_alias(biv.URI_FOR_STATIC_FILES, _BIV_MARKER.to_id(3))
+General.BIV_MARKER = biv.register_marker(1, General)
+biv.register_alias(biv.URI_FOR_NONE, General.BIV_MARKER.to_id(1))
+biv.register_alias(biv.URI_FOR_ERROR, General.BIV_MARKER.to_id(2))
+biv.register_alias(biv.URI_FOR_STATIC_FILES, General.BIV_MARKER.to_id(3))
