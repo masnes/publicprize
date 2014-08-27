@@ -5,5 +5,12 @@
 {% block content %}
 
 <h1>Splash Page</h1>
+<ul>
+
+{% for contest in contests %}
+    <li><h3><a href="{{ contest.format_uri('') }}">{{ contest.display_name }}</a></h3></li>
+{% endfor %}
+    
+</ul>
 
 {% endblock %}
