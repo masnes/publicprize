@@ -1,8 +1,9 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
-from publicprize import controller
 import flask
 from flask_oauthlib.client import OAuth, OAuthException
+from publicprize import controller
+import publicprize.contest.model as pcm
 
 facebook = OAuth(controller.app()).remote_app(
     'facebook',
@@ -17,7 +18,10 @@ facebook = OAuth(controller.app()).remote_app(
 
 class General(controller.Task):
     def action_index(biv_obj):
-        return flask.render_template("general/index.html")
+        return flask.render_template(
+            "general/index.html",
+            contests=pcm.Contest.query.all()
+        )
 
     def action_facebook_login(biv_obj):
         callback = flask.url_for(
