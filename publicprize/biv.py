@@ -8,6 +8,31 @@ URI_FOR_NONE = 'index'
 URI_FOR_ERROR = 'error'
 URI_FOR_STATIC_FILES = 'static'
 
+class Id(int):
+    def __new__(cls, biv_id):
+        if isinstance(biv_id, cls):
+            return biv_id
+        biv_id = int(biv_id)
+        assert _MARKER_MODULUS < biv_id <= _MAX_ID
+        return super().__new__(cls, biv_id)
+
+class Marker(int):
+    def __new__(cls, biv_marker):
+        if isinstance(biv_marker, cls):
+            return biv_marker
+        biv_marker = int(biv_marker)
+        assert 0 < biv_marker <= _MAX_MARKER
+        return super().__new__(cls, biv_marker)
+
+    def to_id(self, bix):
+        """Convert an index value to a biv_id
+        """
+        return _join(_assert_bix(bix), self.__int__())
+
+class URI(str):
+    def __new__(cls, uri):
+        return super().__new__(cls, uri)
+
 def id_to_uri(biv_id, use_alias=True):
     """Converts a biv_id to a biv_uri.
 
@@ -25,7 +50,7 @@ def id_to_uri(biv_id, use_alias=True):
     bix, bm = _split(biv_id)
     bm = _CONV.int2str(bm).zfill(_MARKER_ENC_LEN)
     bix = _CONV.int2str(bix)
-    return _ENC_PREFIX + bix + bm
+    return URI(_ENC_PREFIX + bix + bm)
 
 def register_alias(uri, biv_id):
     """Registers biv_id with uri
@@ -37,7 +62,7 @@ def register_alias(uri, biv_id):
     Returns:
         str: uri
     """
-    biv_id = _assert_id(biv_id)
+    biv_id = Id(biv_id)
     assert not uri in _alias_to_id
     assert not uri[0] == _ENC_PREFIX
     _alias_to_id[uri] = biv_id
@@ -54,16 +79,16 @@ def register_marker(biv_marker, cls):
         biv_marker (int): marker
 
     Returns:
-        _Marker: used for generating idempotent id sequences (special case)
+        Marker: used for generating idempotent id sequences (special case)
 
     Asserts:
         if duplicate or invalid function
     """
-    biv_marker = _assert_marker(biv_marker)
+    biv_marker = Marker(biv_marker)
     assert _has_method(cls, 'load_biv_obj')
     assert not biv_marker in _marker_to_class
     _marker_to_class[biv_marker] = cls
-    return _Marker(biv_marker)
+    return Marker(biv_marker)
 
 def load_obj(biv_uri, use_alias=True):
     """Loads an object for the specified biv_uri
@@ -84,36 +109,17 @@ def load_obj(biv_uri, use_alias=True):
         biv_id = _join(bix, bm)
     return _marker_to_class[bm].load_biv_obj(biv_id)
 
-class _Marker(object):
-    def __init__(self, biv_marker):
-        self._biv_marker = biv_marker
-
-    def to_id(self, bix):
-        """Convert an index value to a biv_id
-        """
-        return _join(_assert_bix(bix), self._biv_marker)
-
 def _assert_bix(bix):
     bix = int(bix)
     assert 0 < bix <= _MAX_BIX
     return bix
-
-def _assert_id(biv_id):
-    biv_id = int(biv_id)
-    assert _MARKER_MODULUS < biv_id <= _MAX_ID
-    return biv_id
-
-def _assert_marker(biv_marker):
-    biv_marker = int(biv_marker)
-    assert 0 < biv_marker <= _MAX_MARKER
-    return biv_marker
 
 def _decode_uri(biv_uri):
     assert biv_uri[0] == _ENC_PREFIX
     biv_uri = biv_uri[1:]
     if len(biv_uri) < _MARKER_ENC_LEN:
         raise ValueError(biv_uri + ': biv_uri too short')
-    bm = _assert_marker(_CONV.str2int(biv_uri[-_MARKER_ENC_LEN:]))
+    bm = Marker(_CONV.str2int(biv_uri[-_MARKER_ENC_LEN:]))
     bix = _assert_bix(_CONV.str2int(biv_uri[:-_MARKER_ENC_LEN]))
     return (bix, bm)
 
@@ -127,8 +133,8 @@ def _has_method(cls, method):
     return False
 
 def _split(biv_id):
-    biv_id = _assert_id(biv_id)
-    bm = _assert_marker(biv_id % _MARKER_MODULUS)
+    biv_id = Id(biv_id)
+    bm = Marker(biv_id % _MARKER_MODULUS)
     bix = biv_id // _MARKER_MODULUS
     return (bix, bm)
     
