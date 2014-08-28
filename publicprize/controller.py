@@ -112,3 +112,8 @@ def _route_404(e):
 @_app.route("/")
 def _route_root():
     return _route('')
+
+@_app.teardown_request
+def _teardown_request(exception):
+    if not exception:
+        db.session.commit()
