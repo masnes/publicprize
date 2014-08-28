@@ -28,8 +28,25 @@
     	<nav class="pp-nav">
       	  <a class="pp-nav-logo" href="/"><img src="/static/img/logo.gif" alt="PUBLIC PRIZE"></a>
       	  <div class="pp-nav-menu pull-right">
-            <a class="pp-nav-item" href="#">Sign up</a>
+
+	    {% if request.environ['beaker.session'].get('user.is_logged_in') %}
+
+    	    {#- TODO(pjm): hard-coded general name #}		  
+            <a class="pp-nav-item" href="/index/logout">Log out</a>
+
+	    {% elif request.environ['beaker.session'].get('user.biv_id') %}
+
+    	    {#- TODO(pjm): hard-coded general name #}
+	    <form class="navbar-form" method="get" action="/index/facebook-login">
+	    	<button class="btn btn-primary btn-sm"><img src="/static/img/facebook.png" alt="Facebook"> Log in with Facebook</button>
+	    </form>
+	    
+	    {% else %}
+
+            <a class="pp-nav-item" data-toggle="modal" data-target="#signupModal" href="#">Sign up</a>
             <a class="pp-nav-item" data-toggle="modal" data-target="#loginModal" href="#">Log in</a>
+
+	    {% endif %}
       	  </div>
     	</nav>
       </div>
@@ -52,22 +69,30 @@
       {% endblock %}
     </div>
 
-    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog">
+    {% macro modal(id, heading_text, button_text) -%}
+    
+    <div class="modal fade" id="{{ id }}" tabindex="-1" role="dialog">
     	<div class="modal-dialog">
       	    <div class="modal-content">
       	    	<div class="modal-header">
-	            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-	            <h4 class="modal-title" id="myModalLabel">Log in</h4>
+	            <button type="button" class="close" data-dismiss="modal"><spanx>&times;</span></button>
+	            <h4 class="modal-title">{{ heading_text }}</h4>
 	      	</div>
             	<div class="pp-login-body modal-body">
-{#- TODO(pjm): hard-coded general name #}		  
-		    <a href="/index/facebook-login" class="btn btn-primary btn-lg btn-block"><img src="/static/img/facebook.png" alt="Facebook"> Log in with Facebook</a>
+    	    	    {#- TODO(pjm): hard-coded general name #}		  
+		    <a href="/index/facebook-login" class="btn btn-primary btn-lg btn-block"><img src="/static/img/facebook.png" alt="Facebook"> {{ button_text }}</a>
             	</div>
       	    </div>
     	</div>
     </div>
 
+    {%- endmacro -%}
+    
+    {{ modal('signupModal', 'Sign up', 'Sign up using Facebook') }}
+    {{ modal('loginModal', 'Log in', 'Log in with Facebook') }}
+
     {% block scripts %}
+
     <script src="/static/js/jquery/jquery-1.11.1.min.js"></script>
     <script src="/static/js/bootstrap/bootstrap-3.2.0.min.js"></script>
     <script src="/static/js/pp-app.js"></script>

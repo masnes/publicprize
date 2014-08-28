@@ -2,8 +2,10 @@
 
 from publicprize import biv
 from publicprize import config
+from beaker.middleware import SessionMiddleware
 import flask
-import flask.ext.sqlalchemy as fesa
+from flask.ext.sqlalchemy import SQLAlchemy
+import flask.sessions
 import importlib
 import inspect
 import re
@@ -24,7 +26,10 @@ def init():
         cm = 'publicprize.' + cn + '.';
         importlib.import_module(cm + _MODEL_MODULE)
         importlib.import_module(cm + _TASK_MODULE)
-        
+
+def session():
+    return flask.request.environ['beaker.session']
+
 class Task(object):
 
     def __init__(self):
@@ -49,6 +54,24 @@ class Model(object):
     def format_uri(self, path):
         return '/' + biv.id_to_uri(self.biv_id) + '/' + path
 
+class BeakerSessionInterface(flask.sessions.SessionInterface):
+    def init_app(app):
+        app.wsgi_app = SessionMiddleware(
+            app.wsgi_app,
+            {
+                'session.type': 'ext:database',
+                'session.url': app.config['SQLALCHEMY_DATABASE_URI'],
+                'session.lock_dir': '/tmp/cache/lock',
+            }
+        )
+        app.session_interface = BeakerSessionInterface()
+
+    def open_session(self, app, request):
+        return request.environ.get('beaker.session')
+
+    def save_session(self, app, session, response):
+        session.save()
+
 _ACTION_METHOD_PREFIX = 'action_'
 _DEFAULT_ACTION_NAME = 'index'
 _TASK_MODULE = 'task'
@@ -56,7 +79,8 @@ _MODEL_MODULE = 'model'
 _MODEL_MODULE_RE = r'(?<=\.)' + _MODEL_MODULE + r'$'
 _app = flask.Flask(__name__, template_folder='.')
 _app.config.from_object(config.DevConfig)
-db = fesa.SQLAlchemy(_app)
+BeakerSessionInterface.init_app(_app)
+db = SQLAlchemy(_app)
 
 def _dispatch_action(name, biv_obj):
     if len(name) == 0:
@@ -88,3 +112,8 @@ def _route_404(e):
 @_app.route("/")
 def _route_root():
     return _route('')
+
+@_app.teardown_request
+def _teardown_request(exception):
+    if not exception:
+        db.session.commit()
