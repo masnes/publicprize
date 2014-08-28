@@ -2,6 +2,7 @@
 
 import flask.ext.script as fes
 import json
+import os
 import publicprize.controller as ppc
 from publicprize.controller import db
 import publicprize.auth.model
@@ -13,6 +14,10 @@ _manager = fes.Manager(ppc.app())
 
 @_manager.command
 def create_db():
+    config = ppc.app().config
+    os.system('createuser --user=postgres --no-superuser --no-createdb --no-createrole %s' % config['PP_DATABASE_USER'])
+    os.system('createdb --user=postgres --owner=%s %s' % (config['PP_DATABASE_USER'], config['PP_DATABASE']))
+    os.system('echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql --user=postgres template1' % (config['PP_DATABASE_USER'], config['PP_DATABASE_PASSWORD']))
     db.create_all()
 
 @_manager.command
@@ -20,28 +25,20 @@ def create_test_data():
     data = json.load(open('data/test_data.json', 'r'))
 
     for contest in data['Contest']:
-        db.session.add(
-            _create_contest(contest)
-        )
-
+        contest_id = _add_model(_create_contest(contest))
         for contestant in contest['Contestant']:
-            db.session.add(
-                publicprize.contest.model.Contestant(
-                    # TODO(pjm): there must be a way to do this in a map()
-                    biv_id=contestant['biv_id'],
-                    display_name=contestant['display_name'],
-                    youtube_code=contestant['youtube_code'],
-                    slideshow_code=contestant['slideshow_code'],
-                    contestant_desc=contestant['contestant_desc'],
-                )
-            )
-            _add_owner(contest, contestant)
+            contestant_id = _add_model(publicprize.contest.model.Contestant(
+                # TODO(pjm): there must be a way to do this in a map()
+                display_name=contestant['display_name'],
+                youtube_code=contestant['youtube_code'],
+                slideshow_code=contestant['slideshow_code'],
+                contestant_desc=contestant['contestant_desc'],
+            ))
+            _add_owner(contest_id, contestant_id)
 
             for founder in contestant['Founder']:
-                db.session.add(
-                    _create_founder(founder)
-                )
-                _add_owner(contestant, founder)
+                founder_id = _add_model(_create_founder(founder))
+                _add_owner(contestant_id, founder_id)
 
     db.session.commit()
 
@@ -50,23 +47,29 @@ def create_test_db():
     drop_db()
     create_db()
     create_test_data()
-    
+
 @_manager.command
 def drop_db():
     if fes.prompt_bool("Drop database?"):
-        db.drop_all()
+        # db.drop_all()
+        os.system('dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
 
-def _add_owner(parent, child):
+def _add_model(model):
+    db.session.add(model)
+    # flush() makes biv_id available (executes the db sequence)
+    db.session.flush()
+    return model.biv_id
+    
+def _add_owner(parent_id, child_id):
     db.session.add(
         publicprize.auth.model.BivAccess(
-            source_biv_id=parent['biv_id'],
-            target_biv_id=child['biv_id']
+            source_biv_id=parent_id,
+            target_biv_id=child_id
         )
     )
 
 def _create_contest(contest):
     model = publicprize.contest.model.Contest(
-        biv_id=contest['biv_id'],
         display_name=contest['display_name'],
         tag_line=contest['tag_line']
     )
@@ -80,7 +83,6 @@ def _create_contest(contest):
 # TODO(pjm): normalize up binary fields, combine with _create_contest()
 def _create_founder(founder):
     model = publicprize.contest.model.Founder(
-        biv_id=founder['biv_id'],
         display_name=founder['display_name'],
         founder_desc=founder['founder_desc']
     )
