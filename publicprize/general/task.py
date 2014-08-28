@@ -3,7 +3,9 @@
 import flask
 from flask_oauthlib.client import OAuth, OAuthException
 from publicprize import controller
+import publicprize.auth.model as pam
 import publicprize.contest.model as pcm
+import werkzeug
 
 facebook = OAuth(controller.app()).remote_app(
     'facebook',
@@ -24,13 +26,20 @@ class General(controller.Task):
         )
 
     def action_facebook_login(biv_obj):
+        controller.app().logger.info(flask.request.referrer);
         callback = flask.url_for(
             '_route',
             path=biv_obj.format_uri('facebook_authorized'),
+            # TODO(pjm): store next in session
             next=flask.request.args.get('next') or flask.request.referrer or None,
             _external=True
         )
-        return facebook.authorize(callback=callback)
+        state = werkzeug.security.gen_salt(10)
+        flask.session['oauth_state'] = state
+        return facebook.authorize(
+            callback=callback,
+            state=state
+        )
 
     def action_facebook_authorized(biv_obj):
         resp = facebook.authorized_response()
@@ -49,14 +58,28 @@ class General(controller.Task):
             # TODO(pjm): flash message "facebook access denied"
             app.logger.info('Access denied: %s' % resp.message)
             return General.action_index(biv_obj)
+        if flask.session.get('oauth_state') != flask.request.args.get('state'):
+            app.logger.info(
+                'Invalid oauth state, expected: %s response: %s' % (
+                    flask.session.get('oauth_state'),
+                    flask.request.args.get('state')
+                 )
+            )
+            return General.action_index(biv_obj)
 
-        flask.session['oauth_token'] = (resp['access_token'], '')
-        me = facebook.get('/me')
+#        flask.session['oauth_token'] = (resp['access_token'], '')
+        app.logger.info(resp)
+        token = (resp['access_token'], '')
+        me = facebook.get(
+            '/me',
+            token=token
+        )
         app.logger.info(me.data)
         app.logger.info(
             'Logged in as id=%s name=%s redirect=%s' % (
                 me.data['id'], me.data['name'], flask.request.args.get('next'))
         )
+        app.logger.info(flask.request.args);
         return flask.redirect(flask.request.args.get('next') or '/');
         
     def action_not_found(biv_obj):
