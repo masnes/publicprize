@@ -1,149 +1,141 @@
-# Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
-"""biv operations: converting to/from uri's.  Loading objects, etc.
+# -*- coding: utf-8 -*-
+""" biv operations: converting to/from uri's.  Loading objects, etc. 
+
+    :copyright: Copyright (c) 2014 Bivio Software, Inc.  All Rights Reserved.
+    :license: Apache, see LICENSE for more details.
 """
-import inspect
+
 import numconv
+import publicprize.inspect as ppi
 
 URI_FOR_NONE = 'index'
 URI_FOR_ERROR = 'error'
 URI_FOR_STATIC_FILES = 'static'
 
 class Id(int):
-    def __new__(cls, biv_id):
-        if isinstance(biv_id, cls):
-            return biv_id
-        biv_id = int(biv_id)
-        assert _MARKER_MODULUS < biv_id <= _MAX_ID
-        return super().__new__(cls, biv_id)
+    """Represents a biv_id"""
+    def __new__(cls, biv_id_or_marker, biv_index=None):
+        """Pass in an int, str, or existing biv_id"""
+        if isinstance(biv_id_or_marker, cls):
+            return biv_id_or_marker
+        if isinstance(biv_id_or_marker, Marker):
+            assert isinstance(biv_index, Index), repr(biv_index) + ': not Index'
+            bi = biv_index * _MARKER_MODULUS + biv_id_or_marker
+            self = super().__new__(cls, bi)
+            self.__marker = biv_id_or_marker
+            self.__index = biv_index
+        else:
+            bi = int(biv_id_or_marker)
+            assert _MARKER_MODULUS < bi <= _MAX_ID, str(bi) + ': range'
+            self = super().__new__(cls, bi)
+            self.__marker = Marker(bi % _MARKER_MODULUS)
+            self.__index = Index(bi // _MARKER_MODULUS)
+        return self
+
+    @property
+    def biv_marker(self):
+        """Marker object for this Id"""
+        return self.__marker
+
+    @property
+    def biv_index(self):
+        """Index object for this Id"""
+        return self.__index
+
+    def to_biv_uri(self, use_alias=True):
+        """Converts a biv_id to a biv_uri.
+
+        :param use_alias: If False, creates encoded uri, always
+        """
+        if use_alias and self.__int__() in _id_to_alias:
+            return _id_to_alias[self.__int__()][0]
+        return URI(self)
+
+class Index(int):
+    """The sequenced part of an Id"""
+    def __new__(cls, biv_index):
+        if isinstance(biv_index, cls):
+            return biv_index
+        bi = int(biv_index)
+        assert 0 < bi <= _MAX_INDEX, str(biv_index) + ': range'
+        return super().__new__(cls, bi)
 
 class Marker(int):
+    """The type part of the Id"""
     def __new__(cls, biv_marker):
         if isinstance(biv_marker, cls):
             return biv_marker
-        biv_marker = int(biv_marker)
-        assert 0 < biv_marker <= _MAX_MARKER
-        return super().__new__(cls, biv_marker)
+        bm = int(biv_marker)
+        assert 0 < bm <= _MAX_MARKER, str(biv_marker) + ': range'
+        return super().__new__(cls, bm)
 
-    def to_id(self, bix):
-        """Convert an index value to a biv_id
-        """
-        return _join(_assert_bix(bix), self.__int__())
+    def to_biv_id(self, biv_index):
+        "Convert an index value to a biv_id"
+        return Id(self, Index(biv_index))
 
 class URI(str):
-    def __new__(cls, uri):
-        return super().__new__(cls, uri)
+    """Parses and stores an encoded biv_uri or an alias"""
+    def __new__(cls, biv_uri_or_id):
+        if isinstance(biv_uri_or_id, cls):
+            return biv_uri_or_id
+        if isinstance(biv_uri_or_id, Id):
+            self = super().__new__(cls, cls.__encode(biv_uri_or_id))
+            self.__id = biv_uri_or_id
+            return self
+        bu = str(biv_uri_or_id)
+        self = super().__new__(cls, bu)
+        if bu[0] == _ENC_PREFIX:
+            self.__id = cls._decode(bu)
+        else:
+            assert bu in _alias_to_id, bu + ': unknown alias'
+            self.__id = _alias_to_id[bu]
+        return self
 
-def id_to_uri(biv_id, use_alias=True):
-    """Converts a biv_id to a biv_uri.
+    def __decode(biv_uri):
+        bu = biv_uri[1:]
+        assert len(bu) >= _MARKER_ENC_LEN, biv_uri + ': too short'
+        bm = Marker(_CONV.str2int(bu[-_MARKER_ENC_LEN:]))
+        i = _CONV.str2int(bu[:-_MARKER_ENC_LEN])
+        return bm.to_biv_id(i)
 
-    Args:
-        biv_id (int): to be converted
+    def __encode(biv_id):
+        bm = _CONV.int2str(biv_id.biv_marker).zfill(_MARKER_ENC_LEN)
+        bi = _CONV.int2str(biv_id.biv_index)
+        return _ENC_PREFIX + bi + bm
 
-    Returns:
-        str: biv_uri
-
-    Raises:
-        ValueError: if biv_id is not parseable
-    """
-    if use_alias and biv_id in _id_to_alias:
-        return _id_to_alias[biv_id][0]
-    bix, bm = _split(biv_id)
-    bm = _CONV.int2str(bm).zfill(_MARKER_ENC_LEN)
-    bix = _CONV.int2str(bix)
-    return URI(_ENC_PREFIX + bix + bm)
+def load_obj(biv_uri):
+    """Loads the object identified by biv_uri"""
+    if biv_uri is None or len(biv_uri) == 0:
+        biv_uri = URI_FOR_NONE
+    bi = URI(biv_uri).biv_id
+    return _marker_to_class[bi.marker].load_biv_obj(bi)
 
 def register_alias(uri, biv_id):
-    """Registers biv_id with uri
-
-    Args:
-        uri (str): must be globally unique
-        biv_id (int): what's identified
-        
-    Returns:
-        str: uri
-    """
-    biv_id = Id(biv_id)
-    assert not uri in _alias_to_id
-    assert not uri[0] == _ENC_PREFIX
-    _alias_to_id[uri] = biv_id
-    if not biv_id in _id_to_alias:
-        _id_to_alias[biv_id] = []
-    _id_to_alias[biv_id].append(uri)
-    return uri
+    """Registers biv_id with non-encoded uri"""
+    assert not uri in _alias_to_id, uri + ': exists'
+    assert not uri[0] == _ENC_PREFIX, uri + ': encoded uri'
+    bi = Id(biv_id)
+    _alias_to_id[uri] = bi
+    bu = URI(uri)
+    if not bi in _id_to_alias:
+        _id_to_alias[bi] = []
+    _id_to_alias[bi].append(bu)
+    return bu
     
 def register_marker(biv_marker, cls):
-    """Registers a marker in a global table for a model, which
-    can load_biv_obj
-
-    Args:
-        biv_marker (int): marker
-
-    Returns:
-        Marker: used for generating idempotent id sequences (special case)
-
-    Asserts:
-        if duplicate or invalid function
-    """
+    """Registers a marker in a global table for a model, which can load_biv_obj"""
     biv_marker = Marker(biv_marker)
-    assert _has_method(cls, 'load_biv_obj')
-    assert not biv_marker in _marker_to_class
+    assert ppi.class_has_method(cls, 'load_biv_obj'), str(cls) + ': missing method'
+    assert not biv_marker in _marker_to_class, str(biv_marker) + ': exists'
     _marker_to_class[biv_marker] = cls
     return Marker(biv_marker)
 
-def load_obj(biv_uri, use_alias=True):
-    """Loads an object for the specified biv_uri
-
-    Args:
-        biv_uri (str): identify of obj
-
-    Returns:
-        object: biv_obj
-    """
-    if biv_uri is None or len(biv_uri) == 0:
-        biv_uri = URI_FOR_NONE
-    if use_alias and biv_uri in _alias_to_id:
-        biv_id = _alias_to_id[biv_uri]
-        bix, bm = _split(biv_id)
-    else:
-        bix, bm = _decode_uri(biv_uri)
-        biv_id = _join(bix, bm)
-    return _marker_to_class[bm].load_biv_obj(biv_id)
-
-def _assert_bix(bix):
-    bix = int(bix)
-    assert 0 < bix <= _MAX_BIX
-    return bix
-
-def _decode_uri(biv_uri):
-    assert biv_uri[0] == _ENC_PREFIX
-    biv_uri = biv_uri[1:]
-    if len(biv_uri) < _MARKER_ENC_LEN:
-        raise ValueError(biv_uri + ': biv_uri too short')
-    bm = Marker(_CONV.str2int(biv_uri[-_MARKER_ENC_LEN:]))
-    bix = _assert_bix(_CONV.str2int(biv_uri[:-_MARKER_ENC_LEN]))
-    return (bix, bm)
-
-def _join(bix, bm):
-    return bix * _MARKER_MODULUS + bm
-
-def _has_method(cls, method):
-    for c in inspect.getmro(cls):
-        if hasattr(c, method) and inspect.ismethod(getattr(c, method)):
-            return True
-    return False
-
-def _split(biv_id):
-    biv_id = Id(biv_id)
-    bm = Marker(biv_id % _MARKER_MODULUS)
-    bix = biv_id // _MARKER_MODULUS
-    return (bix, bm)
-    
 _CONV = numconv.NumConv(radix=62, alphabet=numconv.BASE62)
 _ENC_PREFIX = '_'
 _IDEMPOTENT_URI = None
 _MARKER_MODULUS = 1000
-_MAX_ID = int(10e18) - 1
-_MAX_BIX = _MAX_ID // _MARKER_MODULUS
+_MAX_ID = int(1e18) - 1
+_MAX_INDEX = _MAX_ID // _MARKER_MODULUS
 # We reserve 900 and above for versioning and growth
 _MAX_MARKER = _MARKER_MODULUS - 101
 _MARKER_ENC_LEN = len(_CONV.int2str(_MAX_MARKER))
