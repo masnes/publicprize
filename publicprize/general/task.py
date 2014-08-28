@@ -70,9 +70,9 @@ class General(controller.Task):
         controller.app().logger.info(info)
         # avatar link
         # https://graph.facebook.com/{id}/picture?type=square
-        user = User.query.filter(
-            User.oauth_type == 'facebook',
-            User.oauth_id == info['id']
+        user = User.query.filter_by(
+            oauth_type='facebook',
+            oauth_id=info['id']
         ).first()
         if user == None:
             user = User(
@@ -89,6 +89,7 @@ class General(controller.Task):
         session = controller.session()
         session['user.biv_id'] = user.biv_id
         session['user.is_logged_in'] = True
+        session['user.display_name'] = user.display_name
         
     def _facebook_validate_auth(resp):
         app = controller.app()
