@@ -9,6 +9,8 @@ class BivAccess(db.Model, controller.Model):
     target_biv_id = db.Column(db.Numeric(18), primary_key=True)
 
 class User(db.Model, controller.Model):
+    # don't conflict with postgres "user" table
+    __tablename__ = 'user_t'
     biv_id = db.Column(
         db.Numeric(18),
         db.Sequence('user_s', start=1006, increment=1000),
@@ -20,6 +22,7 @@ class User(db.Model, controller.Model):
         db.Enum('facebook', 'linkedin', 'google', name='oauth_type'),
         nullable=False
     )
+    oauth_id = db.Column(db.String(100), nullable=False)
 
 BivAccess.BIV_MARKER = biv.register_marker(5, BivAccess)
 User.BIV_MARKER = biv.register_marker(6, User)
