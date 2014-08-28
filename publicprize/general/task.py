@@ -3,6 +3,7 @@
 import flask
 from flask_oauthlib.client import OAuth, OAuthException
 from publicprize import controller
+from publicprize.auth.model import User
 import publicprize.contest.model
 import werkzeug
 
@@ -46,17 +47,50 @@ class General(controller.Task):
         if 'oauth.next_uri' in session:
             next = session['oauth.next_uri']
             del session['oauth.next_uri']
-        if not General._validate_facebook_auth(resp):
+        if not General._facebook_validate_auth(resp):
             return flask.redirect(next or '/')
         session['oauth.token'] = (resp['access_token'], '')
-        me = facebook.get('/me', token=(resp['access_token'], ''))
-        controller.app().logger.info(me.data)
+        General._facebook_user(
+            facebook.get('/me', token=(resp['access_token'], '')).data
+        )
         return flask.redirect(next or '/')
+
+    def action_logout(biv_obj):
+        session = controller.session()
+        session['user.is_logged_in'] = False
+        del session['oauth.token']
+        # TODO(pjm): flash logged-out message
+        return flask.redirect('/')
         
     def action_not_found(biv_obj):
         return flask.render_template('general/not-found.html'), 404
 
-    def _validate_facebook_auth(resp):
+    def _facebook_user(info):
+        # info contains email, last_name, first_name, id, name
+        controller.app().logger.info(info)
+        # avatar link
+        # https://graph.facebook.com/{id}/picture?type=square
+        user = User.query.filter(
+            User.oauth_type == 'facebook',
+            User.oauth_id == info['id']
+        ).first()
+        if user == None:
+            user = User(
+                display_name=info['name'],
+                user_email=info['email'],
+                oauth_type='facebook',
+                oauth_id=info['id']
+            )
+        else:
+            user.display_name = info['name']
+            user.user_email = info['email']
+        controller.db.session.add(user)
+        controller.db.session.flush()
+        session = controller.session()
+        session['user.biv_id'] = user.biv_id
+        session['user.is_logged_in'] = True
+        
+    def _facebook_validate_auth(resp):
         app = controller.app()
         
         if resp is None:
