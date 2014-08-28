@@ -9,7 +9,10 @@ class BaseConfig(object):
 
 class DevConfig(BaseConfig):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/pp.db'
+    PP_DATABASE = 'pp'
+    PP_DATABASE_USER = 'ppuser'
+    PP_DATABASE_PASSWORD = 'pppass'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://' + PP_DATABASE_USER + ':' + PP_DATABASE_PASSWORD + '@localhost/' + PP_DATABASE
     SQLALCHEMY_ECHO = True
 
 class ProdConfig(BaseConfig):
