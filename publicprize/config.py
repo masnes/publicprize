@@ -4,6 +4,7 @@ import os
 
 class BaseConfig(object):
     SECRET_KEY = "ppsecret"
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     PP_FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID')
     PP_FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET')
 
