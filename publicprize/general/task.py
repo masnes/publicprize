@@ -32,9 +32,9 @@ class General(controller.Task):
             _external=True
         )
         # return to the "next" or referrer page when return from callback
-        controller.session()['oauth.next_uri'] = flask.request.args.get('next') or flask.request.referrer or None
-        state = werkzeug.security.gen_salt(10)
-        controller.session()['oauth.state'] = state
+        flask.session['oauth.next_uri'] = flask.request.args.get('next') or flask.request.referrer or None
+        state = werkzeug.security.gen_salt(64)
+        flask.session['oauth.state'] = state
         return facebook.authorize(
             callback=callback,
             state=state
@@ -42,23 +42,21 @@ class General(controller.Task):
 
     def action_facebook_authorized(biv_obj):
         resp = facebook.authorized_response()
-        session = controller.session()
         next = None
-        if 'oauth.next_uri' in session:
-            next = session['oauth.next_uri']
-            del session['oauth.next_uri']
+        if 'oauth.next_uri' in flask.session:
+            next = flask.session['oauth.next_uri']
+            del flask.session['oauth.next_uri']
         if not General._facebook_validate_auth(resp):
             return flask.redirect(next or '/')
-        session['oauth.token'] = (resp['access_token'], '')
+        flask.session['oauth.token'] = (resp['access_token'], '')
         General._facebook_user(
             facebook.get('/me', token=(resp['access_token'], '')).data
         )
         return flask.redirect(next or '/')
 
     def action_logout(biv_obj):
-        session = controller.session()
-        session['user.is_logged_in'] = False
-        del session['oauth.token']
+        flask.session['user.is_logged_in'] = False
+        del flask.session['oauth.token']
         # TODO(pjm): flash logged-out message
         return flask.redirect('/')
         
@@ -86,10 +84,9 @@ class General(controller.Task):
             user.user_email = info['email']
         controller.db.session.add(user)
         controller.db.session.flush()
-        session = controller.session()
-        session['user.biv_id'] = user.biv_id
-        session['user.is_logged_in'] = True
-        session['user.display_name'] = user.display_name
+        flask.session['user.biv_id'] = user.biv_id
+        flask.session['user.is_logged_in'] = True
+        flask.session['user.display_name'] = user.display_name
         
     def _facebook_validate_auth(resp):
         app = controller.app()
@@ -107,9 +104,8 @@ class General(controller.Task):
             # TODO(pjm): flash message "facebook access denied"
             app.logger.warn(resp)
             return False
-        session = controller.session()
-        state = session['oauth.state']
-        del session['oauth.state']
+        state = flask.session['oauth.state']
+        del flask.session['oauth.state']
         if state != flask.request.args.get('state'):
             # TODO(pjm): flash message "facebook access denied"
             app.logger.warn(
@@ -123,5 +119,5 @@ class General(controller.Task):
 
 @facebook.tokengetter
 def _get_facebook_oauth_token():
-    return controller.session().get('oauth.token')
+    return flask.session.get('oauth.token')
     
