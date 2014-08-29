@@ -29,13 +29,13 @@
       	  <a class="pp-nav-logo" href="/"><img src="/static/img/logo.gif" alt="PUBLIC PRIZE"></a>
       	  <div class="pp-nav-menu pull-right">
 
-	    {% if request.environ['beaker.session'].get('user.is_logged_in') %}
+	    {% if session.get('user.is_logged_in') %}
 
-	    <span class="text-primary"><strong>{{ request.environ['beaker.session'].get('user.display_name') }}</strong></span>
+	    <span class="text-primary"><strong>{{ session.get('user.display_name') }}</strong></span>
     	    {#- TODO(pjm): hard-coded general name #}		  
             <a class="pp-nav-item" href="/pub/logout">Log out</a>
 
-	    {% elif request.environ['beaker.session'].get('user.biv_id') %}
+	    {% elif session.get('user.biv_id') %}
 
     	    {#- TODO(pjm): hard-coded general name #}
 	    <form class="navbar-form" method="get" action="/pub/facebook-login">
