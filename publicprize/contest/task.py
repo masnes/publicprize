@@ -1,9 +1,11 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 import flask
 import io
+import publicprize.contest.form as pcf
 import publicprize.contest.model as pcm
 import publicprize.controller as ppc
 import publicprize.auth.model as pam
+from publicprize import controller
 
 class Contest(ppc.Task):
     def action_about(biv_obj):
@@ -28,6 +30,31 @@ class Contest(ppc.Task):
             io.BytesIO(biv_obj.contest_logo),
             'image/' + biv_obj.logo_type
         )
+    def action_submit_contestant(biv_obj):
+        form = pcf.ContestantForm()
+        if form.validate_on_submit():
+            c = pcm.Contestant()
+            form.populate_obj(c)
+            f = pcm.Founder()
+            form.populate_obj(f)
+            f.display_name = flask.session['user.display_name']
+            controller.db.session.add(c)
+            controller.db.session.add(f)
+            controller.db.session.flush()
+            controller.db.session.add(
+                pam.BivAccess(
+                    source_biv_id=biv_obj.biv_id,
+                    target_biv_id=c.biv_id
+                )
+            )
+            controller.db.session.add(
+                pam.BivAccess(
+                    source_biv_id=c.biv_id,
+                    target_biv_id=f.biv_id
+                )
+            )
+            return flask.redirect(c.format_uri('contestant'))
+        return Contest._render_template(biv_obj, 'submit', form=form)
     def _render_template(biv_obj, name, **kwargs):
         return flask.render_template(
             "contest/" + name + ".html",
@@ -41,8 +68,9 @@ class Contestant(ppc.Task):
         return flask.render_template(
             'contest/detail.html',
             contest=pcm.Contest.query.select_from(pam.BivAccess).filter(
+                pam.BivAccess.source_biv_id == pcm.Contest.biv_id,
                 pam.BivAccess.target_biv_id == biv_obj.biv_id
-            ).first_or_404(),
+            ).one(),
             contestant=biv_obj,
             founders=pcm.Founder.query.select_from(pam.BivAccess).filter(
                 pam.BivAccess.source_biv_id == biv_obj.biv_id,
