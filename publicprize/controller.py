@@ -27,9 +27,6 @@ def init():
         importlib.import_module(cm + _MODEL_MODULE)
         importlib.import_module(cm + _TASK_MODULE)
 
-def session():
-    return flask.request.environ['beaker.session']
-
 class Task(object):
 
     def __init__(self):
