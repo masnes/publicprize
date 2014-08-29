@@ -111,7 +111,7 @@ def _parse_path(path):
     path_info = parts[2] if len(parts) >= 3 else None
     return biv.load_obj(biv_uri), action, path_info
 
-@_app.route("/<path:path>")
+@_app.route("/<path:path>", methods=('GET', 'POST'))
 def _route(path):
     # request_context
     biv_obj, action, path_info = _parse_path(path)
