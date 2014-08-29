@@ -33,12 +33,12 @@
 
 	    <span class="text-primary"><strong>{{ request.environ['beaker.session'].get('user.display_name') }}</strong></span>
     	    {#- TODO(pjm): hard-coded general name #}		  
-            <a class="pp-nav-item" href="/index/logout">Log out</a>
+            <a class="pp-nav-item" href="/pub/logout">Log out</a>
 
 	    {% elif request.environ['beaker.session'].get('user.biv_id') %}
 
     	    {#- TODO(pjm): hard-coded general name #}
-	    <form class="navbar-form" method="get" action="/index/facebook-login">
+	    <form class="navbar-form" method="get" action="/pub/facebook-login">
 	    	<button class="btn btn-primary btn-sm"><img src="/static/img/facebook.png" alt="Facebook"> Log in with Facebook</button>
 	    </form>
 	    
@@ -81,7 +81,7 @@
 	      	</div>
             	<div class="pp-login-body modal-body">
     	    	    {#- TODO(pjm): hard-coded general name #}		  
-		    <a href="/index/facebook-login" class="btn btn-primary btn-lg btn-block"><img src="/static/img/facebook.png" alt="Facebook"> {{ button_text }}</a>
+		    <a href="/pub/facebook-login" class="btn btn-primary btn-lg btn-block"><img src="/static/img/facebook.png" alt="Facebook"> {{ button_text }}</a>
             	</div>
       	    </div>
     	</div>
