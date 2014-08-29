@@ -51,8 +51,9 @@ class Model(object):
         assert inspect.isclass(self.__default_task_class)
         return self.__default_task_class
 
-    def format_uri(self, path):
-        return '/' + biv.id_to_uri(self.biv_id) + '/' + path
+    def format_uri(self, path=None):
+        path = '/' + path if not path is None and len(path) else ''
+        return '/' + biv.Id(self.biv_id).to_biv_uri() + path
 
 class BeakerSessionInterface(flask.sessions.SessionInterface):
     def init_app(app):

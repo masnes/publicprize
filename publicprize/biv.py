@@ -8,6 +8,7 @@
 import numconv
 import publicprize.inspect as ppi
 
+URI_FOR_GENERAL_TASKS = 'pub'
 URI_FOR_NONE = 'index'
 URI_FOR_ERROR = 'error'
 URI_FOR_STATIC_FILES = 'static'
@@ -85,11 +86,16 @@ class URI(str):
         bu = str(biv_uri_or_id)
         self = super().__new__(cls, bu)
         if bu[0] == _ENC_PREFIX:
-            self.__id = cls._decode(bu)
+            self.__id = cls.__decode(bu)
         else:
             assert bu in _alias_to_id, bu + ': unknown alias'
             self.__id = _alias_to_id[bu]
         return self
+
+    @property
+    def biv_id(self):
+        """Returns Id for this URI"""
+        return self.__id
 
     def __decode(biv_uri):
         bu = biv_uri[1:]
@@ -108,7 +114,7 @@ def load_obj(biv_uri):
     if biv_uri is None or len(biv_uri) == 0:
         biv_uri = URI_FOR_NONE
     bi = URI(biv_uri).biv_id
-    return _marker_to_class[bi.marker].load_biv_obj(bi)
+    return _marker_to_class[bi.biv_marker].load_biv_obj(bi)
 
 def register_alias(uri, biv_id):
     """Registers biv_id with non-encoded uri"""

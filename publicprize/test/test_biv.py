@@ -9,6 +9,7 @@ import pytest
 from publicprize import biv
 # Needed to initialize known biv.ids
 import publicprize.general.task
+import publicprize.general.model
 
 def test_marker():
     assert biv.Marker(1) == 1
@@ -26,10 +27,22 @@ def test_index():
 
 def test_id():
     assert biv.Id(1001) == 1001
-    i = biv.Id(3001)
+    i = biv.Id(13001)
     assert i.biv_marker == 1
-    assert i.biv_index == 3
-    assert i.to_biv_uri() == '_301'
+    assert i.biv_index == 13
+    assert i.to_biv_uri() == '_D01'
     for v in (1000, 1):
         with pytest.raises(AssertionError):
             biv.Id(v)
+
+def test_uri():
+    assert biv.URI('index') == 'index'
+    assert biv.URI('index').biv_id == 4001
+    assert biv.URI('_401') == '_401'
+    assert biv.URI('_401').biv_id == 4001
+
+def test_load_obj():
+    assert biv.load_obj('_101').format_uri() == '/pub'
+    assert biv.load_obj('').format_uri('') == '/index'
+    assert biv.load_obj('').format_uri() == '/index'
+    assert biv.load_obj('').format_uri() == '/index'
