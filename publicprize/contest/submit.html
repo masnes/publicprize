@@ -1,0 +1,46 @@
+{% extends 'contest/contest.html' %}
+
+{% block title %}
+Submit Contest Entry
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="col-sm-7 pp-form">
+
+  {%- macro errors(field) -%}
+      {% if form[field].errors %}
+        <span class="pp-form-error text-danger"><strong>{{ form[field].errors[0] }}</strong></span>
+      {% endif %}
+  {%- endmacro -%}
+
+  {%- macro field(field) -%}
+    <div class="form-group">
+      {{ form[field].label }}
+      {{ errors(field) }}
+      {{ form[field](class="form-control") }}
+    </div>
+  {%- endmacro -%}
+
+  <form method="POST" action="{{ contest.format_uri('submit_contestant') }}">
+    {{ form.csrf_token() }}
+    {{ field('display_name') }}
+    <div class="form-group">
+      {{ form.contestant_desc.label }}
+      {{ errors('contestant_desc') }}
+      {{ form.contestant_desc(rows=5, class="form-control") }}
+    </div>
+    {{ field('youtube_code') }}
+    {{ field('slideshow_code') }}
+    <div class="form-group">
+      <label for="website">Project Website <span class="text-muted"><small>(Optional)</small></span></label>
+      {{ form.website(class="form-control") }}
+    </div>
+    {{ field('founder_desc') }}
+    <button type="submit" class="btn btn-primary btn-lg">Submit Entry</button>
+    <a class="pp-cancel-link" href="{{ contest.format_uri('contestants') }}">Cancel</a>
+  </form>
+
+</div>
+{% endblock %}
