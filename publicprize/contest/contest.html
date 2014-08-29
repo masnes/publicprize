@@ -4,6 +4,10 @@
 - {{ contest.display_name }}
 {% endblock %}
 
+{% block logged_in_nav %}
+  <a class="pp-nav-item" href="{{ contest.format_uri('submit_contestant') }}">Submit an Entry</a>
+{% endblock %}
+
 {% block content %}
 
 <div class="col-sm-7 pp-main">
