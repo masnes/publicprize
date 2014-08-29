@@ -1,7 +1,6 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
 from publicprize.controller import db
-from publicprize.contest.form import ContestantForm
 from publicprize import controller
 from publicprize import biv
 
