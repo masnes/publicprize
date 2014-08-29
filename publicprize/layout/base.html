@@ -31,6 +31,7 @@
 
 	    {% if request.environ['beaker.session'].get('user.is_logged_in') %}
 
+	    <span class="text-primary"><strong>{{ request.environ['beaker.session'].get('user.display_name') }}</strong></span>
     	    {#- TODO(pjm): hard-coded general name #}		  
             <a class="pp-nav-item" href="/index/logout">Log out</a>
 
@@ -75,7 +76,7 @@
     	<div class="modal-dialog">
       	    <div class="modal-content">
       	    	<div class="modal-header">
-	            <button type="button" class="close" data-dismiss="modal"><spanx>&times;</span></button>
+	            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
 	            <h4 class="modal-title">{{ heading_text }}</h4>
 	      	</div>
             	<div class="pp-login-body modal-body">

@@ -3,6 +3,7 @@
 from publicprize import biv
 from publicprize import controller
 from publicprize.controller import db
+from sqlalchemy import UniqueConstraint
 
 class BivAccess(db.Model, controller.Model):
     source_biv_id = db.Column(db.Numeric(18), primary_key=True)
@@ -23,6 +24,7 @@ class User(db.Model, controller.Model):
         nullable=False
     )
     oauth_id = db.Column(db.String(100), nullable=False)
+    __table_args__ = (UniqueConstraint('oauth_type', 'oauth_id'),)
 
 BivAccess.BIV_MARKER = biv.register_marker(5, BivAccess)
 User.BIV_MARKER = biv.register_marker(6, User)
