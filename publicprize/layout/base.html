@@ -31,6 +31,8 @@
 
 	    {% if session.get('user.is_logged_in') %}
 
+	    {% block logged_in_nav %}{% endblock %}
+
 	    <span class="text-primary"><strong>{{ session.get('user.display_name') }}</strong></span>
     	    {#- TODO(pjm): hard-coded general name #}		  
             <a class="pp-nav-item" href="/pub/logout">Log out</a>
