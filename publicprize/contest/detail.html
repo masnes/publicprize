@@ -39,7 +39,10 @@
     	{% for founder in founders %}
 
     	    <div class="pp-item">
+
+	      {% if founder.founder_avatar: %}
     	    	<img class="pp-thumb" src="{{ founder.format_uri('founder_avatar') }}" alt="{{ founder.display_name }}"/>
+	      {% endif %}
     	    	<span class="pp-name">{{ founder.display_name }}</span>
     	    	<span class="pp-desc">{{ founder.founder_desc }}</span>
     	    </div>
