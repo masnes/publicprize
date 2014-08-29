@@ -3,7 +3,7 @@ Public Prize
 
 ###### Setting up a dev environment.
 
-First [install Python3 with pyenv](../utilities/Environment.md), then:
+First [install Python3 with pyenv](//github.com/biviosoftware/utilities/blob/master/Environment.md), then:
 
 ```
 pip install `cat requirements.txt`

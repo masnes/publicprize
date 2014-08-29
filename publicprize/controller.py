@@ -28,18 +28,22 @@ def init():
         importlib.import_module(cm + _TASK_MODULE)
 
 class Task(object):
+    """Provides the actions for a Model"""
 
     def __init__(self):
         pass
 
 class Model(object):
+    """Provides biv support for Models"""
 
     @classmethod
     def load_biv_obj(cls, biv_id):
+        """Load a biv from the db"""
         return cls.query.filter_by(biv_id=biv_id).first_or_404()
 
     @property
     def task_class(self):
+        """Corresponding Task class for this Model"""
         if hasattr(self, '__default_task_class'):
             return self.__default_task_class
         mn = self.__module__
@@ -48,9 +52,17 @@ class Model(object):
         assert inspect.isclass(self.__default_task_class)
         return self.__default_task_class
 
-    def format_uri(self, path=None):
-        path = '/' + path if not path is None and len(path) else ''
-        return '/' + biv.Id(self.biv_id).to_biv_uri() + path
+    def format_uri(self, action=None, path_info=None):
+        """Creates a URI for this biv_obj appending action and path_info"""
+        biv_id = biv.Id(self.biv_id)
+        uri = '/' + biv_id.to_biv_uri()
+        if action is not None:
+            _action_uri_to_function(action, self)
+            uri += '/' + action
+        if path_info is not None:
+            assert action is not None, path_info + ': path_info requires an action'
+            uri += '/' + path_info
+        return uri
 
 class BeakerSessionInterface(flask.sessions.SessionInterface):
     def init_app(app):
@@ -80,15 +92,17 @@ _app.config.from_object(config.DevConfig)
 BeakerSessionInterface.init_app(_app)
 db = SQLAlchemy(_app)
 
-def _dispatch_action(name, biv_obj):
-    if len(name) == 0:
-        name = _DEFAULT_ACTION_NAME
+def _action_uri_to_function(name, biv_obj):
     name = re.sub('\W', '_', name)
     name = _ACTION_METHOD_PREFIX + name
     f = getattr(biv_obj.task_class, name)
-    if not inspect.isfunction(f):
-        raise ValueError(name + ': action not a method')
-    return f(biv_obj)
+    assert inspect.isfunction(f), name + ': no action for ' + biv_obj.biv_id
+    return f
+    
+def _dispatch_action(name, biv_obj):
+    if len(name) == 0:
+        name = _DEFAULT_ACTION_NAME
+    return _action_uri_to_function(name, biv_obj)(biv_obj)
 
 def _parse_path(path):
     parts = path.split('/', 2)
