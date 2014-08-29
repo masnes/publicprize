@@ -123,6 +123,15 @@ border-bottom: 1px solid #e5e5e5;
   line-height: 1.5;
 }
 
+.pp-form {
+  background-color: #fff7f0;
+  border-radius: 8px;
+  margin-left: 15px;
+  padding: 2ex;
+  border: 1px solid #ccc;
+  
+}
+
 /* Sidebar modules for boxing content */
 .sidebar-module {
   padding: 15px;
@@ -413,4 +422,11 @@ img.pp-fb-tray {
 }
 .pp-login-body {
   margin: 6ex 0;
+}
+.pp-cancel-link {
+    margin-left: 1em;
+    vertical-align: -22%;
+}
+.pp-form-error {
+    float: right;
 }
