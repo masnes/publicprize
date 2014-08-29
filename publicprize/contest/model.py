@@ -1,6 +1,7 @@
 # Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
 
 from publicprize.controller import db
+from publicprize.contest.form import ContestantForm
 from publicprize import controller
 from publicprize import biv
 
@@ -35,6 +36,7 @@ class Contestant(db.Model, controller.Model):
     slideshow_code = db.Column(db.String(500))
     contestant_desc = db.Column(db.String)
     tax_id = db.Column(db.Numeric(9))
+    website = db.Column(db.String(100))
 
 class Founder(db.Model, controller.Model):
     biv_id = db.Column(
