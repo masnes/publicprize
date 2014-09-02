@@ -1,4 +1,9 @@
-# Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
+# -*- coding: utf-8 -*-
+""" Database creation and test data loading
+
+    :copyright: Copyright (c) 2014 Bivio Software, Inc.  All Rights Reserved.
+    :license: Apache, see LICENSE for more details.
+"""
 
 import flask.ext.script as fes
 import json
@@ -14,6 +19,7 @@ _manager = fes.Manager(ppc.app())
 
 @_manager.command
 def create_db():
+    """Create the postgres user, database, and publicprize schema"""
     config = ppc.app().config
     os.system('createuser --user=postgres --no-superuser --no-createdb --no-createrole %s' % config['PP_DATABASE_USER'])
     os.system('echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql --user=postgres template1' % (config['PP_DATABASE_USER'], config['PP_DATABASE_PASSWORD']))
@@ -22,6 +28,7 @@ def create_db():
 
 @_manager.command
 def create_test_data():
+    """Populate database with contents of data/test_data.json file"""
     data = json.load(open('data/test_data.json', 'r'))
 
     for contest in data['Contest']:
@@ -49,23 +56,27 @@ def create_test_data():
 
 @_manager.command
 def create_test_db():
+    """Recreates the database and loads the test data from data/test_data.json"""
     drop_db()
     create_db()
     create_test_data()
 
 @_manager.command
 def drop_db():
+    """Destroy the database"""
     if fes.prompt_bool("Drop database?"):
         # db.drop_all()
         os.system('dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
 
 def _add_model(model):
+    """Adds a SQLAlchemy model and returns it's biv_id"""
     db.session.add(model)
     # flush() makes biv_id available (executes the db sequence)
     db.session.flush()
     return model.biv_id
     
 def _add_owner(parent_id, child_id):
+    """Creates a BivAccess record between the parent and child ids"""
     db.session.add(
         publicprize.auth.model.BivAccess(
             source_biv_id=parent_id,
@@ -74,6 +85,7 @@ def _add_owner(parent_id, child_id):
     )
 
 def _create_contest(contest):
+    """Creates a SQLAlchemy model Contest with optional logo file"""
     model = publicprize.contest.model.Contest(
         display_name=contest['display_name'],
         tag_line=contest['tag_line']
@@ -87,6 +99,7 @@ def _create_contest(contest):
 
 # TODO(pjm): normalize up binary fields, combine with _create_contest()
 def _create_founder(founder):
+    """Creates a SQLAlchemy model Founder with optional avatar file"""
     model = publicprize.contest.model.Founder(
         display_name=founder['display_name'],
         founder_desc=founder['founder_desc']
