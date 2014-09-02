@@ -9,14 +9,18 @@ Submit Contest Entry
 {{ super() }}
 <div class="col-sm-7 pp-form">
 
+  {%- macro error_class(field) -%}
+    {% if form[field].errors %}has-error{% endif %}
+  {%- endmacro -%}
+
   {%- macro errors(field) -%}
-      {% if form[field].errors %}
-        <span class="pp-form-error text-danger"><strong>{{ form[field].errors[0] }}</strong></span>
-      {% endif %}
+    {% if form[field].errors %}
+      <span class="pp-form-error text-danger"><strong>{{ form[field].errors[0] }}</strong></span>
+    {% endif %}
   {%- endmacro -%}
 
   {%- macro field(field) -%}
-    <div class="form-group">
+    <div class="form-group {{ error_class(field) }}">
       {{ form[field].label }}
       {{ errors(field) }}
       {{ form[field](class="form-control") }}
@@ -26,19 +30,20 @@ Submit Contest Entry
   <form method="POST" action="{{ contest.format_uri('submit_contestant') }}">
     {{ form.csrf_token() }}
     {{ field('display_name') }}
-    <div class="form-group">
+    <div class="form-group {{ error_class('contestant_desc') }}">
       {{ form.contestant_desc.label }}
       {{ errors('contestant_desc') }}
       {{ form.contestant_desc(rows=5, class="form-control") }}
     </div>
     {{ field('youtube_code') }}
     {{ field('slideshow_code') }}
-    <div class="form-group">
+    <div class="form-group {{ error_class('website') }}">
       <label for="website">Project Website <span class="text-muted"><small>(Optional)</small></span></label>
+      {{ errors('website') }}
       {{ form.website(class="form-control") }}
     </div>
     {{ field('founder_desc') }}
-    <button type="submit" class="btn btn-primary btn-lg">Submit Entry</button>
+    <button type="submit" class="pp-big-button btn btn-primary btn-lg">Submit Entry</button>
     <a class="pp-cancel-link" href="{{ contest.format_uri('contestants') }}">Cancel</a>
   </form>
 
