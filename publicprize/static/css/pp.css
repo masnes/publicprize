@@ -285,7 +285,7 @@ border-bottom: 1px solid #e5e5e5;
   border: 1px solid #FCB03C;
 }
 
-.pp-donate {
+.pp-big-button {
 /*#1A4F63 dark blue
 #068587 turquoise     
 #6FB07F middle green
@@ -295,7 +295,7 @@ border-bottom: 1px solid #e5e5e5;
   background-color: #068587;
 }
 
-.pp-donate:hover {
+.pp-big-button:hover {
 /*#1A4F63 dark blue
 #068587 turquoise     
 #6FB07F middle green
