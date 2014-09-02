@@ -42,6 +42,7 @@ class Contest(ppc.Task):
             io.BytesIO(biv_obj.contest_logo),
             'image/' + biv_obj.logo_type
         )
+    @ppc.login_required
     def action_submit_contestant(biv_obj):
         """Submit project page"""
         return pcf.ContestantForm().execute(biv_obj)
