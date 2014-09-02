@@ -1,4 +1,9 @@
-# Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
+# -*- coding: utf-8 -*-
+""" contest models: Contest, Contestant, Donor, and Founder
+
+    :copyright: Copyright (c) 2014 Bivio Software, Inc.  All Rights Reserved.
+    :license: Apache, see LICENSE for more details.
+"""
 
 from publicprize.controller import db
 from publicprize import controller
@@ -7,6 +12,16 @@ import publicprize.auth.model as pam
 import sqlalchemy.orm
 
 class Contest(db.Model, controller.Model):
+    """contest database model.
+
+    Fields:
+        biv_id: primary ID
+        display_name: name of the contest
+        tag_line: sub-name of the contest
+        contest_logo: image blob
+        logo_type: image type (gif, png, jpeg)
+    
+    """
     biv_id = db.Column(
         db.Numeric(18),
         db.Sequence('contest_s', start=1002, increment=1000),
@@ -19,6 +34,7 @@ class Contest(db.Model, controller.Model):
     logo_type = db.Column(db.Enum('gif', 'png', 'jpeg', name='logo_type'))
 
     def contestant_count(self):
+        """Returns the number of contestants for the current contest"""
         return pam.BivAccess.query.select_from(Contestant).filter(
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == Contestant.biv_id,
@@ -26,6 +42,7 @@ class Contest(db.Model, controller.Model):
         ).count()
 
     def donor_count(self):
+        """Returns the total donor count across all the contestants"""
         access_alias = sqlalchemy.orm.aliased(pam.BivAccess)
         return Donor.query.select_from(pam.BivAccess, access_alias).filter(
             pam.BivAccess.source_biv_id == self.biv_id,
@@ -34,10 +51,23 @@ class Contest(db.Model, controller.Model):
         ).count()
 
     def user_has_submission(self):
+        """Has the current user already submitted an entry?"""
         # TODO(pjm): check if current user is a founder for this contest
         return False
 
 class Contestant(db.Model, controller.Model):
+    """contestant database model.
+
+    Fields:
+        biv_id: primary ID
+        display_name: project name
+        youtube_code: the VIDEO_ID for the youtube video
+        slideshow_code: the SlideShare ID for the slide deck
+        contestant_desc: project description
+        tax_id: project EIN
+        website: project website
+        is_public: is the project to be shown on the public contestant list?
+    """
     biv_id = db.Column(
         db.Numeric(18),
         db.Sequence('contestant_s', start=1003, increment=1000),
@@ -52,6 +82,11 @@ class Contestant(db.Model, controller.Model):
     is_public = db.Column(db.Boolean, nullable=False)
 
 class Donor(db.Model, controller.Model):
+    """donor database model.
+
+    Fields:
+        biv_id: primary ID
+    """
     biv_id = db.Column(
         db.Numeric(18),
         db.Sequence('donor_s', start=1007, increment=1000),
@@ -59,6 +94,15 @@ class Donor(db.Model, controller.Model):
     )
     
 class Founder(db.Model, controller.Model):
+    """founder database model.
+
+    Fields:
+        biv_id: primary ID
+        display_name: donor full name
+        fouder_desc: founder's short bio
+        founder_avatar: avatar image blob
+        avatar_type: image type (gif, png, jpeg)
+    """
     biv_id = db.Column(
         db.Numeric(18),
         db.Sequence('founder_s', start=1004, increment=1000),
