@@ -5,7 +5,11 @@
 {% endblock %}
 
 {% block logged_in_nav %}
-  <a class="pp-nav-item" href="{{ contest.format_uri('submit_contestant') }}">Submit an Entry</a>
+  {% if contest.user_has_submission() %}
+    <a class="pp-nav-item" href="{{ contest.format_uri('submit_contestant') }}">My Entry</a>
+  {% else %}
+    <a class="pp-nav-item" href="{{ contest.format_uri('submit_contestant') }}">Submit an Entry</a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
