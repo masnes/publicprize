@@ -18,7 +18,7 @@
 	      "display_name": "Abby Sturges",
 	      "avatar_filename": "data/abby-sturges.jpg",
 	      "avatar_type": "jpeg",
-	      "founder_desc": "Product Manager @Tastemade. Founder/COO @Culture Kitchen, @500 Startups, @Designer Fund. MFA Design @Stanford University. BFA Industrial Design @CMU University."
+	      "founder_desc": "Product Manager😀 @Tastemade. Founder/COO @Culture Kitchen, @500 Startups, @Designer Fund. MFA Design @Stanford University. BFA Industrial Design @CMU University."
 	    },
 	    {
 	      "display_name": "Jennifer Lopez",
@@ -26,6 +26,12 @@
 	      "avatar_type": "jpeg",
 	      "founder_desc": "Founder @Culture Kitchen. MFA Product Design @Stanford University. First DFund class at 500 Startups. @Dartmouth College 2008. Jewelry Designer and Metalsmith. "
 	    }
+	  ],
+	  "Donor": [
+	    {},
+	    {},
+	    {},
+	    {}
 	  ]
 	},
 	{
@@ -33,8 +39,11 @@
 	  "youtube_code": "IltOrITTJBo",
 	  "slideshow_code": "18075112",
 	  "contestant_desc": "gazeMetrix empowers brands with insight into when and where their brand was photographed across social media in real-time. Using proprietary computer vision and machine learning algorithms, gazeMetrix accurately analyzes user-created photos on Instagram and identifies when a brand is featured. Brands discover their latest photos instantly. We automatically pick up the 'most popular pictures' and they can share them on their fan page/ Pinterest boards or twitter streams.",
-
-	  "Founder": []
+	  "Founder": [],
+	  "Donor": [
+	    {},
+	    {}
+	  ]
 	}
       ]
     },
