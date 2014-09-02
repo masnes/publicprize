@@ -21,19 +21,19 @@ class ContestantForm(Form):
     Fields:
         display_name: project name
         contestant_desc: project summary
-        youtube_code: full YouTube video url
-        slideshow_code: full SlideShare url
+        youtube_url: full YouTube video url
+        slideshow_url: full SlideShare url
         founder_desc: current user's founder info for this project
         website: project website (optional)
     """
     display_name = StringField('Project Name', validators=[DataRequired()])
     contestant_desc = TextAreaField(
         'Project Summary', validators=[DataRequired()])
-    youtube_code = StringField(
+    youtube_url = StringField(
         'YouTube Video URL',
         validators=[DataRequired()]
     )
-    slideshow_code = StringField(
+    slideshow_url = StringField(
         'SlideShare Pitch Deck URL',
         validators=[DataRequired()]
     )
@@ -56,19 +56,23 @@ class ContestantForm(Form):
     def validate(self):
         """Performs superclass wtforms validation followed by url
         field validation"""
-        if super().validate():
-            self._validate_youtube()
-            self._validate_slideshare()
-            self._validate_website()
-            if not self.errors:
-                return True
-        return False
+        super().validate()
+        self._validate_youtube()
+        self._validate_slideshare()
+        self._validate_website()
+        self._log_errors()
+        return not self.errors
+
+    def _log_errors(self):
+        """Put any form errors in logs as warning"""
+        if self.errors:
+            controller.app().logger.warn(self.errors)
 
     def _slideshare_code(self):
         """Ensure the slideshare url contains an ID"""
         # www.slideshare.net/benjaminevans/culture-kitchen-pitch-deck-18074260
         # www.slideshare.net/slideshow/embed_code/18074260
-        value = self.slideshow_code.data
+        value = self.slideshow_url.data
         m = re.search('(\d{5}\d+)$', value)
         if m:
             return m.group(1)
@@ -77,10 +81,10 @@ class ContestantForm(Form):
     def _update_models(self, contest):
         """Creates the Contestant and Founder models
         and adds BivAccess models to join the contest and Founder models"""
-        self.youtube_code.data = self._youtube_code()
-        self.slideshow_code.data = self._slideshare_code()
         contestant = pcm.Contestant()
         self.populate_obj(contestant)
+        contestant.youtube_code = self._youtube_code()
+        contestant.slideshow_code = self._slideshare_code()
         contestant.is_public = controller.app().config[
             'PP_ALL_PUBLIC_CONTESTANTS']
         f = pcm.Founder()
@@ -105,7 +109,7 @@ class ContestantForm(Form):
 
     def _youtube_code(self):
         """Ensure the youtube url contains a VIDEO_ID"""
-        value = self.youtube_code.data
+        value = self.youtube_url.data
         # http://youtu.be/a1Y73sPHKxw
         # or https://www.youtube.com/watch?v=a1Y73sPHKxw
         if re.search('\?', value) and re.search('v\=', value):
@@ -134,28 +138,35 @@ class ContestantForm(Form):
             return False
         return True
 
-    def _validate_website(self):
-        """Ensures the website exists"""
-        if self.website.data:
-            if not self._validate_url(self.website.data):
-                self.website.errors = ['Website invalid or unavailable']
-
-    def _validate_youtube(self):
-        """Ensures the YouTube video exists"""
-        code = self._youtube_code()
-        if code:
-            if not self._validate_url('http://youtu.be/' + code):
-                self.youtube_code.errors = [
-                    'Unknown YouTube VIDEO_ID: ' + code]
-        else:
-            self.youtube_code.errors = ['Invalid YouTube URL']
-
     def _validate_slideshare(self):
         """Ensures the SlideShare slide deck exists"""
+        if self.slideshow_url.errors:
+            return
         code = self._slideshare_code()
         if code:
             if not self._validate_url(
                 'http://www.slideshare.net/slideshow/embed_code/' + code):
-                self.slideshow_code.errors = ['Unknown SlideShare ID: ' + code]
+                self.slideshow_url.errors = [
+                    'Unknown SlideShare ID: ' + code + '.']
         else:
-            self.slideshow_code.errors = ['Invalid SlideShare URL']
+            self.slideshow_url.errors = ['Invalid SlideShare URL.']
+
+    def _validate_website(self):
+        """Ensures the website exists"""
+        if self.website.errors:
+            return
+        if self.website.data:
+            if not self._validate_url(self.website.data):
+                self.website.errors = ['Website invalid or unavailable.']
+
+    def _validate_youtube(self):
+        """Ensures the YouTube video exists"""
+        if self.youtube_url.errors:
+            return
+        code = self._youtube_code()
+        if code:
+            if not self._validate_url('http://youtu.be/' + code):
+                self.youtube_url.errors = [
+                    'Unknown YouTube VIDEO_ID: ' + code + '.']
+        else:
+            self.youtube_url.errors = ['Invalid YouTube URL.']
