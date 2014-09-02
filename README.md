@@ -13,6 +13,22 @@ pip install -e .
 This will create an "editable version" of this repository with pip so
 that pytest can find the files.
 
+###### Postgresql database
+
+A postgresql server must be running with the utf8 character
+encoding. The tail of the pg_hba.conf must be:
+
+```
+# TYPE  DATABASE    USER        CIDR-ADDRESS          METHOD
+
+# "local" is for Unix domain socket connections only
+local   all         all                               trust
+# IPv4 local connections:
+host    all         all         127.0.0.1/32          password
+# IPv6 local connections:
+host    all         all         ::1/128               password
+```
+
 ###### Create test db
 
 Run this to create a test db:
