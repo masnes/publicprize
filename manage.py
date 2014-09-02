@@ -16,8 +16,8 @@ _manager = fes.Manager(ppc.app())
 def create_db():
     config = ppc.app().config
     os.system('createuser --user=postgres --no-superuser --no-createdb --no-createrole %s' % config['PP_DATABASE_USER'])
-    os.system('createdb --user=postgres --owner=%s %s' % (config['PP_DATABASE_USER'], config['PP_DATABASE']))
     os.system('echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql --user=postgres template1' % (config['PP_DATABASE_USER'], config['PP_DATABASE_PASSWORD']))
+    os.system("createdb --encoding='utf8' --locale=en_US.UTF-8 --user=postgres --owner=%s %s" % (config['PP_DATABASE_USER'], config['PP_DATABASE']))
     db.create_all()
 
 @_manager.command
@@ -33,12 +33,17 @@ def create_test_data():
                 youtube_code=contestant['youtube_code'],
                 slideshow_code=contestant['slideshow_code'],
                 contestant_desc=contestant['contestant_desc'],
+                is_public=True
             ))
             _add_owner(contest_id, contestant_id)
 
             for founder in contestant['Founder']:
                 founder_id = _add_model(_create_founder(founder))
                 _add_owner(contestant_id, founder_id)
+
+            for donor in contestant['Donor']:
+                donor_id = _add_model(publicprize.contest.model.Donor())
+                _add_owner(contestant_id, donor_id)
 
     db.session.commit()
 
