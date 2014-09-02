@@ -16,7 +16,7 @@ class Contest(ppc.Task):
             contestants=pcm.Contestant.query.select_from(pam.BivAccess).filter(
                 pam.BivAccess.source_biv_id == biv_obj.biv_id,
                 pam.BivAccess.target_biv_id == pcm.Contestant.biv_id
-            ).all()
+            ).filter(pcm.Contestant.is_public == True).all()
         )
     def action_donors(biv_obj):
         return Contest._render_template(biv_obj, 'donors')
