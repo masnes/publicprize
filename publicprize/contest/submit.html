@@ -35,8 +35,8 @@ Submit Contest Entry
       {{ errors('contestant_desc') }}
       {{ form.contestant_desc(rows=5, class="form-control") }}
     </div>
-    {{ field('youtube_code') }}
-    {{ field('slideshow_code') }}
+    {{ field('youtube_url') }}
+    {{ field('slideshow_url') }}
     <div class="form-group {{ error_class('website') }}">
       <label for="website">Project Website <span class="text-muted"><small>(Optional)</small></span></label>
       {{ errors('website') }}
