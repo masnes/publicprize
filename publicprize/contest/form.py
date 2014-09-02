@@ -1,4 +1,9 @@
-# Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
+# -*- coding: utf-8 -*-
+""" contest forms: HTTP form processing for contest pages
+
+    :copyright: Copyright (c) 2014 Bivio Software, Inc.  All Rights Reserved.
+    :license: Apache, see LICENSE for more details.
+"""
 
 import flask
 from flask.ext.wtf import Form
@@ -11,6 +16,16 @@ from wtforms import StringField, TextAreaField
 from wtforms.validators import DataRequired
 
 class ContestantForm(Form):
+    """Project submission form.
+
+    Fields:
+        display_name: project name
+        contestant_desc: project summary
+        youtube_code: full YouTube video url
+        slideshow_code: full SlideShare url
+        founder_desc: current user's founder info for this project
+        website: project website (optional)
+    """
     display_name = StringField('Project Name', validators=[DataRequired()])
     contestant_desc = TextAreaField(
         'Project Summary', validators=[DataRequired()])
@@ -27,10 +42,11 @@ class ContestantForm(Form):
     website = StringField('Project Website')
 
     def execute(self, contest):
+        """Validates and creates the contestant model"""
         if self.is_submitted() and self.validate():
-            c = self._update_models(contest)
-            if c:
-                return flask.redirect(c.format_uri('contestant'))
+            contestant = self._update_models(contest)
+            if contestant:
+                return flask.redirect(contestant.format_uri('contestant'))
         return flask.render_template(
             'contest/submit.html',
             contest=contest,
@@ -38,6 +54,8 @@ class ContestantForm(Form):
         )
 
     def validate(self):
+        """Performs superclass wtforms validation followed by url
+        field validation"""
         if super().validate():
             self._validate_youtube()
             self._validate_slideshare()
@@ -47,6 +65,7 @@ class ContestantForm(Form):
         return False
 
     def _slideshare_code(self):
+        """Ensure the slideshare url contains an ID"""
         # www.slideshare.net/benjaminevans/culture-kitchen-pitch-deck-18074260
         # www.slideshare.net/slideshow/embed_code/18074260
         value = self.slideshow_code.data
@@ -56,11 +75,14 @@ class ContestantForm(Form):
         return None
         
     def _update_models(self, contest):
+        """Creates the Contestant and Founder models
+        and adds BivAccess models to join the contest and Founder models"""
         self.youtube_code.data = self._youtube_code()
         self.slideshow_code.data = self._slideshare_code()
-        c = pcm.Contestant()
-        self.populate_obj(c)
-        c.is_public = controller.app().config['PP_ALL_PUBLIC_CONTESTANTS']
+        contestant = pcm.Contestant()
+        self.populate_obj(contestant)
+        contestant.is_public = controller.app().config[
+            'PP_ALL_PUBLIC_CONTESTANTS']
         f = pcm.Founder()
         self.populate_obj(f)
         f.display_name = flask.session['user.display_name']
@@ -70,18 +92,19 @@ class ContestantForm(Form):
         controller.db.session.add(
             pam.BivAccess(
                 source_biv_id=contest.biv_id,
-                target_biv_id=c.biv_id
+                target_biv_id=contestant.biv_id
             )
         )
         controller.db.session.add(
             pam.BivAccess(
-                source_biv_id=c.biv_id,
+                source_biv_id=contestant.biv_id,
                 target_biv_id=f.biv_id
             )
         )
-        return c
+        return contestant
 
     def _youtube_code(self):
+        """Ensure the youtube url contains a VIDEO_ID"""
         value = self.youtube_code.data
         # http://youtu.be/a1Y73sPHKxw
         # or https://www.youtube.com/watch?v=a1Y73sPHKxw
@@ -96,6 +119,9 @@ class ContestantForm(Form):
         return None
 
     def _validate_url(self, url):
+        """Performs a HTTP GET on the url.
+
+        Returns False if the url is invalid or not-found"""
         if not re.search(r'^http', url):
             url = 'http://' + url
         try:
@@ -109,11 +135,13 @@ class ContestantForm(Form):
         return True
 
     def _validate_website(self):
+        """Ensures the website exists"""
         if self.website.data:
             if not self._validate_url(self.website.data):
                 self.website.errors = ['Website invalid or unavailable']
 
     def _validate_youtube(self):
+        """Ensures the YouTube video exists"""
         code = self._youtube_code()
         if code:
             if not self._validate_url('http://youtu.be/' + code):
@@ -123,6 +151,7 @@ class ContestantForm(Form):
             self.youtube_code.errors = ['Invalid YouTube URL']
 
     def _validate_slideshare(self):
+        """Ensures the SlideShare slide deck exists"""
         code = self._slideshare_code()
         if code:
             if not self._validate_url(
