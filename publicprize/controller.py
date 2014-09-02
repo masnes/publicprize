@@ -4,12 +4,14 @@ from publicprize import biv
 from publicprize import config
 from beaker.middleware import SessionMiddleware
 import flask
+from functools import wraps
 from flask.ext.sqlalchemy import SQLAlchemy
 import flask.sessions
 import importlib
 import inspect
 import re
 import sys
+import urllib.parse
 
 db = None
 
@@ -26,6 +28,21 @@ def init():
         cm = 'publicprize.' + cn + '.';
         importlib.import_module(cm + _MODEL_MODULE)
         importlib.import_module(cm + _TASK_MODULE)
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not flask.session.get('user.is_logged_in'):
+            #TODO(pjm): determine url from general.task
+            #TODO(pjm): redirect to /pub/login which determines which
+            # oauth provider based on logged-out user's session
+            return flask.redirect(
+                '/pub/facebook-login?' + urllib.parse.urlencode({
+                    'next': flask.request.url
+                })
+            )
+        return f(*args, **kwargs)
+    return decorated_function
 
 class Task(object):
     """Provides the actions for a Model"""
