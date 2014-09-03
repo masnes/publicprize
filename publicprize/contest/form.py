@@ -129,6 +129,12 @@ class ContestantForm(Form):
                 target_biv_id=founder.biv_id
             )
         )
+        controller.db.session.add(
+            pam.BivAccess(
+                source_biv_id=flask.session['user.biv_id'],
+                target_biv_id=founder.biv_id
+            )
+        )
         return contestant
 
     def _youtube_code(self):
