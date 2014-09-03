@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    {% block head %}
+    {%- block head %}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,20 +18,19 @@
       <script src="/static/js/msie/html5shiv.min.js"></script>
       <script src="/static/js/msie/respond.min.js"></script>
     <![endif]-->
-    {% endblock %}
+    {% endblock -%}
   </head>
-
   <body>
     <div class="pp-masthead">
-      {% block masthead %}
+      {%- block masthead -%}
       <div class="container">
     	<nav class="pp-nav">
       	  <a class="pp-nav-logo" href="/"><img src="/static/img/logo.gif" alt="PUBLIC PRIZE"></a>
       	  <div class="pp-nav-menu pull-right">
 
-	    {% if session.get('user.is_logged_in') %}
+	    {%- if session.get('user.is_logged_in') -%}
 
-	    {% block logged_in_nav %}{% endblock %}
+	    {%- block logged_in_nav %}{% endblock -%}
 
 	    <span class="text-primary"><strong>{{ session.get('user.display_name') }}</strong></span>
     	    {#- TODO(pjm): hard-coded general name #}		  
@@ -44,22 +43,32 @@
 	    	<button class="btn btn-primary btn-sm"><img src="/static/img/facebook.png" alt="Facebook"> Log in with Facebook</button>
 	    </form>
 	    
-	    {% else %}
+	    {%- else -%}
 
             <a class="pp-nav-item" data-toggle="modal" data-target="#signupModal" href="#">Sign up</a>
             <a class="pp-nav-item" data-toggle="modal" data-target="#loginModal" href="#">Log in</a>
 
-	    {% endif %}
+	    {%- endif %}
       	  </div>
     	</nav>
       </div>
-      {% endblock %}
+      {%- endblock -%}
     </div>
-    
-    <div class="container pp-content">{% block content %}{% endblock %}</div>
-
+    <div class="container pp-content">
+      {%- with messages = get_flashed_messages() -%}
+        {%- if messages -%}
+      	  <div class="alert alert-success alert-dismissible">
+    	    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            {%- for message in messages -%}
+	      <strong>{{ message }}</strong>
+            {%- endfor -%}
+	  </div>
+      	{%- endif -%}
+      {%- endwith -%}
+      {% block content %}{% endblock %}
+    </div>
     <div class="pp-footer">
-      {% block footer %}
+      {%- block footer %}
       <div class="container">
         <div class="row">
           <div class="pull-left">
@@ -69,10 +78,10 @@
           </div>
         </div>
       </div>
-      {% endblock %}
+      {% endblock -%}
     </div>
 
-    {% macro modal(id, heading_text, button_text) -%}
+    {%- macro modal(id, heading_text, button_text) -%}
     
     <div class="modal fade" id="{{ id }}" tabindex="-1" role="dialog">
     	<div class="modal-dialog">
@@ -94,11 +103,10 @@
     {{ modal('signupModal', 'Sign up', 'Sign up using Facebook') }}
     {{ modal('loginModal', 'Log in', 'Log in with Facebook') }}
 
-    {% block scripts %}
-
+    {%- block scripts %}
     <script src="/static/js/jquery/jquery-1.11.1.min.js"></script>
     <script src="/static/js/bootstrap/bootstrap-3.2.0.min.js"></script>
     <script src="/static/js/pp-app.js"></script>
-    {% endblock %}
+    {% endblock -%}
   </body>
 </html>
