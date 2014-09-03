@@ -63,19 +63,42 @@ class ContestantForm(Form):
         self._log_errors()
         return not self.errors
 
+    def _get_url_content(self, url):
+        """Performs a HTTP GET on the url.
+
+        Returns False if the url is invalid or not-found"""
+        rv = None
+        if not re.search(r'^http', url):
+            url = 'http://' + url
+        try:
+            req = urllib.request.urlopen(url, None, 10)
+            rv = req.read().decode("utf-8")
+            req.close()
+        except urllib.request.URLError:
+            return None
+        except ValueError:
+            return None
+        return rv
+
     def _log_errors(self):
         """Put any form errors in logs as warning"""
         if self.errors:
             controller.app().logger.warn(self.errors)
 
     def _slideshare_code(self):
-        """Ensure the slideshare url contains an ID"""
-        # www.slideshare.net/benjaminevans/culture-kitchen-pitch-deck-18074260
-        # www.slideshare.net/slideshow/embed_code/18074260
-        value = self.slideshow_url.data
-        m = re.search('(\d{5}\d+)$', value)
+        """Download slideshare url and extract embed code.
+        The original url may not have the code.
+        ex. www.slideshare.net/Micahseff/game-xplain-pitch-deck-81610
+        Adds field errors if the code can not be determined.
+        """
+        html = self._get_url_content(self.slideshow_url.data)
+        if not html:
+            self.slideshow_url.errors = ['Invalid SideShare URL.']
+            return None
+        m = re.search(r'slideshow/embed_code/(\d+)', html)
         if m:
             return m.group(1)
+        self.slideshow_url.errors = ['Embed code not found on SlideShare page.']
         return None
         
     def _update_models(self, contest):
@@ -87,11 +110,11 @@ class ContestantForm(Form):
         contestant.slideshow_code = self._slideshare_code()
         contestant.is_public = controller.app().config[
             'PP_ALL_PUBLIC_CONTESTANTS']
-        f = pcm.Founder()
-        self.populate_obj(f)
-        f.display_name = flask.session['user.display_name']
-        controller.db.session.add(c)
-        controller.db.session.add(f)
+        founder = pcm.Founder()
+        self.populate_obj(founder)
+        founder.display_name = flask.session['user.display_name']
+        controller.db.session.add(contestant)
+        controller.db.session.add(founder)
         controller.db.session.flush()
         controller.db.session.add(
             pam.BivAccess(
@@ -102,7 +125,7 @@ class ContestantForm(Form):
         controller.db.session.add(
             pam.BivAccess(
                 source_biv_id=contestant.biv_id,
-                target_biv_id=f.biv_id
+                target_biv_id=founder.biv_id
             )
         )
         return contestant
@@ -122,41 +145,23 @@ class ContestantForm(Form):
                 return m.group(1)
         return None
 
-    def _validate_url(self, url):
-        """Performs a HTTP GET on the url.
-
-        Returns False if the url is invalid or not-found"""
-        if not re.search(r'^http', url):
-            url = 'http://' + url
-        try:
-            req = urllib.request.urlopen(url, None, 10)
-            req.read()
-            req.close()
-        except urllib.request.URLError:
-            return False
-        except ValueError:
-            return False
-        return True
-
     def _validate_slideshare(self):
         """Ensures the SlideShare slide deck exists"""
         if self.slideshow_url.errors:
             return
         code = self._slideshare_code()
         if code:
-            if not self._validate_url(
+            if not self._get_url_content(
                 'http://www.slideshare.net/slideshow/embed_code/' + code):
                 self.slideshow_url.errors = [
                     'Unknown SlideShare ID: ' + code + '.']
-        else:
-            self.slideshow_url.errors = ['Invalid SlideShare URL.']
 
     def _validate_website(self):
         """Ensures the website exists"""
         if self.website.errors:
             return
         if self.website.data:
-            if not self._validate_url(self.website.data):
+            if not self._get_url_content(self.website.data):
                 self.website.errors = ['Website invalid or unavailable.']
 
     def _validate_youtube(self):
@@ -165,7 +170,7 @@ class ContestantForm(Form):
             return
         code = self._youtube_code()
         if code:
-            if not self._validate_url('http://youtu.be/' + code):
+            if not self._get_url_content('http://youtu.be/' + code):
                 self.youtube_url.errors = [
                     'Unknown YouTube VIDEO_ID: ' + code + '.']
         else:
