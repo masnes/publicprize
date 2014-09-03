@@ -5,6 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
+import flask
 from publicprize.controller import db
 from publicprize import controller
 from publicprize import biv
@@ -50,10 +51,28 @@ class Contest(db.Model, controller.Model):
             access_alias.target_biv_id == Donor.biv_id
         ).count()
 
-    def user_has_submission(self):
-        """Has the current user already submitted an entry?"""
-        # TODO(pjm): check if current user is a founder for this contest
-        return False
+    def user_submission_url(self):
+        """Returns the current user's submission url or None.
+        Iterates all the contest's contestant's founders, matching with
+        the current logged in user.
+        """
+        access_alias = sqlalchemy.orm.aliased(pam.BivAccess)
+        founders = Founder.query.select_from(pam.BivAccess, access_alias).filter(
+            pam.BivAccess.source_biv_id == self.biv_id,
+            pam.BivAccess.target_biv_id == access_alias.source_biv_id,
+            access_alias.target_biv_id == Founder.biv_id
+        ).all()
+
+        for founder in founders:
+            if Founder.query.select_from(pam.BivAccess).filter(
+                pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
+                pam.BivAccess.target_biv_id == founder.biv_id
+            ).first():
+                return Contestant.query.select_from(pam.BivAccess).filter(
+                    pam.BivAccess.source_biv_id == Contestant.biv_id,
+                    pam.BivAccess.target_biv_id == founder.biv_id
+                ).one().format_uri('contestant')
+        return None
 
 class Contestant(db.Model, controller.Model):
     """contestant database model.
