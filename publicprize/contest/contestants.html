@@ -17,7 +17,13 @@ Contestants
 
 <div class="pp-contestant-entry clearfix">
     <div class="col-sm-7 pull-left">
-    	<iframe style="width:100%" src="//www.youtube.com/embed/{{ contestant.youtube_code }}?controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+    	{#- show video as still image, playback on detail page, this avoids
+	a long lag time when loading a page with lots of videos -#}
+        <a href="{{ contestant.format_uri('contestant') }}">
+          <img class="pp-video-thumbnail" src="https://img.youtube.com/vi/{{ contestant.youtube_code }}/mqdefault.jpg" alt="{{ contestant.display_name }}">
+	  {#- TODO(pjm): use bootstrap play glyph -#}
+	  <img class="pp-video-play" src="/static/img/play.png" alt="Play">
+	</a>
     </div>
     <h3 class="media-heading"><a href="{{ contestant.format_uri('contestant') }}">{{ contestant.display_name }}</a></h3>
     <p>{{ contestant.contestant_desc }}
