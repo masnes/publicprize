@@ -57,7 +57,7 @@ class General(controller.Task):
     def action_logout(biv_obj):
         flask.session['user.is_logged_in'] = False
         del flask.session['oauth.token']
-        # TODO(pjm): flash logged-out message
+        flask.flash('You have successfully logged out.')
         return flask.redirect('/')
         
     def action_not_found(biv_obj):
