@@ -46,6 +46,7 @@ class ContestantForm(Form):
         if self.is_submitted() and self.validate():
             contestant = self._update_models(contest)
             if contestant:
+                flask.flash('Thank you for submitting your entry. You will be contacted by email when your entry has been reviewed.')
                 return flask.redirect(contestant.format_uri('contestant'))
         return flask.render_template(
             'contest/submit.html',
