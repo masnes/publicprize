@@ -7,6 +7,7 @@ from publicprize.auth.model import User
 import publicprize.contest.model
 import werkzeug
 
+#TODO(pjm): move to auth.facebook
 facebook = OAuth(controller.app()).remote_app(
     'facebook',
     consumer_key=controller.app().config['PP_FACEBOOK_APP_ID'],
@@ -66,6 +67,10 @@ class General(controller.Task):
     def _facebook_user(info):
         # info contains email, last_name, first_name, id, name
         controller.app().logger.info(info)
+        if not info.get('email'):
+            del flask.session['oauth.token']
+            flask.flash('Your email must be provided to this App to login.')
+            return;
         # avatar link
         # https://graph.facebook.com/{id}/picture?type=square
         user = User.query.filter_by(
@@ -92,7 +97,7 @@ class General(controller.Task):
         app = controller.app()
         
         if resp is None:
-            # TODO(pjm): flash message "facebook access denied"
+            flask.flash('Facebook has denied access to this App.')
             app.logger.warn(
                 'Access denied: reason=%s error=%s' % (
                     flask.request.args.get('error_reason'),
@@ -101,13 +106,13 @@ class General(controller.Task):
             )
             return False
         if isinstance(resp, OAuthException):
-            # TODO(pjm): flash message "facebook access denied"
+            flask.flash('Facebook has denied access to this App.')
             app.logger.warn(resp)
             return False
         state = flask.session['oauth.state']
         del flask.session['oauth.state']
         if state != flask.request.args.get('state'):
-            # TODO(pjm): flash message "facebook access denied"
+            flask.flash('Facebook has denied access to this App.')
             app.logger.warn(
                 'Invalid oauth state, expected: %s response: %s' % (
                     state,
