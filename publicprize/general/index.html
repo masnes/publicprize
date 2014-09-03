@@ -1,16 +1,16 @@
 {% extends 'layout/base.html' %}
 
-{% block title %}Crowdfunded Contests{% endblock %}
+{%- block title %}Crowdfunded Contests{% endblock -%}
 
-{% block content %}
+{%- block content -%}
 
 <h1>Splash Page</h1>
 <ul>
 
-{% for contest in contests %}
+{%- for contest in contests %}
     <li><h3><a href="{{ contest.format_uri('contestants') }}">{{ contest.display_name }}</a></h3></li>
-{% endfor %}
+{% endfor -%}
     
 </ul>
 
-{% endblock %}
+{%- endblock -%}
