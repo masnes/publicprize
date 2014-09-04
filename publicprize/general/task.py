@@ -64,13 +64,35 @@ class General(controller.Task):
     def action_not_found(biv_obj):
         return flask.render_template('general/not-found.html'), 404
 
+    def action_new_test_user(biv_obj):
+        """Creates a new test user model and log in."""
+        if not controller.app().config['PP_TEST_USER']:
+            raise Error("PP_TEST_USER not enabled");
+        flask.session['oauth.token'] = werkzeug.security.gen_salt(64)
+        name = 'F' + werkzeug.security.gen_salt(6).lower() + ' ' + 'L' + werkzeug.security.gen_salt(8).lower()
+        user = User(
+            display_name=name,
+            user_email=name.lower() + '@localhost',
+            oauth_type='test',
+            oauth_id=werkzeug.security.gen_salt(64)
+        )
+        General._add_user_to_session(user)
+        return flask.redirect('/')
+
+    def _add_user_to_session(user):
+        controller.db.session.add(user)
+        controller.db.session.flush()
+        flask.session['user.biv_id'] = user.biv_id
+        flask.session['user.is_logged_in'] = True
+        flask.session['user.display_name'] = user.display_name
+        
     def _facebook_user(info):
         # info contains email, last_name, first_name, id, name
         controller.app().logger.info(info)
         if not info.get('email'):
             del flask.session['oauth.token']
             flask.flash('Your email must be provided to this App to login.')
-            return;
+            return
         # avatar link
         # https://graph.facebook.com/{id}/picture?type=square
         user = User.query.filter_by(
@@ -87,11 +109,7 @@ class General(controller.Task):
         else:
             user.display_name = info['name']
             user.user_email = info['email']
-        controller.db.session.add(user)
-        controller.db.session.flush()
-        flask.session['user.biv_id'] = user.biv_id
-        flask.session['user.is_logged_in'] = True
-        flask.session['user.display_name'] = user.display_name
+        General._add_user_to_session(user)
         
     def _facebook_validate_auth(resp):
         app = controller.app()
