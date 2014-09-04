@@ -20,7 +20,7 @@ class User(db.Model, controller.Model):
     display_name = db.Column(db.String(100), nullable=False)
     user_email = db.Column(db.String(100), nullable=False)
     oauth_type = db.Column(
-        db.Enum('facebook', 'linkedin', 'google', name='oauth_type'),
+        db.Enum('facebook', 'linkedin', 'google', 'test', name='oauth_type'),
         nullable=False
     )
     oauth_id = db.Column(db.String(100), nullable=False)
