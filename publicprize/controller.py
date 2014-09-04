@@ -9,6 +9,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 import flask.sessions
 import importlib
 import inspect
+import os
 import re
 import sys
 import urllib.parse
@@ -141,3 +142,10 @@ def _route_404(e):
 @_app.route("/")
 def _route_root():
     return _route('')
+
+@_app.route('/favicon.ico')
+def _favicon():
+    return flask.send_from_directory(
+        os.path.join(_app.root_path, 'static/img'),
+        'favicon.ico', mimetype='image/vnd.microsoft.icon'
+    )
