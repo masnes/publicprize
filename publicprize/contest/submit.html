@@ -1,4 +1,5 @@
 {% extends 'contest/contest.html' %}
+{% from "layout/macros.html" import error_class, errors, field %}
 
 {% block title %}
 Submit Contest Entry
@@ -9,42 +10,24 @@ Submit Contest Entry
 {{ super() }}
 <div class="col-sm-7 pp-form">
 
-  {%- macro error_class(field) -%}
-    {% if form[field].errors %}has-error{% endif %}
-  {%- endmacro -%}
-
-  {%- macro errors(field) -%}
-    {% if form[field].errors %}
-      <span class="pp-form-error text-danger"><strong>{{ form[field].errors[0] }}</strong></span>
-    {% endif %}
-  {%- endmacro -%}
-
-  {%- macro field(field) -%}
-    <div class="form-group {{ error_class(field) }}">
-      {{ form[field].label }}
-      {{ errors(field) }}
-      {{ form[field](class="form-control") }}
-    </div>
-  {%- endmacro -%}
-
   <form method="POST" action="{{ contest.format_uri('submit_contestant') }}">
     {{ form.csrf_token() }}
-    {{ field('display_name') }}
-    <div class="form-group {{ error_class('contestant_desc') }}">
+    {{ field(form, 'display_name') }}
+    <div class="form-group {{ error_class(form, 'contestant_desc') }}">
       {{ form.contestant_desc.label }}
-      {{ errors('contestant_desc') }}
+      {{ errors(form, 'contestant_desc') }}
       {{ form.contestant_desc(rows=5, class="form-control") }}
     </div>
-    {{ field('youtube_url') }}
-    {{ field('slideshow_url') }}
-    <div class="form-group {{ error_class('website') }}">
+    {{ field(form, 'youtube_url') }}
+    {{ field(form, 'slideshow_url') }}
+    <div class="form-group {{ error_class(form, 'website') }}">
       <label for="website">Project Website <span class="text-muted"><small>(Optional)</small></span></label>
-      {{ errors('website') }}
+      {{ errors(form, 'website') }}
       {{ form.website(class="form-control") }}
     </div>
-    <div class="form-group {{ error_class('founder_desc') }}">
+    <div class="form-group {{ error_class(form, 'founder_desc') }}">
       <label for="founder_desc">Your Bio <span class="text-muted"><small>(100 words or less)</small></span></label>
-      {{ errors('founder_desc') }}
+      {{ errors(form, 'founder_desc') }}
       {{ form.founder_desc(class="form-control") }}
     </div>
     <button type="submit" class="pp-big-button btn btn-primary btn-lg">Submit Entry</button>
