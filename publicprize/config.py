@@ -16,6 +16,7 @@ class DevConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = 'postgresql://' + PP_DATABASE_USER + ':' + PP_DATABASE_PASSWORD + '@localhost/' + PP_DATABASE
 #    SQLALCHEMY_ECHO = True
     PP_ALL_PUBLIC_CONTESTANTS = True
+    PP_TEST_USER = True
 
 class ProdConfig(BaseConfig):
     pass
