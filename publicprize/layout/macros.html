@@ -1,0 +1,20 @@
+
+{%- macro error_class(form, field) -%}
+  {% if form[field].errors %}has-error{% endif %}
+{%- endmacro -%}
+
+{%- macro errors(form, field) -%}
+  {% if form[field].errors %}
+    <span class="pp-form-error text-danger"><strong>{{ form[field].errors[0] }}</strong></span>
+  {% endif %}
+{%- endmacro -%}
+
+{%- macro field(form, field) -%}
+  <div class="form-group {{ error_class(form, field) }}">
+    {{ form[field].label }}
+    {{ errors(form, field) }}
+    {{ form[field](class="form-control") }}
+  </div>
+{%- endmacro -%}
+
+    
