@@ -7,12 +7,13 @@
 
 import flask
 from flask.ext.wtf import Form
+import paypalrestsdk
 import publicprize.auth.model as pam
 import publicprize.contest.model as pcm
 from publicprize import controller
 import re
 import urllib.request
-from wtforms import StringField, TextAreaField
+import wtforms
 from wtforms.validators import DataRequired
 
 class ContestantForm(Form):
@@ -26,20 +27,17 @@ class ContestantForm(Form):
         founder_desc: current user's founder info for this project
         website: project website (optional)
     """
-    display_name = StringField('Project Name', validators=[DataRequired()])
-    contestant_desc = TextAreaField(
+    display_name = wtforms.StringField(
+        'Project Name', validators=[DataRequired()])
+    contestant_desc = wtforms.TextAreaField(
         'Project Summary', validators=[DataRequired()])
-    youtube_url = StringField(
-        'YouTube Video URL',
-        validators=[DataRequired()]
-    )
-    slideshow_url = StringField(
-        'SlideShare Pitch Deck URL',
-        validators=[DataRequired()]
-    )
-    founder_desc = TextAreaField(
+    youtube_url = wtforms.StringField(
+        'YouTube Video URL', validators=[DataRequired()])
+    slideshow_url = wtforms.StringField(
+        'SlideShare Pitch Deck URL', validators=[DataRequired()])
+    founder_desc = wtforms.TextAreaField(
         'Your Short Bio', validators=[DataRequired()])
-    website = StringField('Project Website')
+    website = wtforms.StringField('Project Website')
 
     def execute(self, contest):
         """Validates and creates the contestant model"""
@@ -61,7 +59,7 @@ class ContestantForm(Form):
         self._validate_youtube()
         self._validate_slideshare()
         self._validate_website()
-        self._log_errors()
+        _log_errors(self)
         return not self.errors
 
     def _get_url_content(self, url):
@@ -80,11 +78,6 @@ class ContestantForm(Form):
         except ValueError:
             return None
         return rv
-
-    def _log_errors(self):
-        """Put any form errors in logs as warning"""
-        if self.errors:
-            controller.app().logger.warn(self.errors)
 
     def _slideshare_code(self):
         """Download slideshare url and extract embed code.
@@ -182,3 +175,78 @@ class ContestantForm(Form):
                     'Unknown YouTube VIDEO_ID: ' + code + '.']
         else:
             self.youtube_url.errors = ['Invalid YouTube URL.']
+
+class DonateForm(Form):
+    """Donation form.
+
+    Fields:
+        amount: donation amount
+    """
+    amount = wtforms.DecimalField(
+        'Donation Amount', validators=[DataRequired()])
+
+    def execute(self, contest):
+        """Validates and """
+        if self.is_submitted() and self.validate():
+            self._paypal_payment(contest)
+        return flask.render_template(
+            'contest/donate.html',
+            contest=contest,
+            form=self
+        )
+
+    def validate(self):
+        super().validate()
+        if self.amount.data:
+            if float(self.amount.data) < 1:
+                self.amount.errors = ['Amount must be at least $1']
+        else:
+            self.amount.raw_data = None
+        _log_errors(self)
+        return not self.errors
+
+    def _paypal_payment(self, contest):
+        payment = paypalrestsdk.Payment({
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": flask.url_for(
+                    '_route',
+                    path=contest.format_uri('donate_confirm'),
+                    _external=True
+                ),
+                "cancel_url": flask.url_for(
+                    '_route',
+                    path=contest.format_uri('donate_cancel'),
+                    _external=True
+                ),
+            },
+            "transactions": [
+                {
+                    "amount": {
+                        "total": str(self.amount.data),
+                        "currency": "USD"
+                    },
+                    "description": ""
+                }
+            ]
+        })
+
+        if payment.create():
+            controller.app().logger.info(payment)
+        else:
+            controller.app().logger.warn(payment.error)
+            self.amount.errors = ['There was an error processing your donation.']
+
+
+def _log_errors(form):
+    """Put any form errors in logs as warning"""
+    if form.errors:
+        controller.app().logger.warn({
+            "data": flask.request.form,
+            "errors": form.errors
+        })
+
+            
