@@ -27,6 +27,15 @@ class Contest(ppc.Task):
                 pam.BivAccess.target_biv_id == pcm.Contestant.biv_id
             ).filter(pcm.Contestant.is_public == True).all()
         )
+    def action_donate(biv_obj):
+        """Donation form"""
+        return pcf.DonateForm().execute(biv_obj)
+    def action_donate_cancel(biv_obj):
+        form = pcf.DonateForm()
+        form.amount.errors = ["Please resubmit your donation."]
+        form.execute(biv_obj)
+    def action_donate_confirm(biv_obj):
+        pass
     def action_donors(biv_obj):
         """Donors page"""
         return Contest._render_template(biv_obj, 'donors')
