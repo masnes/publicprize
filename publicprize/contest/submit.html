@@ -42,7 +42,11 @@ Submit Contest Entry
       {{ errors('website') }}
       {{ form.website(class="form-control") }}
     </div>
-    {{ field('founder_desc') }}
+    <div class="form-group {{ error_class('founder_desc') }}">
+      <label for="founder_desc">Your Bio <span class="text-muted"><small>(100 words or less)</small></span></label>
+      {{ errors('founder_desc') }}
+      {{ form.founder_desc(class="form-control") }}
+    </div>
     <button type="submit" class="pp-big-button btn btn-primary btn-lg">Submit Entry</button>
     <a class="pp-cancel-link" href="{{ contest.format_uri('contestants') }}">Cancel</a>
   </form>
