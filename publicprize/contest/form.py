@@ -37,8 +37,8 @@ class ContestantForm(Form):
         'SlideShare Pitch Deck URL',
         validators=[DataRequired()]
     )
-    founder_desc = StringField(
-        'Founder Short Bio', validators=[DataRequired()])
+    founder_desc = TextAreaField(
+        'Your Short Bio', validators=[DataRequired()])
     website = StringField('Project Website')
 
     def execute(self, contest):
