@@ -1,0 +1,28 @@
+{% extends 'contest/contest.html' %}
+{% from "layout/macros.html" import error_class, errors %}
+
+{% block title %}
+Donate
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="col-sm-7 pp-form">
+
+  <form method="POST" action="{{ contest.format_uri('donate') }}">
+    {{ form.csrf_token() }}
+
+    <div class="form-group {{ error_class(form, 'amount') }}">
+      {{ form['amount'].label }}
+      {{ errors(form, 'amount') }}
+      <div class="input-group">
+	<span class="input-group-addon"><strong>$</strong></span>
+        {{ form['amount'](class="form-control") }}
+      </div>
+    </div>
+    <button type="submit" class="pp-big-button btn btn-primary btn-lg">Contine to PayPal</button>
+  </form>
+
+</div>
+{% endblock %}
