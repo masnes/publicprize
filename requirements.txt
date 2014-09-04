@@ -11,9 +11,13 @@ SQLAlchemy==0.9.7
 WTForms==2.0.1
 Werkzeug==0.9.6
 argparse==1.2.1
+certifi==14.05.14
 itsdangerous==0.24
 numconv==2.1.1
 oauthlib==0.6.3
+paypalrestsdk==1.3.0
 psycopg2==2.5.3
 py==1.4.23
 pytest==2.6.1
+requests==2.4.0
+six==1.7.3
