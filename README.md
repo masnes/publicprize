@@ -50,6 +50,15 @@ Starts the server from this directory:
 python manage.py runserver -h 0.0.0.0 -p 8000
 ```
 
+###### Logging in as a test user
+
+You can avoid using the social network login by visiting the url:
+
+http://localhost:8000/pub/new-test-user
+
+Each time you visit the url above, a new user will be created and
+logged in.
+
 ###### Running pytests
 
 ```
