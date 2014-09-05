@@ -27,11 +27,7 @@ class General(controller.Task):
         )
 
     def action_facebook_login(biv_obj):
-        callback = flask.url_for(
-            '_route',
-            path=biv_obj.format_uri('facebook_authorized'),
-            _external=True
-        )
+        callback = biv_obj.format_absolute_uri('facebook_authorized')
         # return to the "next" or referrer page when return from callback
         flask.session['oauth.next_uri'] = flask.request.args.get('next') or flask.request.referrer or None
         state = werkzeug.security.gen_salt(64)
