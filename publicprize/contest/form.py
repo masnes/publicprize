@@ -212,16 +212,8 @@ class DonateForm(Form):
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": flask.url_for(
-                    '_route',
-                    path=contest.format_uri('donate_confirm'),
-                    _external=True
-                ),
-                "cancel_url": flask.url_for(
-                    '_route',
-                    path=contest.format_uri('donate_cancel'),
-                    _external=True
-                ),
+                "return_url": contest.format_absolute_uri('donate_confirm'),
+                "cancel_url": contest.format_absolute_uri('donate_cancel'),
             },
             "transactions": [
                 {
