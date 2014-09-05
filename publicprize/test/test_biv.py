@@ -43,6 +43,6 @@ def test_uri():
 
 def test_load_obj():
     assert biv.load_obj('_101').format_uri() == '/pub'
-#    assert biv.load_obj('').format_uri('') == '/index'
-#    assert biv.load_obj('').format_uri() == '/index'
-#    assert biv.load_obj('').format_uri() == '/index'
+    assert biv.load_obj('').format_uri() == '/index'
+    assert biv.load_obj('_101').format_uri('logout') == '/pub/logout'
+
