@@ -70,6 +70,14 @@ class Model(object):
         assert inspect.isclass(self.__default_task_class)
         return self.__default_task_class
 
+    def format_absolute_uri(self, action):
+        """Create an absolute URI for a model action."""
+        return flask.url_for(
+            '_route',
+            path=self.format_uri(action),
+            _external=True
+        )
+
     def format_uri(self, action=None, path_info=None):
         """Creates a URI for this biv_obj appending action and path_info"""
         biv_id = biv.Id(self.biv_id)
