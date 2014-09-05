@@ -42,6 +42,20 @@ Subsequent runs of this command will produce
 
 Postgresql should already be running.
 
+###### Environment Variables
+
+Application secret values are controlled by the environment. Add the
+items below to enable Facebook and PayPal features. Test applications
+for each service can be created on the respective developer websites.
+
+```
+export FACEBOOK_APP_ID=...
+export FACEBOOK_APP_SECRET=...
+export PAYPAL_MODE=sandbox
+export PAYPAL_CLIENT_ID=...
+export PAYPAL_CLIENT_SECRET=...
+```
+
 ###### Running Flask server
 
 Starts the server from this directory:
