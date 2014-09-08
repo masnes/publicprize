@@ -1,0 +1,20 @@
+{% extends 'contest/contest.html' %}
+
+{% block title %}
+Confirm Donation
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="col-sm-7 pp-form">
+
+  <form method="POST" action="{{ contest.format_uri('donate-confirm') }}">
+    {{ form.csrf_token() }}
+    {{ form['payer_id']() }}
+    <p>Confirm your donation to ... for $...<p>
+    <button type="submit" class="pp-big-button btn btn-primary btn-lg">Confirm Donation</button>
+  </form>
+
+</div>
+{% endblock %}
