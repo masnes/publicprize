@@ -9,7 +9,7 @@ Confirm Donation
 {{ super() }}
 <div class="col-sm-7 pp-form">
 
-  <form method="POST" action="{{ contest.format_uri('donate-confirm') }}">
+  <form method="POST" action="{{ contestant.format_uri('donate-confirm') }}">
     {{ form.csrf_token() }}
     {{ form['payer_id']() }}
     <p>Confirm your donation to ... for $...<p>
