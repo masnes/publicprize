@@ -11,6 +11,7 @@ import paypalrestsdk
 import publicprize.auth.model as pam
 import publicprize.contest.model as pcm
 from publicprize import controller
+import random
 import re
 import urllib.request
 import wtforms
@@ -185,15 +186,16 @@ class DonateForm(Form):
     amount = wtforms.DecimalField(
         'Donation Amount', validators=[DataRequired()])
 
-    def execute(self, contest):
+    def execute(self, contestant):
         """Validates and redirects to PayPal"""
         if self.is_submitted() and self.validate():
-            url = self._paypal_payment(contest)
+            url = self._paypal_payment(contestant)
             if url:
                 return flask.redirect(url)
         return flask.render_template(
             'contest/donate.html',
-            contest=contest,
+            contestant=contestant,
+            contest=contestant.get_contest(),
             form=self
         )
 
@@ -207,24 +209,37 @@ class DonateForm(Form):
         _log_errors(self)
         return not self.errors
 
-    def _paypal_payment(self, contest):
+    def _paypal_payment(self, contestant):
         payment = paypalrestsdk.Payment({
             "intent": "sale",
             "payer": {
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": contest.format_absolute_uri('donate_confirm'),
-                "cancel_url": contest.format_absolute_uri('donate_cancel'),
+                "return_url": contestant.format_absolute_uri('donate_confirm'),
+                "cancel_url": contestant.format_absolute_uri('donate_cancel'),
             },
             "transactions": [
                 {
                     "amount": {
                         "total": str(self.amount.data),
-                        "currency": "USD"
+                        "currency": "USD",
                     },
-                    # TODO(pjm): set payment description
-                    "description": ""
+
+                    # TODO(pjm): use donation model biv_id
+                    "invoice_number": int(random.random() * 10000),
+
+                    "item_list": {
+                        "items": [
+                            {
+                                "quantity": 1,
+                                "price": str(self.amount.data),
+                                "currency": "USD",
+                                "name": contestant.display_name + " donation, " + contestant.get_contest().display_name,
+                                "tax": 0
+                            }
+                        ]
+                    }
                 }
             ]
         })
@@ -244,9 +259,12 @@ class DonateConfirmForm(Form):
     """Confirm donation form."""
     payer_id = wtforms.HiddenField()
 
-    def execute(self, contest):
+    def execute(self, contestant):
         """Shows confirmation page and executes payment at PayPal"""
-        controller.app().logger.info(flask.session['paypal.id'])
+        if not flask.session.get('paypal.id'):
+            controller.app().logger.warn('missing paypal.id')
+            flask.flash('The referenced donation was already processed')
+            return flask.redirect(contestant.format_uri())
         if not self.is_submitted():
             self.payer_id.data = flask.request.args['PayerID']
         if self.is_submitted() and self.validate():
@@ -257,12 +275,13 @@ class DonateConfirmForm(Form):
             del flask.session['paypal.id']
             if payment.execute({ "payer_id": str(self.payer_id.data) }):
                 # TODO(pjm): create donation model
-                flask.flash('Thank you for your donation to ' + contest.display_name)
-                return flask.redirect(contest.format_uri())
+                flask.flash('Thank you for your donation for ' + contestant.display_name)
+                return flask.redirect(contestant.format_uri())
             controller.app().logger.warn('payment execute failed')
         return flask.render_template(
             'contest/donate-confirm.html',
-            contest=contest,
+            contestant=contestant,
+            contest=contestant.get_contest(),
             form=self
         )
     
