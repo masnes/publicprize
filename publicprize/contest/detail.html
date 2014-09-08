@@ -9,10 +9,16 @@
 {{ super() }}
 <div class="col-sm-7 pp-main">
 
-<div class="pp-contestant">
-    <div class="row">
-    	<div class="pp-vote-detail col-sm-7 col-sm-offset-5"><button type="button" class="pp-big-button btn btn-primary btn-lg btn-block">Vote for {{ contestant.display_name }}</button></div>
+{%- macro donate_button() -%}
+  <div class="row">
+    <div class="pp-vote-detail col-sm-7 col-sm-offset-5">
+      <a href="{{ contestant.format_uri('donate') }}" class="pp-big-button btn btn-primary btn-lg btn-block"><span class="pp-trimmed-text">Donate to {{ contestant.display_name }}</span></a>
     </div>
+  </div>
+{%- endmacro -%}
+
+<div class="pp-contestant">
+    {{ donate_button() }}
     <div class="pp-title">{{ contestant.display_name }}</div>
     <div class="pp-pitch">
     	<div class="embed-responsive embed-responsive-16by9">
@@ -50,9 +56,7 @@
     	{% endfor %}
 
     </div>
-    <div class="row">
-    	<div class="pp-vote-detail col-sm-7 col-sm-offset-5"><button type="button" class="pp-big-button btn btn-primary btn-lg btn-block">Vote for {{ contestant.display_name }}</button></div>
-    </div>
+    {{ donate_button() }}
 </div>
 </div>
 {% endblock %}
