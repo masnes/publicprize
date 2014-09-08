@@ -10,7 +10,7 @@ Donate
 {{ super() }}
 <div class="col-sm-7 pp-form">
 
-  <form method="POST" action="{{ contest.format_uri('donate') }}">
+  <form method="POST" action="{{ contestant.format_uri('donate') }}">
     {{ form.csrf_token() }}
 
     <div class="form-group {{ error_class(form, 'amount') }}">
