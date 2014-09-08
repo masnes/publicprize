@@ -447,3 +447,8 @@ img.pp-video-play {
 img.pp-video-play:hover {
     opacity: 1;
 }
+.pp-trimmed-text {
+    overflow: hidden;
+    display: block;
+    text-overflow: ellipsis;
+}
