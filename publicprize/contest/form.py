@@ -186,9 +186,11 @@ class DonateForm(Form):
         'Donation Amount', validators=[DataRequired()])
 
     def execute(self, contest):
-        """Validates and """
+        """Validates and redirects to PayPal"""
         if self.is_submitted() and self.validate():
-            self._paypal_payment(contest)
+            url = self._paypal_payment(contest)
+            if url:
+                return flask.redirect(url)
         return flask.render_template(
             'contest/donate.html',
             contest=contest,
@@ -221,6 +223,7 @@ class DonateForm(Form):
                         "total": str(self.amount.data),
                         "currency": "USD"
                     },
+                    # TODO(pjm): set payment description
                     "description": ""
                 }
             ]
@@ -228,11 +231,41 @@ class DonateForm(Form):
 
         if payment.create():
             controller.app().logger.info(payment)
+            flask.session['paypal.id'] = str(payment.id)
+            for link in payment.links:
+                if link.method == "REDIRECT":
+                    return str(link.href)
         else:
             controller.app().logger.warn(payment.error)
             self.amount.errors = ['There was an error processing your donation.']
+        return None
 
+class DonateConfirmForm(Form):
+    """Confirm donation form."""
+    payer_id = wtforms.HiddenField()
 
+    def execute(self, contest):
+        """Shows confirmation page and executes payment at PayPal"""
+        controller.app().logger.info(flask.session['paypal.id'])
+        if not self.is_submitted():
+            self.payer_id.data = flask.request.args['PayerID']
+        if self.is_submitted() and self.validate():
+            controller.app().logger.info(flask.session['paypal.id'])
+            payment = paypalrestsdk.Payment({
+                "id": flask.session['paypal.id']
+            })
+            del flask.session['paypal.id']
+            if payment.execute({ "payer_id": str(self.payer_id.data) }):
+                # TODO(pjm): create donation model
+                flask.flash('Thank you for your donation to ' + contest.display_name)
+                return flask.redirect(contest.format_uri())
+            controller.app().logger.warn('payment execute failed')
+        return flask.render_template(
+            'contest/donate-confirm.html',
+            contest=contest,
+            form=self
+        )
+    
 def _log_errors(form):
     """Put any form errors in logs as warning"""
     if form.errors:
