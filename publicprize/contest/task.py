@@ -33,9 +33,10 @@ class Contest(ppc.Task):
     def action_donate_cancel(biv_obj):
         form = pcf.DonateForm()
         form.amount.errors = ["Please resubmit your donation."]
-        form.execute(biv_obj)
+        return form.execute(biv_obj)
     def action_donate_confirm(biv_obj):
-        pass
+        """Confirm donation"""
+        return pcf.DonateConfirmForm().execute(biv_obj)
     def action_donors(biv_obj):
         """Donors page"""
         return Contest._render_template(biv_obj, 'donors')
