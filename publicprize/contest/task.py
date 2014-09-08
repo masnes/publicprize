@@ -27,16 +27,6 @@ class Contest(ppc.Task):
                 pam.BivAccess.target_biv_id == pcm.Contestant.biv_id
             ).filter(pcm.Contestant.is_public == True).all()
         )
-    def action_donate(biv_obj):
-        """Donation form"""
-        return pcf.DonateForm().execute(biv_obj)
-    def action_donate_cancel(biv_obj):
-        form = pcf.DonateForm()
-        form.amount.errors = ["Please resubmit your donation."]
-        return form.execute(biv_obj)
-    def action_donate_confirm(biv_obj):
-        """Confirm donation"""
-        return pcf.DonateConfirmForm().execute(biv_obj)
     def action_donors(biv_obj):
         """Donors page"""
         return Contest._render_template(biv_obj, 'donors')
@@ -69,21 +59,32 @@ class Contestant(ppc.Task):
     """Contestant actions"""
     def action_contestant(biv_obj):
         """Project detail page, loads contest owner and project founders"""
-        return flask.render_template(
-            'contest/detail.html',
-            contest=pcm.Contest.query.select_from(pam.BivAccess).filter(
-                pam.BivAccess.source_biv_id == pcm.Contest.biv_id,
-                pam.BivAccess.target_biv_id == biv_obj.biv_id
-            ).one(),
-            contestant=biv_obj,
+        return Contestant._render_template(biv_obj, 'detail',
             founders=pcm.Founder.query.select_from(pam.BivAccess).filter(
                 pam.BivAccess.source_biv_id == biv_obj.biv_id,
                 pam.BivAccess.target_biv_id == pcm.Founder.biv_id
             ).all()
         )
+    def action_donate(biv_obj):
+        """Donation form"""
+        return pcf.DonateForm().execute(biv_obj)
+    def action_donate_cancel(biv_obj):
+        form = pcf.DonateForm()
+        form.amount.errors = ["Please resubmit your donation."]
+        return form.execute(biv_obj)
+    def action_donate_confirm(biv_obj):
+        """Confirm donation"""
+        return pcf.DonateConfirmForm().execute(biv_obj)
     def action_index(biv_obj):
         """Default to contestant page"""
         return Contestant.action_contestant(biv_obj)
+    def _render_template(biv_obj, name, **kwargs):
+        return flask.render_template(
+            "contest/" + name + ".html",
+            contestant=biv_obj,
+            contest=biv_obj.get_contest(),
+            **kwargs
+        )
     
 class Founder(ppc.Task):
     """Founder actions"""
