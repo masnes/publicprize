@@ -100,6 +100,13 @@ class Contestant(db.Model, controller.Model):
     website = db.Column(db.String(100))
     is_public = db.Column(db.Boolean, nullable=False)
 
+    def get_contest(self):
+        """Returns the Contest model which owns this Contestant"""
+        return Contest.query.select_from(pam.BivAccess).filter(
+            pam.BivAccess.source_biv_id == Contest.biv_id,
+            pam.BivAccess.target_biv_id == self.biv_id
+        ).one()
+
 class Donor(db.Model, controller.Model):
     """donor database model.
 
