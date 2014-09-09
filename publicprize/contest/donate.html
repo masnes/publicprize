@@ -1,8 +1,8 @@
 {% extends 'contest/contest.html' %}
-{% from "layout/macros.html" import error_class, errors %}
+{% import "layout/macros.html" as macros %}
 
 {% block title %}
-Donate
+Contribute
 {{ super() }}
 {% endblock %}
 
@@ -10,19 +10,24 @@ Donate
 {{ super() }}
 <div class="col-sm-7 pp-form">
 
+  <div class="pp-title">{{ contestant.display_name }}</div>
+  
   <form method="POST" action="{{ contestant.format_uri('donate') }}">
     {{ form.csrf_token() }}
 
-    <div class="form-group {{ error_class(form, 'amount') }}">
+    <div class="form-group {{ macros.error_class(form, 'amount') }}">
       {{ form['amount'].label }}
-      {{ errors(form, 'amount') }}
+      {{ macros.errors(form, 'amount') }}
       <div class="input-group">
 	<span class="input-group-addon"><strong>$</strong></span>
         {{ form['amount'](class="form-control") }}
       </div>
     </div>
-    <button type="submit" class="pp-big-button btn btn-primary btn-lg">Contine to PayPal</button>
+    {{ macros.submit_button('Continue to PayPal') }}
   </form>
 
+</div>
+<div class="col-sm-7">
+  <!-- PayPal Logo --><img src="https://www.paypalobjects.com/webstatic/mktg/logo/AM_mc_vs_dc_ae.jpg" alt="PayPal Acceptance Mark"><!-- PayPal Logo -->
 </div>
 {% endblock %}
