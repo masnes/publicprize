@@ -118,6 +118,31 @@ class Donor(db.Model, controller.Model):
         db.Sequence('donor_s', start=1007, increment=1000),
         primary_key=True
     )
+    amount = db.Column(db.Numeric(15, 2), nullable=False)
+    display_name = db.Column(db.String(100))
+    donor_email = db.Column(db.String(100))
+    donor_state = db.Column(db.Enum('submitted', 'pending_confirmation', 'executed', 'canceled', name='donor_state'))
+    paypal_payment_id = db.Column(db.String(100))
+    paypal_payer_id = db.Column(db.String(100))
+
+    def add_to_session(self):
+        controller.db.session.add(self)
+        controller.db.session.flush()
+        flask.session['donor.biv_id'] = self.biv_id
+
+    def remove_from_session(self):
+        if flask.session.get('donor.biv_id'):
+            del flask.session['donor.biv_id']
+        
+    def unsafe_load_from_session():
+        """Loads the donor from the session.
+        Returns None if session value is missing or donor does not exist.
+        """
+        if flask.session.get('donor.biv_id'):
+            return Donor.query.filter_by(
+                biv_id=flask.session['donor.biv_id']
+            ).first()
+        return None
     
 class Founder(db.Model, controller.Model):
     """founder database model.
