@@ -1,7 +1,7 @@
 {% extends 'contest/contest.html' %}
 
 {% block title %}
-Confirm Donation
+Confirm Contribution
 {{ super() }}
 {% endblock %}
 
@@ -9,11 +9,13 @@ Confirm Donation
 {{ super() }}
 <div class="col-sm-7 pp-form">
 
+  <div class="pp-title">{{ contestant.display_name }}</div>
+  
   <form method="POST" action="{{ contestant.format_uri('donate-confirm') }}">
     {{ form.csrf_token() }}
-    {{ form['payer_id']() }}
-    <p>Confirm your donation to ... for $...<p>
-    <button type="submit" class="pp-big-button btn btn-primary btn-lg">Confirm Donation</button>
+    <p>Please confirm your contribution to {{ contestant.display_name }}
+      for ${{ donor.amount }}<p>
+    {{ macros.submit_button('Confirm Contribution) }}
   </form>
 
 </div>
