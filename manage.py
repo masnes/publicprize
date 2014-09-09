@@ -49,7 +49,9 @@ def create_test_data():
                 _add_owner(contestant_id, founder_id)
 
             for donor in contestant['Donor']:
-                donor_id = _add_model(publicprize.contest.model.Donor())
+                donor_id = _add_model(publicprize.contest.model.Donor(
+                    amount=donor['amount']
+                ))
                 _add_owner(contestant_id, donor_id)
 
     db.session.commit()
