@@ -45,7 +45,7 @@ class Contest(ppc.Task):
     @ppc.login_required
     def action_submit_contestant(biv_obj):
         """Submit project page"""
-        return pcf.ContestantForm().execute(biv_obj)
+        return pcf.Contestant().execute(biv_obj)
     def _render_template(biv_obj, name, **kwargs):
         """Render the page, putting the selected menu and contest in env"""
         return flask.render_template(
@@ -67,14 +67,19 @@ class Contestant(ppc.Task):
         )
     def action_donate(biv_obj):
         """Donation form"""
-        return pcf.DonateForm().execute(biv_obj)
+        return pcf.Donate().execute(biv_obj)
     def action_donate_cancel(biv_obj):
-        form = pcf.DonateForm()
+        donor = pcm.Donor.unsafe_load_from_session()
+        if donor:
+            donor.remove_from_session()
+            donor.donor_state = 'canceled'
+            ppc.db.session.add(donor)
+        form = pcf.Donate()
         form.amount.errors = ["Please resubmit your donation."]
         return form.execute(biv_obj)
     def action_donate_confirm(biv_obj):
         """Confirm donation"""
-        return pcf.DonateConfirmForm().execute(biv_obj)
+        return pcf.DonateConfirm().execute(biv_obj)
     def action_index(biv_obj):
         """Default to contestant page"""
         return Contestant.action_contestant(biv_obj)
