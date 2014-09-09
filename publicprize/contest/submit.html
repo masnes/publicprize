@@ -1,5 +1,5 @@
 {% extends 'contest/contest.html' %}
-{% from "layout/macros.html" import error_class, errors, field %}
+{% import "layout/macros.html" as macros %}
 
 {% block title %}
 Submit Contest Entry
@@ -12,25 +12,25 @@ Submit Contest Entry
 
   <form method="POST" action="{{ contest.format_uri('submit_contestant') }}">
     {{ form.csrf_token() }}
-    {{ field(form, 'display_name') }}
-    <div class="form-group {{ error_class(form, 'contestant_desc') }}">
+    {{ macros.field(form, 'display_name') }}
+    <div class="form-group {{ macros.error_class(form, 'contestant_desc') }}">
       {{ form.contestant_desc.label }}
-      {{ errors(form, 'contestant_desc') }}
+      {{ macros.errors(form, 'contestant_desc') }}
       {{ form.contestant_desc(rows=5, class="form-control") }}
     </div>
-    {{ field(form, 'youtube_url') }}
-    {{ field(form, 'slideshow_url') }}
-    <div class="form-group {{ error_class(form, 'website') }}">
+    {{ macros.field(form, 'youtube_url') }}
+    {{ macros.field(form, 'slideshow_url') }}
+    <div class="form-group {{ macros.error_class(form, 'website') }}">
       <label for="website">Project Website <span class="text-muted"><small>(Optional)</small></span></label>
-      {{ errors(form, 'website') }}
+      {{ macros.errors(form, 'website') }}
       {{ form.website(class="form-control") }}
     </div>
-    <div class="form-group {{ error_class(form, 'founder_desc') }}">
+    <div class="form-group {{ macros.error_class(form, 'founder_desc') }}">
       <label for="founder_desc">Your Bio <span class="text-muted"><small>(100 words or less)</small></span></label>
-      {{ errors(form, 'founder_desc') }}
+      {{ macros.errors(form, 'founder_desc') }}
       {{ form.founder_desc(class="form-control") }}
     </div>
-    <button type="submit" class="pp-big-button btn btn-primary btn-lg">Submit Entry</button>
+    {{ macros.submit_button('Submit Entry') }}
     <a class="pp-cancel-link" href="{{ contest.format_uri('contestants') }}">Cancel</a>
   </form>
 
