@@ -28,7 +28,12 @@
 
 <div class="col-sm-4 col-sm-offset-1 pp-sidebar">
     <div class="sidebar-module sidebar-module-inset pp-summary">
-    	<h3>Contest Info...</h3>
+	<span class="pp-summary-money">${{ contest.donor_executed_amount() }}</span>
+	<span class="pp-summary-name">Raised</span>
+	<span class="pp-summary-number">{{ contest.donor_count() }}</span>
+	<span class="pp-summary-name">Contributors</span>
+	<span class="pp-summary-number">XXX</span>
+	<span class="pp-summary-undertitle">days to go</span>
     </div>
 </div>
 
@@ -42,7 +47,6 @@
     {%- endmacro -%}
     <select class="pp-menu-xs form-control visible-xs" onchange="window.location = this.options[this.selectedIndex].value;">
       	{{ option('contestants', 'Contestants', contest.contestant_count()) }}
-	{{ option('donors', 'Donors', contest.donor_count()) }}
 	{{ option('about', 'About') }}
 	{{ option('how-to-enter', 'How to Enter') }}
     </select>
@@ -53,7 +57,6 @@
     {%- endmacro -%}
     <div class="btn-group pp-menu hidden-xs">
         {{ menu_link('contestants', 'Contestants', contest.contestant_count()) }}
-	{{ menu_link('donors', 'Donors', contest.donor_count()) }}
 	{{ menu_link('about', 'About') }}
 	{{ menu_link('how-to-enter', 'How to Enter') }}
   </div>
@@ -64,7 +67,7 @@
 </div>
 
 <div class="col-sm-4 col-sm-offset-1 col-xs-8 col-xs-offset-2 pp-sidebar">
-  <h2 style="text-align: center">Sponsors</h3>
+  <h2 style="text-align: center">Sponsors</h2>
     <div class="sidebar-module sidebar-module-inset pp-donate-sidebar">
       <img style="width: 100%" src="/static/img/logoBoulderChamber.png" alt="Boulder Chamber" />
     </div>
