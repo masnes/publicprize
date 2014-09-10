@@ -50,7 +50,8 @@ def create_test_data():
 
             for donor in contestant['Donor']:
                 donor_id = _add_model(publicprize.contest.model.Donor(
-                    amount=donor['amount']
+                    amount=donor['amount'],
+                    donor_state="executed"
                 ))
                 _add_owner(contestant_id, donor_id)
 
