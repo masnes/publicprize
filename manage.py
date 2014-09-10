@@ -15,9 +15,9 @@ import publicprize.contest.model
 
 # Needs to be explicit
 ppc.init()
-_manager = fes.Manager(ppc.app())
+_MANAGER = fes.Manager(ppc.app())
 
-@_manager.command
+@_MANAGER.command
 def create_db():
     """Create the postgres user, database, and publicprize schema"""
     config = ppc.app().config
@@ -26,7 +26,7 @@ def create_db():
     os.system("createdb --encoding='utf8' --locale=en_US.UTF-8 --user=postgres --owner=%s %s" % (config['PP_DATABASE_USER'], config['PP_DATABASE']))
     db.create_all()
 
-@_manager.command
+@_MANAGER.command
 def create_test_data():
     """Populate database with contents of data/test_data.json file"""
     data = json.load(open('data/test_data.json', 'r'))
@@ -56,14 +56,14 @@ def create_test_data():
 
     db.session.commit()
 
-@_manager.command
+@_MANAGER.command
 def create_test_db():
     """Recreates the database and loads the test data from data/test_data.json"""
     drop_db()
     create_db()
     create_test_data()
 
-@_manager.command
+@_MANAGER.command
 def drop_db():
     """Destroy the database"""
     if fes.prompt_bool("Drop database?"):
@@ -76,7 +76,7 @@ def _add_model(model):
     # flush() makes biv_id available (executes the db sequence)
     db.session.flush()
     return model.biv_id
-    
+
 def _add_owner(parent_id, child_id):
     """Creates a BivAccess record between the parent and child ids"""
     db.session.add(
@@ -93,10 +93,10 @@ def _create_contest(contest):
         tag_line=contest['tag_line']
     )
     if 'logo_filename' in contest:
-        f = open(contest['logo_filename'], 'rb')
-        model.contest_logo = f.read()
+        logo_file = open(contest['logo_filename'], 'rb')
+        model.contest_logo = logo_file.read()
         model.logo_type = contest['logo_type']
-        f.close()
+        logo_file.close()
     return model
 
 # TODO(pjm): normalize up binary fields, combine with _create_contest()
@@ -107,11 +107,11 @@ def _create_founder(founder):
         founder_desc=founder['founder_desc']
     )
     if 'avatar_filename' in founder:
-        f = open(founder['avatar_filename'], 'rb')
-        model.founder_avatar = f.read()
+        avatar_file = open(founder['avatar_filename'], 'rb')
+        model.founder_avatar = avatar_file.read()
         model.avatar_type = founder['avatar_type']
-        f.close()
+        avatar_file.close()
     return model
-    
+
 if __name__ == "__main__":
-    _manager.run()
+    _MANAGER.run()
