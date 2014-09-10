@@ -1,13 +1,20 @@
-# Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
+# -*- coding: utf-8 -*-
+""" Flask configuration.
+
+    :copyright: Copyright (c) 2014 Bivio Software, Inc.  All Rights Reserved.
+    :license: Apache, see LICENSE for more details.
+"""
 
 import os
 
 class BaseConfig(object):
+    """Common config across dev/test/production"""
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     PP_FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID')
     PP_FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET')
 
 class DevConfig(BaseConfig):
+    """Development config"""
     SECRET_KEY = "ppsecret"
     DEBUG = True
     PP_DATABASE = 'pp'
@@ -19,4 +26,5 @@ class DevConfig(BaseConfig):
     PP_TEST_USER = True
 
 class ProdConfig(BaseConfig):
+    """Production config"""
     pass
