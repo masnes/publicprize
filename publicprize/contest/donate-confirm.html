@@ -1,22 +1,19 @@
 {% extends 'contest/contest.html' %}
+{% import "layout/macros.html" as macros %}
 
 {% block title %}
 Confirm Contribution
 {{ super() }}
 {% endblock %}
 
-{% block content %}
-{{ super() }}
-<div class="col-sm-7 pp-form">
-
+{% block contest_content %}
+<div class="pp-form">
   <div class="pp-title">{{ contestant.display_name }}</div>
-  
   <form method="POST" action="{{ contestant.format_uri('donate-confirm') }}">
     {{ form.csrf_token() }}
     <p>Please confirm your contribution to {{ contestant.display_name }}
       for ${{ donor.amount }}<p>
-    {{ macros.submit_button('Confirm Contribution) }}
+    {{ macros.submit_button('Confirm Contribution') }}
   </form>
-
 </div>
 {% endblock %}
