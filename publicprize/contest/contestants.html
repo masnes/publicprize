@@ -5,9 +5,8 @@ Contestants
 {{ super() }}
 {% endblock %}
 
-{% block content %}
-{{ super() }}
-<div class="col-sm-7 pp-main">
+{% block contest_content %}
+<div class="pp-main">
 
 {% for contestant in contestants %}
 
@@ -31,4 +30,5 @@ Contestants
 {% endfor %}
 
 </div>
+
 {% endblock %}
