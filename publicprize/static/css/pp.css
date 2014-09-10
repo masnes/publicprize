@@ -160,19 +160,15 @@ border-bottom: 1px solid #e5e5e5;
   border-radius: none;
 }
 
-.pp-summary-prize-money {
+.pp-summary-money {
   font-weight: bold;
-  font-size: 24px;
   display: block;
-  line-height: 30px;
-}
-.pp-summary-prize-money.pp-first-prize {
   font-size: 48px;
   line-height: 48px;
   margin-bottom: 5px;
 }
 
-.pp-summary-prize-name {
+.pp-summary-name {
   font-size: 14px;
   display: block;
   margin-bottom: 7px;
@@ -278,13 +274,13 @@ border-bottom: 1px solid #e5e5e5;
   min-width: 7em;
   border-bottom: 3px solid #FCB03C;
   font-weight: bold;
-  width: 25%;
+  width: 33%;
   margin-bottom: 0px;
 }
 
 .pp-button {
   font-weight: bold;
-  width: 25%;
+  width: 33%;
 }
 .pp-button:hover {
   background-color: transparent;
