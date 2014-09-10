@@ -21,7 +21,6 @@ class Contest(db.Model, controller.Model):
         tag_line: sub-name of the contest
         contest_logo: image blob
         logo_type: image type (gif, png, jpeg)
-    
     """
     biv_id = db.Column(
         db.Numeric(18),
@@ -65,8 +64,8 @@ class Contest(db.Model, controller.Model):
 
         for founder in founders:
             if Founder.query.select_from(pam.BivAccess).filter(
-                pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
-                pam.BivAccess.target_biv_id == founder.biv_id
+                    pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
+                    pam.BivAccess.target_biv_id == founder.biv_id
             ).first():
                 return Contestant.query.select_from(pam.BivAccess).filter(
                     pam.BivAccess.source_biv_id == Contestant.biv_id,
@@ -126,14 +125,17 @@ class Donor(db.Model, controller.Model):
     paypal_payer_id = db.Column(db.String(100))
 
     def add_to_session(self):
+        """Add the donor to the session by biv_id."""
         controller.db.session.add(self)
         controller.db.session.flush()
         flask.session['donor.biv_id'] = self.biv_id
 
     def remove_from_session(self):
+        """Remove the donor's biv_id from the session, if present."""
         if flask.session.get('donor.biv_id'):
             del flask.session['donor.biv_id']
-        
+
+    @staticmethod
     def unsafe_load_from_session():
         """Loads the donor from the session.
         Returns None if session value is missing or donor does not exist.
