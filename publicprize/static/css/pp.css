@@ -291,18 +291,6 @@ border-bottom: 1px solid #e5e5e5;
   border: 1px solid #FCB03C;
 }
 
-/*
-.pp-big-button {
-  border-color: #068587;
-  background-color: #068587;
-}
-
-.pp-big-button:hover {
-  border-color: #179698;
-  background-color: #179698;
-}
-*/
-
 a {
   color: #068587;
 }
@@ -425,6 +413,9 @@ img.pp-fb-tray {
 .pp-cancel-link {
     margin-left: 1em;
     vertical-align: -22%;
+}
+.pp-form {
+  margin-top: 15px;
 }
 .pp-form-error {
     float: right;
