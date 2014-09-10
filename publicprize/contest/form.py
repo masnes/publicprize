@@ -8,11 +8,13 @@
 import flask
 import flask_wtf
 import paypalrestsdk
+import paypalrestsdk.exceptions
 import publicprize.auth.model as pam
 import publicprize.contest.model as pcm
 from publicprize import controller
 import re
 import socket
+import sys
 import urllib.request
 import wtforms
 import wtforms.validators as validator
@@ -213,13 +215,25 @@ class Donate(flask_wtf.Form):
         _log_errors(self)
         return not self.errors
 
-    def _paypal_payment(self, contestant):
-        """Call paypal server to create payment record.
-        Returns a redirect link to paypal site or None on error."""
+    def _create_donor(self, contestant):
+        """Create a new donor model and link to the parent contestant."""
         donor = pcm.Donor()
         self.populate_obj(donor)
         donor.donor_state = 'submitted'
         controller.db.session.add(donor)
+        controller.db.session.flush()
+        controller.db.session.add(
+            pam.BivAccess(
+                source_biv_id=contestant.biv_id,
+                target_biv_id=donor.biv_id
+            )
+        )
+        return donor
+
+    def _paypal_payment(self, contestant):
+        """Call paypal server to create payment record.
+        Returns a redirect link to paypal site or None on error."""
+        donor = self._create_donor(contestant)
         amount = "%.2f" % float(self.amount.data)
         payment = paypalrestsdk.Payment({
             "intent": "sale",
@@ -251,17 +265,23 @@ class Donate(flask_wtf.Form):
             ]
         })
 
-        if payment.create():
-            controller.app().logger.info(payment)
-            donor.paypal_payment_id = str(payment.id)
-            donor.add_to_session()
+        try:
+            if payment.create():
+                controller.app().logger.info(payment)
+                donor.paypal_payment_id = str(payment.id)
+                donor.add_to_session()
 
-            for link in payment.links:
-                if link.method == "REDIRECT":
-                    return str(link.href)
-        else:
-            controller.app().logger.warn(payment.error)
-            self.amount.errors = ['There was an error processing your contribution.']
+                for link in payment.links:
+                    if link.method == "REDIRECT":
+                        return str(link.href)
+            else:
+                controller.app().logger.warn(payment.error)
+        except paypalrestsdk.exceptions.ClientError as err:
+            controller.app().logger.warn(err)
+        except:
+            controller.app().logger.warn(sys.exc_info()[0])
+        self.amount.errors = [
+            'There was an error processing your contribution.']
         return None
 
 class DonateConfirm(flask_wtf.Form):
@@ -282,12 +302,18 @@ class DonateConfirm(flask_wtf.Form):
                 "id": donor.paypal_payment_id
             })
             donor.remove_from_session()
-            if payment.execute({"payer_id": donor.paypal_payer_id}):
-                donor.donor_state = 'executed'
-                controller.db.session.add(donor)
-                flask.flash('Thank you for your contribution for ' + contestant.display_name + '.')
-                return flask.redirect(contestant.format_uri())
-            controller.app().logger.warn('payment execute failed')
+            try:
+                if payment.execute({"payer_id": donor.paypal_payer_id}):
+                    donor.donor_state = 'executed'
+                    controller.db.session.add(donor)
+                    flask.flash('Thank you for your contribution for ' + contestant.display_name + '.')
+                    return flask.redirect(contestant.format_uri())
+                else:
+                    controller.app().logger.warn('payment execute failed')
+            except paypalrestsdk.exceptions.ClientError as err:
+                controller.app().logger.warn(err)
+            except:
+                controller.app().logger.warn(sys.exc_info()[0])
         return flask.render_template(
             'contest/donate-confirm.html',
             contestant=contestant,
