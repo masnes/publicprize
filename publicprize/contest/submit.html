@@ -6,9 +6,8 @@ Submit Contest Entry
 {{ super() }}
 {% endblock %}
 
-{% block content %}
-{{ super() }}
-<div class="col-sm-7 pp-form">
+{% block contest_content %}
+<div class="pp-form">
 
   <form method="POST" action="{{ contest.format_uri('submit_contestant') }}">
     {{ form.csrf_token() }}
