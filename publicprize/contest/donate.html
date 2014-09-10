@@ -6,12 +6,9 @@ Contribute
 {{ super() }}
 {% endblock %}
 
-{% block content %}
-{{ super() }}
-<div class="col-sm-7 pp-form">
-
+{% block contest_content %}
+<div class="pp-form">
   <div class="pp-title">{{ contestant.display_name }}</div>
-  
   <form method="POST" action="{{ contestant.format_uri('donate') }}">
     {{ form.csrf_token() }}
 
@@ -25,7 +22,6 @@ Contribute
     </div>
     {{ macros.submit_button('Continue to PayPal') }}
   </form>
-
 </div>
 <div class="col-sm-7">
   <!-- PayPal Logo --><img src="https://www.paypalobjects.com/webstatic/mktg/logo/AM_mc_vs_dc_ae.jpg" alt="PayPal Acceptance Mark"><!-- PayPal Logo -->
