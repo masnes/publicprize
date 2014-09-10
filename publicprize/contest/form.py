@@ -70,12 +70,15 @@ class Contestant(flask.ext.wtf.Form):
         if not re.search(r'^http', url):
             url = 'http://' + url
         try:
-            req = urllib.request.urlopen(url, None, 10)
+            req = urllib.request.urlopen(url, None, 30)
             rv = req.read().decode("utf-8")
             req.close()
         except urllib.request.URLError:
             return None
         except ValueError:
+            return None
+        # catch socket.timeout
+        except:
             return None
         return rv
 
@@ -87,7 +90,7 @@ class Contestant(flask.ext.wtf.Form):
         """
         html = self._get_url_content(self.slideshow_url.data)
         if not html:
-            self.slideshow_url.errors = ['Invalid SideShare URL.']
+            self.slideshow_url.errors = ['SlideShare URL invalid or unavailable.']
             return None
         m = re.search(r'slideshow/embed_code/(\d+)', html)
         if m:
@@ -259,7 +262,6 @@ class Donate(flask.ext.wtf.Form):
             self.amount.errors = ['There was an error processing your contribution.']
         return None
 
-# TODO(pjm): test with credit card entry w/no paypal account
 class DonateConfirm(flask.ext.wtf.Form):
     """Confirm donation form."""
 
