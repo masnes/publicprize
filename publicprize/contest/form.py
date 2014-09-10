@@ -6,17 +6,18 @@
 """
 
 import flask
-import flask.ext.wtf
+import flask_wtf
 import paypalrestsdk
 import publicprize.auth.model as pam
 import publicprize.contest.model as pcm
 from publicprize import controller
 import re
+import socket
 import urllib.request
 import wtforms
 import wtforms.validators as validator
 
-class Contestant(flask.ext.wtf.Form):
+class Contestant(flask_wtf.Form):
     """Project submission form.
 
     Fields:
@@ -66,21 +67,20 @@ class Contestant(flask.ext.wtf.Form):
         """Performs a HTTP GET on the url.
 
         Returns False if the url is invalid or not-found"""
-        rv = None
+        res = None
         if not re.search(r'^http', url):
             url = 'http://' + url
         try:
             req = urllib.request.urlopen(url, None, 30)
-            rv = req.read().decode("utf-8")
+            res = req.read().decode("utf-8")
             req.close()
         except urllib.request.URLError:
             return None
         except ValueError:
             return None
-        # catch socket.timeout
-        except:
+        except socket.timeout:
             return None
-        return rv
+        return res
 
     def _slideshare_code(self):
         """Download slideshare url and extract embed code.
@@ -92,12 +92,12 @@ class Contestant(flask.ext.wtf.Form):
         if not html:
             self.slideshow_url.errors = ['SlideShare URL invalid or unavailable.']
             return None
-        m = re.search(r'slideshow/embed_code/(\d+)', html)
-        if m:
-            return m.group(1)
+        match = re.search(r'slideshow/embed_code/(\d+)', html)
+        if match:
+            return match.group(1)
         self.slideshow_url.errors = ['Embed code not found on SlideShare page.']
         return None
-        
+
     def _update_models(self, contest):
         """Creates the Contestant and Founder models
         and adds BivAccess models to join the contest and Founder models"""
@@ -138,14 +138,14 @@ class Contestant(flask.ext.wtf.Form):
         value = self.youtube_url.data
         # http://youtu.be/a1Y73sPHKxw
         # or https://www.youtube.com/watch?v=a1Y73sPHKxw
-        if re.search('\?', value) and re.search('v\=', value):
-            m = re.search(r'(?:\?|\&)v\=(.*)', value)
-            if m:
-                return m.group(1)
+        if re.search(r'\?', value) and re.search(r'v\=', value):
+            match = re.search(r'(?:\?|\&)v\=(.*)', value)
+            if match:
+                return match.group(1)
         else:
-            m = re.search(r'\/([^\&\?\/]+)$', value)
-            if m:
-                return m.group(1)
+            match = re.search(r'\/([^\&\?\/]+)$', value)
+            if match:
+                return match.group(1)
         return None
 
     def _validate_slideshare(self):
@@ -154,8 +154,7 @@ class Contestant(flask.ext.wtf.Form):
             return
         code = self._slideshare_code()
         if code:
-            if not self._get_url_content(
-                'http://www.slideshare.net/slideshow/embed_code/' + code):
+            if not self._get_url_content('http://www.slideshare.net/slideshow/embed_code/' + code):
                 self.slideshow_url.errors = [
                     'Unknown SlideShare ID: ' + code + '.']
 
@@ -179,7 +178,7 @@ class Contestant(flask.ext.wtf.Form):
         else:
             self.youtube_url.errors = ['Invalid YouTube URL.']
 
-class Donate(flask.ext.wtf.Form):
+class Donate(flask_wtf.Form):
     """Donation form.
 
     Fields:
@@ -204,6 +203,7 @@ class Donate(flask.ext.wtf.Form):
         )
 
     def validate(self):
+        """Ensure the amount is present and at least $1"""
         super().validate()
         if self.amount.data:
             if float(self.amount.data) < 1:
@@ -214,6 +214,8 @@ class Donate(flask.ext.wtf.Form):
         return not self.errors
 
     def _paypal_payment(self, contestant):
+        """Call paypal server to create payment record.
+        Returns a redirect link to paypal site or None on error."""
         donor = pcm.Donor()
         self.populate_obj(donor)
         donor.donor_state = 'submitted'
@@ -253,7 +255,7 @@ class Donate(flask.ext.wtf.Form):
             controller.app().logger.info(payment)
             donor.paypal_payment_id = str(payment.id)
             donor.add_to_session()
-            
+
             for link in payment.links:
                 if link.method == "REDIRECT":
                     return str(link.href)
@@ -262,7 +264,7 @@ class Donate(flask.ext.wtf.Form):
             self.amount.errors = ['There was an error processing your contribution.']
         return None
 
-class DonateConfirm(flask.ext.wtf.Form):
+class DonateConfirm(flask_wtf.Form):
     """Confirm donation form."""
 
     def execute(self, contestant):
@@ -270,29 +272,20 @@ class DonateConfirm(flask.ext.wtf.Form):
         donor = pcm.Donor.unsafe_load_from_session()
         if not donor:
             controller.app().logger.warn('missing session donor')
-            flask.flash('The referenced contribution was already processed')
+            flask.flash('The referenced contribution was already processed.')
             return flask.redirect(contestant.format_uri())
-        
+
         if not self.is_submitted():
-            try:
-                payment = paypalrestsdk.Payment.find(donor.paypal_payment_id)
-                info = payment.payer.payer_info
-                donor.donor_email = info.email
-                donor.display_name = info.first_name + ' ' + info.last_name
-            except paypalrestsdk.exceptions.ConnectionError as e:
-                contestant.app().logger.warn(e)
-            donor.paypal_payer_id = flask.request.args['PayerID']
-            donor.donor_state = 'pending_confirmation'
-            controller.db.session.add(donor)
+            self._save_payment_info_to_donor(donor)
         if self.is_submitted() and self.validate():
             payment = paypalrestsdk.Payment({
                 "id": donor.paypal_payment_id
             })
             donor.remove_from_session()
-            if payment.execute({ "payer_id": donor.paypal_payer_id }):
+            if payment.execute({"payer_id": donor.paypal_payer_id}):
                 donor.donor_state = 'executed'
                 controller.db.session.add(donor)
-                flask.flash('Thank you for your contribution for ' + contestant.display_name)
+                flask.flash('Thank you for your contribution for ' + contestant.display_name + '.')
                 return flask.redirect(contestant.format_uri())
             controller.app().logger.warn('payment execute failed')
         return flask.render_template(
@@ -302,7 +295,43 @@ class DonateConfirm(flask.ext.wtf.Form):
             donor=donor,
             form=self
         )
-    
+
+    def _link_donor_to_user(self, donor):
+        """Link the donor model to a user model. Match the donor email with
+        the user. If no match, use the current user, if present."""
+        if pam.BivAccess.query.select_from(pam.User).filter(
+                pam.BivAccess.source_biv_id == pam.User.biv_id,
+                pam.BivAccess.target_biv_id == donor.biv_id
+        ).count() > 0:
+            return
+        user = pam.User.query.filter_by(user_email=donor.donor_email).first()
+        if not user and flask.session.get('user.is_logged_in'):
+            user = pam.User.query.filter_by(
+                biv_id=flask.session['user.biv_id']
+            ).one()
+        if not user:
+            return
+        controller.db.session.add(
+            pam.BivAccess(
+                source_biv_id=user.biv_id,
+                target_biv_id=donor.biv_id
+            )
+        )
+
+    def _save_payment_info_to_donor(self, donor):
+        """Get payer info from paypal server, save info to Donor model."""
+        try:
+            payment = paypalrestsdk.Payment.find(donor.paypal_payment_id)
+            info = payment.payer.payer_info
+            donor.donor_email = info.email
+            donor.display_name = info.first_name + ' ' + info.last_name
+        except paypalrestsdk.exceptions.ConnectionError as err:
+            controller.app().logger.warn(err)
+        donor.paypal_payer_id = flask.request.args['PayerID']
+        donor.donor_state = 'pending_confirmation'
+        controller.db.session.add(donor)
+        self._link_donor_to_user(donor)
+
 def _log_errors(form):
     """Put any form errors in logs as warning"""
     if form.errors:
