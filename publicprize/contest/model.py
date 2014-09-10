@@ -5,7 +5,9 @@
     :license: Apache, see LICENSE for more details.
 """
 
+from decimal import Decimal
 import flask
+import locale
 from publicprize.controller import db
 from publicprize import controller
 from publicprize import biv
@@ -47,8 +49,27 @@ class Contest(db.Model, controller.Model):
         return Donor.query.select_from(pam.BivAccess, access_alias).filter(
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == access_alias.source_biv_id,
-            access_alias.target_biv_id == Donor.biv_id
+            access_alias.target_biv_id == Donor.biv_id,
+            Donor.donor_state == "executed"
         ).count()
+
+    def donor_executed_amount(self):
+        """Returns the total amount raised for all executed donors"""
+        access_alias = sqlalchemy.orm.aliased(pam.BivAccess)
+        # TODO(pjm): do sum in sql query
+        rows = Donor.query.select_from(pam.BivAccess, access_alias).filter(
+            pam.BivAccess.source_biv_id == self.biv_id,
+            pam.BivAccess.target_biv_id == access_alias.source_biv_id,
+            access_alias.target_biv_id == Donor.biv_id,
+            Donor.donor_state == 'executed'
+        ).all()
+        total = Decimal(0)
+        for row in rows:
+            total += row.amount
+        # TODO(pjm): probably want setlocale in config instead
+        # TODO(pjm): use UI widget to do formatting
+        locale.setlocale(locale.LC_ALL, 'en_US')
+        return locale.format("%d", total, grouping=True)
 
     def user_submission_url(self):
         """Returns the current user's submission url or None.
@@ -111,6 +132,12 @@ class Donor(db.Model, controller.Model):
 
     Fields:
         biv_id: primary ID
+        amount: promised amount
+        display_name: donor name, from paypal
+        donor_email: donor email, from paypal
+        donor_state: (submitted, pending_confirmation, executed, canceled)
+        paypal_payment_id: payment id, from paypal post
+        paypal_payer_id: payer id, from paypal url callback
     """
     biv_id = db.Column(
         db.Numeric(18),
@@ -145,7 +172,7 @@ class Donor(db.Model, controller.Model):
                 biv_id=flask.session['donor.biv_id']
             ).first()
         return None
-    
+
 class Founder(db.Model, controller.Model):
     """founder database model.
 
