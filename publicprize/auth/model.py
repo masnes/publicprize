@@ -10,6 +10,7 @@ from publicprize import controller
 from publicprize.controller import db
 from sqlalchemy import UniqueConstraint
 
+
 class BivAccess(db.Model, controller.Model):
     """BivAccess links ownership between models. For example, a Contest model
     owns the Contestants and a User also owns their own Contestant submission.
@@ -19,6 +20,7 @@ class BivAccess(db.Model, controller.Model):
     """
     source_biv_id = db.Column(db.Numeric(18), primary_key=True)
     target_biv_id = db.Column(db.Numeric(18), primary_key=True)
+
 
 class User(db.Model, controller.Model):
     """Logged-in User model.
