@@ -11,7 +11,7 @@ from publicprize import config
 from beaker.middleware import SessionMiddleware
 import flask
 from functools import wraps
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 import flask.sessions
 import importlib
 import inspect
@@ -22,9 +22,11 @@ import urllib.parse
 
 db = None
 
+
 def app():
     """Singleton app instance"""
     return _app
+
 
 def init():
     """Initialize class maps.
@@ -37,14 +39,15 @@ def init():
         importlib.import_module(module_prefix + _MODEL_MODULE)
         importlib.import_module(module_prefix + _TASK_MODULE)
 
+
 def login_required(func):
     """Method decorator which requires a logged in user."""
     @wraps(func)
     def decorated_function(*args, **kwargs):
         """If user is not logged in, redirects to the appropriate oauth task"""
         if not flask.session.get('user.is_logged_in'):
-            #TODO(pjm): determine url from general.task
-            #TODO(pjm): redirect to /pub/login which determines which
+            # TODO(pjm): determine url from general.task
+            # TODO(pjm): redirect to /pub/login which determines which
             # oauth provider based on logged-out user's session
             return flask.redirect(
                 '/pub/facebook-login?' + urllib.parse.urlencode({
@@ -54,11 +57,13 @@ def login_required(func):
         return func(*args, **kwargs)
     return decorated_function
 
+
 class Task(object):
     """Provides the actions for a Model"""
 
     def __init__(self):
         pass
+
 
 class Model(object):
     """Provides biv support for Models"""
@@ -96,11 +101,13 @@ class Model(object):
             _action_uri_to_function(action, self)
             uri += '/' + action
         if path_info is not None:
-            assert action is not None, path_info + ': path_info requires an action'
+            assert action is not None, path_info \
+                + ': path_info requires an action'
             uri += '/' + path_info
         return uri
 
-class BeakerSessionInterface(flask.sessions.SessionInterface):
+
+class BeakerSession(flask.sessions.SessionInterface):
     """Session management replacement for standard flask session.
     Stores session info in the application database in the beaker_cache
     table."""
@@ -133,8 +140,9 @@ _MODEL_MODULE = 'model'
 _MODEL_MODULE_RE = r'(?<=\.)' + _MODEL_MODULE + r'$'
 _app = flask.Flask(__name__, template_folder='.')
 _app.config.from_object(config.DevConfig)
-BeakerSessionInterface().init_app()
+BeakerSession().init_app()
 db = SQLAlchemy(_app)
+
 
 def _action_uri_to_function(name, biv_obj):
     """Returns the task function for the uri."""
@@ -144,12 +152,14 @@ def _action_uri_to_function(name, biv_obj):
     assert inspect.isfunction(func), name + ': no action for ' + biv_obj.biv_id
     return func
 
+
 def _dispatch_action(name, biv_obj):
     """Returns the task function for the uri. Returns the "index" action if
     there is no uri."""
     if len(name) == 0:
         name = _DEFAULT_ACTION_NAME
     return _action_uri_to_function(name, biv_obj)(biv_obj)
+
 
 def _parse_path(path):
     """Split the path into the (object, action, path_info) parts."""
@@ -159,21 +169,25 @@ def _parse_path(path):
     path_info = parts[2] if len(parts) >= 3 else None
     return biv.load_obj(biv_uri), action, path_info
 
+
 @_app.route("/<path:path>", methods=('GET', 'POST'))
 def _route(path):
     """Routes the uri to the appropriate biv_obj"""
     biv_obj, action, path_info = _parse_path(path)
     return _dispatch_action(action, biv_obj)
 
+
 @_app.errorhandler(404)
-def _route_404(err):
+def _route_404(_):
     """Not found page."""
     return _route(biv.URI_FOR_ERROR + '/' + 'not-found')
+
 
 @_app.route("/")
 def _route_root():
     """Routes to index."""
     return _route('')
+
 
 @_app.route('/favicon.ico')
 def _favicon():
