@@ -33,8 +33,9 @@ class PublicPrizeTestCase(unittest.TestCase):
         self._follow_link('Esprit Venture Prize 2014')
         self._follow_link('Submit an Entry')
         num = int(random.random() * 10000)
+        name = 'Test Entry {}'.format(num)
         self._submit_form({
-            'display_name': 'Test Entry {}'.format(num),
+            'display_name': name,
             'contestant_desc': 'Description for entry {}'.format(num),
             'youtube_url': 'https://www.youtube.com/watch?v=K5pZlBgXBu0',
             'slideshow_url': 'http://www.slideshare.net/Experian_US/how-to-juggle-debt-retirement',
@@ -42,6 +43,9 @@ class PublicPrizeTestCase(unittest.TestCase):
             'founder_desc': 'Founder bio for entry {}'.format(num)
         })
         self._verify_text('Thank you for submitting your entry')
+        self._verify_text(name)
+        self._follow_link('My Entry')
+        self._verify_text(name)
 
     def _follow_link(self, link_text):
         url = None
