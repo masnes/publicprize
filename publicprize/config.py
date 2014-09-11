@@ -17,7 +17,7 @@ class BaseConfig(object):
 
 class DevConfig(BaseConfig):
     """Development config"""
-    SECRET_KEY = "ppsecret"
+    SECRET_KEY = 'ppsecret'
     DEBUG = True
     PP_DATABASE = 'pp'
     PP_DATABASE_USER = 'ppuser'
