@@ -14,6 +14,7 @@ from publicprize import biv
 import publicprize.auth.model as pam
 import sqlalchemy.orm
 
+
 class Contest(db.Model, controller.Model):
     """contest database model.
 
@@ -50,7 +51,7 @@ class Contest(db.Model, controller.Model):
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == access_alias.source_biv_id,
             access_alias.target_biv_id == Donor.biv_id,
-            Donor.donor_state == "executed"
+            Donor.donor_state == 'executed'
         ).count()
 
     def donor_executed_amount(self):
@@ -69,7 +70,7 @@ class Contest(db.Model, controller.Model):
         # TODO(pjm): probably want setlocale in config instead
         # TODO(pjm): use UI widget to do formatting
         locale.setlocale(locale.LC_ALL, 'en_US')
-        return locale.format("%d", total, grouping=True)
+        return locale.format('%d', total, grouping=True)
 
     def user_submission_url(self):
         """Returns the current user's submission url or None.
@@ -77,7 +78,9 @@ class Contest(db.Model, controller.Model):
         the current logged in user.
         """
         access_alias = sqlalchemy.orm.aliased(pam.BivAccess)
-        founders = Founder.query.select_from(pam.BivAccess, access_alias).filter(
+        founders = Founder.query.select_from(
+            pam.BivAccess, access_alias
+        ).filter(
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == access_alias.source_biv_id,
             access_alias.target_biv_id == Founder.biv_id
@@ -85,14 +88,15 @@ class Contest(db.Model, controller.Model):
 
         for founder in founders:
             if Founder.query.select_from(pam.BivAccess).filter(
-                    pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
-                    pam.BivAccess.target_biv_id == founder.biv_id
+                pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
+                pam.BivAccess.target_biv_id == founder.biv_id
             ).first():
                 return Contestant.query.select_from(pam.BivAccess).filter(
                     pam.BivAccess.source_biv_id == Contestant.biv_id,
                     pam.BivAccess.target_biv_id == founder.biv_id
                 ).one().format_uri('contestant')
         return None
+
 
 class Contestant(db.Model, controller.Model):
     """contestant database model.
@@ -127,6 +131,7 @@ class Contestant(db.Model, controller.Model):
             pam.BivAccess.target_biv_id == self.biv_id
         ).one()
 
+
 class Donor(db.Model, controller.Model):
     """donor database model.
 
@@ -147,7 +152,9 @@ class Donor(db.Model, controller.Model):
     amount = db.Column(db.Numeric(15, 2), nullable=False)
     display_name = db.Column(db.String(100))
     donor_email = db.Column(db.String(100))
-    donor_state = db.Column(db.Enum('submitted', 'pending_confirmation', 'executed', 'canceled', name='donor_state'))
+    donor_state = db.Column(db.Enum(
+        'submitted', 'pending_confirmation', 'executed', 'canceled',
+        name='donor_state'))
     paypal_payment_id = db.Column(db.String(100))
     paypal_payer_id = db.Column(db.String(100))
 
@@ -172,6 +179,7 @@ class Donor(db.Model, controller.Model):
                 biv_id=flask.session['donor.biv_id']
             ).first()
         return None
+
 
 class Founder(db.Model, controller.Model):
     """founder database model.
