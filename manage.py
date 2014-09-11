@@ -5,7 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
-import flask.ext.script as fes
+import flask_script as fes
 import json
 import os
 import publicprize.controller as ppc
@@ -17,14 +17,28 @@ import publicprize.contest.model
 ppc.init()
 _MANAGER = fes.Manager(ppc.app())
 
+
 @_MANAGER.command
 def create_db():
     """Create the postgres user, database, and publicprize schema"""
     config = ppc.app().config
-    os.system('createuser --user=postgres --no-superuser --no-createdb --no-createrole %s' % config['PP_DATABASE_USER'])
-    os.system('echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql --user=postgres template1' % (config['PP_DATABASE_USER'], config['PP_DATABASE_PASSWORD']))
-    os.system("createdb --encoding='utf8' --locale=en_US.UTF-8 --user=postgres --owner=%s %s" % (config['PP_DATABASE_USER'], config['PP_DATABASE']))
+    os.system(
+        'createuser --user=postgres --no-superuser --no-createdb '
+        ' --no-createrole %s' % config['PP_DATABASE_USER'])
+    os.system(
+        'echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql '
+        '--user=postgres template1' % (
+            config['PP_DATABASE_USER'],
+            config['PP_DATABASE_PASSWORD']
+        ))
+    os.system(
+        'createdb --encoding="utf8" --locale=en_US.UTF-8 '
+        ' --user=postgres --owner=%s %s' % (
+            config['PP_DATABASE_USER'],
+            config['PP_DATABASE']
+        ))
     db.create_all()
+
 
 @_MANAGER.command
 def create_test_data():
@@ -51,25 +65,30 @@ def create_test_data():
             for donor in contestant['Donor']:
                 donor_id = _add_model(publicprize.contest.model.Donor(
                     amount=donor['amount'],
-                    donor_state="executed"
+                    donor_state='executed'
                 ))
                 _add_owner(contestant_id, donor_id)
 
     db.session.commit()
 
+
 @_MANAGER.command
 def create_test_db():
-    """Recreates the database and loads the test data from data/test_data.json"""
+    """Recreates the database and loads the test data from
+    data/test_data.json"""
     drop_db()
     create_db()
     create_test_data()
 
+
 @_MANAGER.command
 def drop_db():
     """Destroy the database"""
-    if fes.prompt_bool("Drop database?"):
+    if fes.prompt_bool('Drop database?'):
         # db.drop_all()
-        os.system('dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
+        os.system(
+            'dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
+
 
 def _add_model(model):
     """Adds a SQLAlchemy model and returns it's biv_id"""
@@ -77,6 +96,7 @@ def _add_model(model):
     # flush() makes biv_id available (executes the db sequence)
     db.session.flush()
     return model.biv_id
+
 
 def _add_owner(parent_id, child_id):
     """Creates a BivAccess record between the parent and child ids"""
@@ -86,6 +106,7 @@ def _add_owner(parent_id, child_id):
             target_biv_id=child_id
         )
     )
+
 
 def _create_contest(contest):
     """Creates a SQLAlchemy model Contest with optional logo file"""
@@ -99,6 +120,7 @@ def _create_contest(contest):
         model.logo_type = contest['logo_type']
         logo_file.close()
     return model
+
 
 # TODO(pjm): normalize up binary fields, combine with _create_contest()
 def _create_founder(founder):
@@ -114,5 +136,5 @@ def _create_founder(founder):
         avatar_file.close()
     return model
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     _MANAGER.run()
