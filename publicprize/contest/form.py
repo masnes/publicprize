@@ -19,6 +19,7 @@ import urllib.request
 import wtforms
 import wtforms.validators as validator
 
+
 class Contestant(flask_wtf.Form):
     """Project submission form.
 
@@ -47,7 +48,9 @@ class Contestant(flask_wtf.Form):
         if self.is_submitted() and self.validate():
             contestant = self._update_models(contest)
             if contestant:
-                flask.flash('Thank you for submitting your entry. You will be contacted by email when your entry has been reviewed.')
+                flask.flash(
+                    'Thank you for submitting your entry. You will be '
+                    'contacted by email when your entry has been reviewed.')
                 return flask.redirect(contestant.format_uri('contestant'))
         return flask.render_template(
             'contest/submit.html',
@@ -74,7 +77,7 @@ class Contestant(flask_wtf.Form):
             url = 'http://' + url
         try:
             req = urllib.request.urlopen(url, None, 30)
-            res = req.read().decode("utf-8")
+            res = req.read().decode('utf-8')
             req.close()
         except urllib.request.URLError:
             return None
@@ -92,12 +95,14 @@ class Contestant(flask_wtf.Form):
         """
         html = self._get_url_content(self.slideshow_url.data)
         if not html:
-            self.slideshow_url.errors = ['SlideShare URL invalid or unavailable.']
+            self.slideshow_url.errors = [
+                'SlideShare URL invalid or unavailable.']
             return None
         match = re.search(r'slideshow/embed_code/(\d+)', html)
         if match:
             return match.group(1)
-        self.slideshow_url.errors = ['Embed code not found on SlideShare page.']
+        self.slideshow_url.errors = [
+            'Embed code not found on SlideShare page.']
         return None
 
     def _update_models(self, contest):
@@ -156,7 +161,8 @@ class Contestant(flask_wtf.Form):
             return
         code = self._slideshare_code()
         if code:
-            if not self._get_url_content('http://www.slideshare.net/slideshow/embed_code/' + code):
+            if not self._get_url_content(
+                    'http://www.slideshare.net/slideshow/embed_code/' + code):
                 self.slideshow_url.errors = [
                     'Unknown SlideShare ID: ' + code + '.']
 
@@ -179,6 +185,7 @@ class Contestant(flask_wtf.Form):
                     'Unknown YouTube VIDEO_ID: ' + code + '.']
         else:
             self.youtube_url.errors = ['Invalid YouTube URL.']
+
 
 class Donate(flask_wtf.Form):
     """Donation form.
@@ -234,30 +241,32 @@ class Donate(flask_wtf.Form):
         """Call paypal server to create payment record.
         Returns a redirect link to paypal site or None on error."""
         donor = self._create_donor(contestant)
-        amount = "%.2f" % float(self.amount.data)
+        amount = '%.2f' % float(self.amount.data)
         payment = paypalrestsdk.Payment({
-            "intent": "sale",
-            "payer": {
-                "payment_method": "paypal"
+            'intent': 'sale',
+            'payer': {
+                'payment_method': 'paypal'
             },
-            "redirect_urls": {
-                "return_url": contestant.format_absolute_uri('donate_confirm'),
-                "cancel_url": contestant.format_absolute_uri('donate_cancel'),
+            'redirect_urls': {
+                'return_url': contestant.format_absolute_uri('donate_confirm'),
+                'cancel_url': contestant.format_absolute_uri('donate_cancel'),
             },
-            "transactions": [
+            'transactions': [
                 {
-                    "amount": {
-                        "total": amount,
-                        "currency": "USD",
+                    'amount': {
+                        'total': amount,
+                        'currency': 'USD',
                     },
-                    "item_list": {
-                        "items": [
+                    'item_list': {
+                        'items': [
                             {
-                                "quantity": 1,
-                                "price": amount,
-                                "currency": "USD",
-                                "name": contestant.display_name + " contribution, " + contestant.get_contest().display_name,
-                                "tax": 0
+                                'quantity': 1,
+                                'price': amount,
+                                'currency': 'USD',
+                                'name': '{} contribution, {}'.format(
+                                    contestant.display_name,
+                                    contestant.get_contest().display_name),
+                                'tax': 0
                             }
                         ]
                     }
@@ -272,7 +281,7 @@ class Donate(flask_wtf.Form):
                 donor.add_to_session()
 
                 for link in payment.links:
-                    if link.method == "REDIRECT":
+                    if link.method == 'REDIRECT':
                         return str(link.href)
             else:
                 controller.app().logger.warn(payment.error)
@@ -283,6 +292,7 @@ class Donate(flask_wtf.Form):
         self.amount.errors = [
             'There was an error processing your contribution.']
         return None
+
 
 class DonateConfirm(flask_wtf.Form):
     """Confirm donation form."""
@@ -299,14 +309,16 @@ class DonateConfirm(flask_wtf.Form):
             self._save_payment_info_to_donor(donor)
         if self.is_submitted() and self.validate():
             payment = paypalrestsdk.Payment({
-                "id": donor.paypal_payment_id
+                'id': donor.paypal_payment_id
             })
             donor.remove_from_session()
             try:
-                if payment.execute({"payer_id": donor.paypal_payer_id}):
+                if payment.execute({'payer_id': donor.paypal_payer_id}):
                     donor.donor_state = 'executed'
                     controller.db.session.add(donor)
-                    flask.flash('Thank you for your contribution for ' + contestant.display_name + '.')
+                    flask.flash(
+                        'Thank you for your contribution for '
+                        + contestant.display_name + '.')
                     return flask.redirect(contestant.format_uri())
                 else:
                     controller.app().logger.warn('payment execute failed')
@@ -358,10 +370,11 @@ class DonateConfirm(flask_wtf.Form):
         controller.db.session.add(donor)
         self._link_donor_to_user(donor)
 
+
 def _log_errors(form):
     """Put any form errors in logs as warning"""
     if form.errors:
         controller.app().logger.warn({
-            "data": flask.request.form,
-            "errors": form.errors
+            'data': flask.request.form,
+            'errors': form.errors
         })
