@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" biv operations: converting to/from uri's.  Loading objects, etc. 
+""" biv operations: converting to/from uri's.  Loading objects, etc.
 
     :copyright: Copyright (c) 2014 Bivio Software, Inc.  All Rights Reserved.
     :license: Apache, see LICENSE for more details.
@@ -13,6 +13,7 @@ URI_FOR_NONE = 'index'
 URI_FOR_ERROR = 'error'
 URI_FOR_STATIC_FILES = 'static'
 
+
 class Id(int):
     """Represents a biv_id"""
     def __new__(cls, biv_id_or_marker, biv_index=None):
@@ -20,7 +21,8 @@ class Id(int):
         if isinstance(biv_id_or_marker, cls):
             return biv_id_or_marker
         if isinstance(biv_id_or_marker, Marker):
-            assert isinstance(biv_index, Index), repr(biv_index) + ': not Index'
+            assert isinstance(biv_index, Index), repr(biv_index) \
+                + ': not Index'
             bi = biv_index * _MARKER_MODULUS + biv_id_or_marker
             self = super().__new__(cls, bi)
             self.__marker = biv_id_or_marker
@@ -52,6 +54,7 @@ class Id(int):
             return _id_to_alias[self.__int__()][0]
         return URI(self)
 
+
 class Index(int):
     """The sequenced part of an Id"""
     def __new__(cls, biv_index):
@@ -60,6 +63,7 @@ class Index(int):
         bi = int(biv_index)
         assert 0 < bi <= _MAX_INDEX, str(biv_index) + ': range'
         return super().__new__(cls, bi)
+
 
 class Marker(int):
     """The type part of the Id"""
@@ -73,6 +77,7 @@ class Marker(int):
     def to_biv_id(self, biv_index):
         "Convert an index value to a biv_id"
         return Id(self, Index(biv_index))
+
 
 class URI(str):
     """Parses and stores an encoded biv_uri or an alias"""
@@ -97,6 +102,7 @@ class URI(str):
         """Returns Id for this URI"""
         return self.__id
 
+    @staticmethod
     def __decode(biv_uri):
         bu = biv_uri[1:]
         assert len(bu) >= _MARKER_ENC_LEN, biv_uri + ': too short'
@@ -104,10 +110,12 @@ class URI(str):
         i = _CONV.str2int(bu[:-_MARKER_ENC_LEN])
         return bm.to_biv_id(i)
 
+    @staticmethod
     def __encode(biv_id):
         bm = _CONV.int2str(biv_id.biv_marker).zfill(_MARKER_ENC_LEN)
         bi = _CONV.int2str(biv_id.biv_index)
         return _ENC_PREFIX + bi + bm
+
 
 def load_obj(biv_uri):
     """Loads the object identified by biv_uri"""
@@ -116,23 +124,27 @@ def load_obj(biv_uri):
     bi = URI(biv_uri).biv_id
     return _marker_to_class[bi.biv_marker].load_biv_obj(bi)
 
+
 def register_alias(uri, biv_id):
     """Registers biv_id with non-encoded uri"""
-    assert not uri in _alias_to_id, uri + ': exists'
+    assert uri not in _alias_to_id, uri + ': exists'
     assert not uri[0] == _ENC_PREFIX, uri + ': encoded uri'
     bi = Id(biv_id)
     _alias_to_id[uri] = bi
     bu = URI(uri)
-    if not bi in _id_to_alias:
+    if bi not in _id_to_alias:
         _id_to_alias[bi] = []
     _id_to_alias[bi].append(bu)
     return bu
-    
+
+
 def register_marker(biv_marker, cls):
-    """Registers a marker in a global table for a model, which can load_biv_obj"""
+    """Registers a marker in a global table for a model, which can
+    load_biv_obj"""
     biv_marker = Marker(biv_marker)
-    assert ppi.class_has_method(cls, 'load_biv_obj'), str(cls) + ': missing method'
-    assert not biv_marker in _marker_to_class, str(biv_marker) + ': exists'
+    assert ppi.class_has_method(cls, 'load_biv_obj'), str(cls) \
+        + ': missing method'
+    assert biv_marker not in _marker_to_class, str(biv_marker) + ': exists'
     _marker_to_class[biv_marker] = cls
     return Marker(biv_marker)
 
