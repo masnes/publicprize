@@ -211,6 +211,35 @@ class Donate(flask_wtf.Form):
             form=self
         )
 
+    def execute_payment(self, contestant):
+        """Handles return task from paypal. Calls paypal with payment and
+        payer IDs to complete the transaction."""
+        donor = pcm.Donor.unsafe_load_from_session()
+        if not donor:
+            controller.app().logger.warn('missing session donor')
+            flask.flash('The referenced contribution was already processed.')
+            return flask.redirect(contestant.format_uri())
+        self._save_payment_info_to_donor(donor)
+        payment = paypalrestsdk.Payment({
+            'id': donor.paypal_payment_id
+        })
+        donor.remove_from_session()
+        try:
+            if payment.execute({'payer_id': donor.paypal_payer_id}):
+                donor.donor_state = 'executed'
+                controller.db.session.add(donor)
+                flask.flash(
+                    'Thank you for your contribution for {}.'.format(
+                        contestant.display_name)
+                )
+            else:
+                controller.app().logger.warn('payment execute failed')
+        except paypalrestsdk.exceptions.ClientError as err:
+            controller.app().logger.warn(err)
+        except:
+            controller.app().logger.warn(sys.exc_info()[0])
+        return flask.redirect(contestant.format_uri())
+
     def validate(self):
         """Ensure the amount is present and at least $1"""
         super().validate()
@@ -237,6 +266,28 @@ class Donate(flask_wtf.Form):
         )
         return donor
 
+    def _link_donor_to_user(self, donor):
+        """Link the donor model to a user model. Match the donor email with
+        the user. If no match, use the current user, if present."""
+        if pam.BivAccess.query.select_from(pam.User).filter(
+                pam.BivAccess.source_biv_id == pam.User.biv_id,
+                pam.BivAccess.target_biv_id == donor.biv_id
+        ).count() > 0:
+            return
+        user = pam.User.query.filter_by(user_email=donor.donor_email).first()
+        if not user and flask.session.get('user.is_logged_in'):
+            user = pam.User.query.filter_by(
+                biv_id=flask.session['user.biv_id']
+            ).one()
+        if not user:
+            return
+        controller.db.session.add(
+            pam.BivAccess(
+                source_biv_id=user.biv_id,
+                target_biv_id=donor.biv_id
+            )
+        )
+
     def _paypal_payment(self, contestant):
         """Call paypal server to create payment record.
         Returns a redirect link to paypal site or None on error."""
@@ -248,7 +299,7 @@ class Donate(flask_wtf.Form):
                 'payment_method': 'paypal'
             },
             'redirect_urls': {
-                'return_url': contestant.format_absolute_uri('donate_confirm'),
+                'return_url': contestant.format_absolute_uri('donate_execute'),
                 'cancel_url': contestant.format_absolute_uri('donate_cancel'),
             },
             'transactions': [
@@ -292,69 +343,6 @@ class Donate(flask_wtf.Form):
         self.amount.errors = [
             'There was an error processing your contribution.']
         return None
-
-
-class DonateConfirm(flask_wtf.Form):
-    """Confirm donation form."""
-
-    def execute(self, contestant):
-        """Shows confirmation page and executes payment at PayPal"""
-        donor = pcm.Donor.unsafe_load_from_session()
-        if not donor:
-            controller.app().logger.warn('missing session donor')
-            flask.flash('The referenced contribution was already processed.')
-            return flask.redirect(contestant.format_uri())
-
-        if not self.is_submitted():
-            self._save_payment_info_to_donor(donor)
-        if self.is_submitted() and self.validate():
-            payment = paypalrestsdk.Payment({
-                'id': donor.paypal_payment_id
-            })
-            donor.remove_from_session()
-            try:
-                if payment.execute({'payer_id': donor.paypal_payer_id}):
-                    donor.donor_state = 'executed'
-                    controller.db.session.add(donor)
-                    flask.flash(
-                        'Thank you for your contribution for '
-                        + contestant.display_name + '.')
-                    return flask.redirect(contestant.format_uri())
-                else:
-                    controller.app().logger.warn('payment execute failed')
-            except paypalrestsdk.exceptions.ClientError as err:
-                controller.app().logger.warn(err)
-            except:
-                controller.app().logger.warn(sys.exc_info()[0])
-        return flask.render_template(
-            'contest/donate-confirm.html',
-            contestant=contestant,
-            contest=contestant.get_contest(),
-            donor=donor,
-            form=self
-        )
-
-    def _link_donor_to_user(self, donor):
-        """Link the donor model to a user model. Match the donor email with
-        the user. If no match, use the current user, if present."""
-        if pam.BivAccess.query.select_from(pam.User).filter(
-                pam.BivAccess.source_biv_id == pam.User.biv_id,
-                pam.BivAccess.target_biv_id == donor.biv_id
-        ).count() > 0:
-            return
-        user = pam.User.query.filter_by(user_email=donor.donor_email).first()
-        if not user and flask.session.get('user.is_logged_in'):
-            user = pam.User.query.filter_by(
-                biv_id=flask.session['user.biv_id']
-            ).one()
-        if not user:
-            return
-        controller.db.session.add(
-            pam.BivAccess(
-                source_biv_id=user.biv_id,
-                target_biv_id=donor.biv_id
-            )
-        )
 
     def _save_payment_info_to_donor(self, donor):
         """Get payer info from paypal server, save info to Donor model."""
