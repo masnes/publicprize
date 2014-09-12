@@ -91,9 +91,9 @@ class Contestant(ppc.Task):
         form.amount.errors = ['Please resubmit your donation.']
         return form.execute(biv_obj)
 
-    def action_donate_confirm(biv_obj):
-        """Confirm donation"""
-        return pcf.DonateConfirm().execute(biv_obj)
+    def action_donate_execute(biv_obj):
+        """Execute the payment after returning from paypal"""
+        return pcf.Donate().execute_payment(biv_obj)
 
     def action_index(biv_obj):
         """Default to contestant page"""
