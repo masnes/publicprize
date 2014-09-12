@@ -20,7 +20,7 @@
       <div class="form-group {{ macros.error_class(form, 'amount') }}">
        	<div class="input-group pp-amount-bar">
     	  <span class="input-group-addon"><strong>$</strong></span>
-	    {{ form['amount'](class="form-control", size="12", placeholder="Other Amount") }}
+	    {{ form['amount'](class="form-control", size="6") }}
       	</div>
       	<button type="submit" class="btn btn-primary pp-amount-bar">Back This Contestant</button>
       </div>
@@ -63,7 +63,7 @@
     	    <div class="pp-item">
 
 	      {% if founder.founder_avatar: %}
-    	    	<img class="pp-thumb" src="{{ founder.format_uri('founder_avatar') }}" alt="{{ founder.display_name }}"/>
+    	    	<img class="pp-thumb" src="{{ founder.format_uri('founder-avatar') }}" alt="{{ founder.display_name }}"/>
 	      {% endif %}
     	    	<span class="pp-name">{{ founder.display_name }}</span>
     	    	<span class="pp-desc">{{ founder.founder_desc }}</span>
