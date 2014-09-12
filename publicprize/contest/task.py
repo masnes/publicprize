@@ -81,7 +81,7 @@ class Contestant(ppc.Task):
         form.amount.errors = ['Please resubmit your donation.']
         return form.execute(biv_obj)
 
-    def action_donate_execute(biv_obj):
+    def action_donate_done(biv_obj):
         """Execute the payment after returning from paypal"""
         return pcf.Donate().execute_payment(biv_obj)
 
