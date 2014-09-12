@@ -6,10 +6,10 @@
 """
 
 from publicprize import biv
+from publicprize import common
 from publicprize import controller
 from publicprize.controller import db
-from sqlalchemy import UniqueConstraint
-
+import sqlalchemy
 
 class BivAccess(db.Model, controller.Model):
     """BivAccess links ownership between models. For example, a Contest model
@@ -22,7 +22,7 @@ class BivAccess(db.Model, controller.Model):
     target_biv_id = db.Column(db.Numeric(18), primary_key=True)
 
 
-class User(db.Model, controller.Model):
+class User(db.Model, common.ModelWithDates):
     """Logged-in User model.
     Fields:
         biv_id: primary ID
@@ -47,7 +47,7 @@ class User(db.Model, controller.Model):
         nullable=False
     )
     oauth_id = db.Column(db.String(100), nullable=False)
-    __table_args__ = (UniqueConstraint('oauth_type', 'oauth_id'),)
+    __table_args__ = (sqlalchemy.UniqueConstraint('oauth_type', 'oauth_id'),)
 
 BivAccess.BIV_MARKER = biv.register_marker(5, BivAccess)
 User.BIV_MARKER = biv.register_marker(6, User)
