@@ -318,8 +318,8 @@ class Donate(flask_wtf.Form):
                 'payment_method': 'paypal'
             },
             'redirect_urls': {
-                'return_url': contestant.format_absolute_uri('donate_execute'),
-                'cancel_url': contestant.format_absolute_uri('donate_cancel'),
+                'return_url': contestant.format_absolute_uri('donate-done'),
+                'cancel_url': contestant.format_absolute_uri('donate-cancel'),
             },
             'transactions': [
                 {
