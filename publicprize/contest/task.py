@@ -68,16 +68,6 @@ class Contestant(ppc.Task):
     """Contestant actions"""
     def action_contestant(biv_obj):
         """Project detail page, loads contest owner and project founders"""
-        return Contestant._render_template(
-            biv_obj, 'detail',
-            founders=pcm.Founder.query.select_from(pam.BivAccess).filter(
-                pam.BivAccess.source_biv_id == biv_obj.biv_id,
-                pam.BivAccess.target_biv_id == pcm.Founder.biv_id
-            ).all()
-        )
-
-    def action_donate(biv_obj):
-        """Donation form"""
         return pcf.Donate().execute(biv_obj)
 
     def action_donate_cancel(biv_obj):
@@ -98,15 +88,6 @@ class Contestant(ppc.Task):
     def action_index(biv_obj):
         """Default to contestant page"""
         return Contestant.action_contestant(biv_obj)
-
-    def _render_template(biv_obj, name, **kwargs):
-        """Render the html with the contest and contestant models"""
-        return flask.render_template(
-            'contest/{}.html'.format(name),
-            contestant=biv_obj,
-            contest=biv_obj.get_contest(),
-            **kwargs
-        )
 
 
 class Founder(ppc.Task):
