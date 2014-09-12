@@ -8,7 +8,7 @@
   {% if contest.user_submission_url() %}
     <a class="pp-nav-item" href="{{ contest.user_submission_url() }}">My Entry</a>
   {% else %}
-    <a class="pp-nav-item" href="{{ contest.format_uri('submit_contestant') }}">Submit an Entry</a>
+    <a class="pp-nav-item" href="{{ contest.format_uri('submit-contestant') }}">Submit an Entry</a>
   {% endif %}
 {% endblock %}
 
