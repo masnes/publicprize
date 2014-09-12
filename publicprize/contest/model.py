@@ -9,13 +9,14 @@ from decimal import Decimal
 import flask
 import locale
 from publicprize.controller import db
+from publicprize import common
 from publicprize import controller
 from publicprize import biv
 import publicprize.auth.model as pam
 import sqlalchemy.orm
 
 
-class Contest(db.Model, controller.Model):
+class Contest(db.Model, common.ModelWithDates):
     """contest database model.
 
     Fields:
@@ -98,7 +99,7 @@ class Contest(db.Model, controller.Model):
         return None
 
 
-class Contestant(db.Model, controller.Model):
+class Contestant(db.Model, common.ModelWithDates):
     """contestant database model.
 
     Fields:
@@ -132,7 +133,7 @@ class Contestant(db.Model, controller.Model):
         ).one()
 
 
-class Donor(db.Model, controller.Model):
+class Donor(db.Model, common.ModelWithDates):
     """donor database model.
 
     Fields:
@@ -181,7 +182,7 @@ class Donor(db.Model, controller.Model):
         return None
 
 
-class Founder(db.Model, controller.Model):
+class Founder(db.Model, common.ModelWithDates):
     """founder database model.
 
     Fields:
