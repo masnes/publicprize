@@ -438,3 +438,6 @@ img.pp-video-play:hover {
     display: block;
     text-overflow: ellipsis;
 }
+.pp-amount-bar {
+    margin-top: 15px;
+}
