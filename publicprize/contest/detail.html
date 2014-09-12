@@ -21,7 +21,10 @@
     <div class="pp-pitch">
     	<div class="embed-responsive embed-responsive-16by9">
     	    <iframe class="embed-responsive-item"
-	    src="//www.youtube.com/embed/{{ contestant.youtube_code }}" frameborder="0" allowfullscreen></iframe>
+	    src="//www.youtube.com/embed/{{ contestant.youtube_code -}}
+		 {%- if request.args.get('autoplay'): -%}
+		 ?autoplay=1
+		 {%- endif %}" allowfullscreen></iframe>
     	</div>
     </div>
     <div class="pp-abstract">
@@ -34,7 +37,7 @@
     	<div class="embed-responsive embed-responsive-4by3">
     	    <iframe class="embed-responsive-item"
 	    	src="//www.slideshare.net/slideshow/embed_code/{{ contestant.slideshow_code }}"
-	    	frameborder="0" marginwidth="0" marginheight="0" scrolling="no" allowfullscreen></iframe>
+	    	allowfullscreen></iframe>
     	</div>
     </div>
     <div class="pp-founders">
