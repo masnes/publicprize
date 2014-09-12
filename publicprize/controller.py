@@ -93,7 +93,7 @@ class Model(object):
             _external=True
         )
 
-    def format_uri(self, action=None, path_info=None):
+    def format_uri(self, action=None, path_info=None, query=None):
         """Creates a URI for this biv_obj appending action and path_info"""
         biv_id = biv.Id(self.biv_id)
         uri = '/' + biv_id.to_biv_uri()
@@ -104,6 +104,8 @@ class Model(object):
             assert action is not None, path_info \
                 + ': path_info requires an action'
             uri += '/' + path_info
+        if query:
+            uri += '?' + urllib.parse.urlencode(query)
         return uri
 
 
