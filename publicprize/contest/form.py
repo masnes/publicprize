@@ -5,6 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
+from decimal import Decimal
 import flask
 import flask_wtf
 import paypalrestsdk
@@ -193,8 +194,11 @@ class Donate(flask_wtf.Form):
     Fields:
         amount: donation amount
     """
-    amount = wtforms.DecimalField(
-        'Contribution Amount', validators=[validator.DataRequired()])
+    # TODO(pjm): DecimalField doesn't accept '' value...
+    amount = wtforms.StringField('Contribution Amount')
+    donate10 = wtforms.SubmitField('$10')
+    donate25 = wtforms.SubmitField('$25')
+    donate100 = wtforms.SubmitField('$100')
 
     def execute(self, contestant):
         """Validates and redirects to PayPal
@@ -205,10 +209,14 @@ class Donate(flask_wtf.Form):
             if url:
                 return flask.redirect(url)
         return flask.render_template(
-            'contest/donate.html',
+            'contest/detail.html',
             contestant=contestant,
             contest=contestant.get_contest(),
-            form=self
+            form=self,
+            founders=pcm.Founder.query.select_from(pam.BivAccess).filter(
+                pam.BivAccess.source_biv_id == contestant.biv_id,
+                pam.BivAccess.target_biv_id == pcm.Founder.biv_id
+            ).all()
         )
 
     def execute_payment(self, contestant):
@@ -241,13 +249,24 @@ class Donate(flask_wtf.Form):
         return flask.redirect(contestant.format_uri())
 
     def validate(self):
-        """Ensure the amount is present and at least $1"""
+        """Ensure the amount is present and at least $10"""
         super().validate()
-        if self.amount.data:
-            if float(self.amount.data) < 1:
-                self.amount.errors = ['Amount must be at least $1']
+        amount = None
+
+        if self.donate10.data:
+            amount = 10
+        elif self.donate25.data:
+            amount = 25
+        elif self.donate100.data:
+            amount = 100
+        elif self.amount.data:
+            if float(self.amount.data) < 10:
+                self.amount.errors = ['Amount must be at least $10.']
         else:
+            self.amount.errors = ['Please enter an amount.']
             self.amount.raw_data = None
+        if amount:
+            self.amount.data = Decimal(amount)
         _log_errors(self)
         return not self.errors
 
