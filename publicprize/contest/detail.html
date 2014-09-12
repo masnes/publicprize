@@ -1,22 +1,37 @@
 {% extends 'contest/contest.html' %}
+{% import "layout/macros.html" as macros %}
 
 {% block title %}
 {{ contestant.display_name }}
 {{ super() }}
 {% endblock %}
 
-{%- macro donate_button() -%}
-  <div class="row">
-    <div class="pp-vote-detail col-sm-7 col-sm-offset-5">
-      <a href="{{ contestant.format_uri('donate') }}" class="pp-big-button btn btn-primary btn-lg btn-block"><span class="pp-trimmed-text">Contribute to {{ contestant.display_name }}</span></a>
-    </div>
+{%- macro amount_button(field) -%}
+  <button name="{{ form[field].name }}" value="1" type="submit" class="btn btn-primary ladda-button pp-amount-bar" data-size="xs" data-style="expand-left"><span class="ladda-label">{{ form[field].label.text }}</span></button>
+{%- endmacro -%}
+
+{%- macro amount_bar() -%}
+  <div>
+    <form class="form-inline" method="POST" action="{{ contestant.format_uri('contestant') }}">
+      {{ form.csrf_token() }}
+      {{ amount_button('donate10') }}
+      {{ amount_button('donate25') }}
+      {{ amount_button('donate100') }}
+      <div class="form-group {{ macros.error_class(form, 'amount') }}">
+       	<div class="input-group pp-amount-bar">
+    	  <span class="input-group-addon"><strong>$</strong></span>
+	    {{ form['amount'](class="form-control", size="12", placeholder="Other Amount") }}
+      	</div>
+      	<button type="submit" class="btn btn-primary pp-amount-bar">Back This Contestant</button>
+      </div>
+    </form>
   </div>
 {%- endmacro -%}
 
 {% block contest_content %}
 <div class="pp-main">
 <div class="pp-contestant">
-    {{ donate_button() }}
+    {{ amount_bar() }}
     <div class="pp-title">{{ contestant.display_name }}</div>
     <div class="pp-pitch">
     	<div class="embed-responsive embed-responsive-16by9">
@@ -57,7 +72,7 @@
     	{% endfor %}
 
     </div>
-    {{ donate_button() }}
+    {{ amount_bar() }}
 </div>
 </div>
 {% endblock %}
