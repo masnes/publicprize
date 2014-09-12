@@ -9,7 +9,7 @@ Submit Contest Entry
 {% block contest_content %}
 <div class="pp-form">
 
-  <form method="POST" action="{{ contest.format_uri('submit_contestant') }}">
+  <form method="POST" action="{{ contest.format_uri('submit-contestant') }}">
     {{ form.csrf_token() }}
     {{ macros.field(form, 'display_name') }}
     <div class="form-group {{ macros.error_class(form, 'contestant_desc') }}">
