@@ -4,7 +4,6 @@ python:
 env:
   - FACEBOOK_APP_ID=524730380959867 FACEBOOK_APP_SECRET=3c3b466006521f5a7749d359eac1b909
 install:
-  - pip install .
   - pip install -r requirements.txt
 before_script:
   - python manage.py create_db
