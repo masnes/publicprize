@@ -1,11 +1,11 @@
 
 <!-- https://kuler.adobe.com/AlternativeGarden-color-theme-4155685/edit/?copy=true&base=2&rule=Custom&selected=3&name=Copy%20of%20AlternativeGarden&mode=rgb&rgbvalues=0.10196078431372549,0.30980392156862746,0.38823529411764707,0.023529411764705882,0.5215686274509804,0.5294117647058824,0.43529411764705883,0.6901960784313725,0.4980392156862745,0.9882352941176471,0.6901960784313725,0.23529411764705882,0.9882352941176471,0.3568627450980392,0.24705882352941178&swatchOrder=0,1,2,3,4
 
-#1A4F63 dark blue
-#068587 turquoise     
-#6FB07F middle green
-#FCB03C yellow
-#FC5B3F orange
+#1A4F63 dark blue     (success)
+#068587 turquoise     (primary)
+#6FB07F middle green  (info)
+#FCB03C yellow        (warning)
+#FC5B3F orange        (danger)
 
 http://www.colourlovers.com/op/copaso/open/947527
   -->
@@ -19,16 +19,22 @@ body {
 }
 
 
-/*
- * Override Bootstrap's default container.
- */
-
+/* Override Bootstrap's default container. */
 @media (min-width: 1200px) {
   .container {
     width: 970px;
   }
 }
 
+/* Override Bootstrap's primary button border and active colors *//
+.btn-primary {
+  border-color: #068587;
+  background-color: #068587;
+}
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+  border-color: #179698;
+  background-color: #179698;
+}
 
 .pp-nav-logo {
   line-height: 80%;
@@ -154,19 +160,15 @@ border-bottom: 1px solid #e5e5e5;
   border-radius: none;
 }
 
-.pp-summary-prize-money {
+.pp-summary-money {
   font-weight: bold;
-  font-size: 24px;
   display: block;
-  line-height: 30px;
-}
-.pp-summary-prize-money.pp-first-prize {
   font-size: 48px;
   line-height: 48px;
   margin-bottom: 5px;
 }
 
-.pp-summary-prize-name {
+.pp-summary-name {
   font-size: 14px;
   display: block;
   margin-bottom: 7px;
@@ -272,39 +274,17 @@ border-bottom: 1px solid #e5e5e5;
   min-width: 7em;
   border-bottom: 3px solid #FCB03C;
   font-weight: bold;
-  width: 25%;
+  width: 33%;
   margin-bottom: 0px;
 }
 
 .pp-button {
   font-weight: bold;
-  width: 25%;
+  width: 33%;
 }
 .pp-button:hover {
   background-color: transparent;
   border: 1px solid #FCB03C;
-}
-
-.pp-big-button {
-/*#1A4F63 dark blue
-#068587 turquoise     
-#6FB07F middle green
-#FCB03C yellow
-#FC5B3F orange*/
-  border-color: #068587;
-  background-color: #068587;
-}
-
-.pp-big-button:hover {
-/*#1A4F63 dark blue
-#068587 turquoise     
-#6FB07F middle green
-#FCB03C yellow
-#FC5B3F orange*/
-/*  border-color: #6FB07F;
-  background-color: #6FB07F; */
-  border-color: #179698;
-  background-color: #179698;
 }
 
 a {
@@ -389,6 +369,9 @@ img.pp-fb-tray {
 .pp-contestant-entry {
   margin-top: 20px;
 }
+.pp-contestant-desc {
+  white-space: pre-line;
+}
 .pp-rules-list dt {
   margin: 5px 0 3px 0;
 }
@@ -427,6 +410,9 @@ img.pp-fb-tray {
     margin-left: 1em;
     vertical-align: -22%;
 }
+.pp-form {
+  margin-top: 15px;
+}
 .pp-form-error {
     float: right;
 }
@@ -451,4 +437,10 @@ img.pp-video-play:hover {
     overflow: hidden;
     display: block;
     text-overflow: ellipsis;
+}
+.pp-amount-bar {
+    margin-top: 15px;
+}
+.pp-hidden-slider {
+    display: none;
 }

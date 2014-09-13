@@ -1,29 +1,59 @@
 {% extends 'contest/contest.html' %}
+{% import "layout/macros.html" as macros %}
 
 {% block title %}
 {{ contestant.display_name }}
 {{ super() }}
 {% endblock %}
 
-{% block content %}
-{{ super() }}
-<div class="col-sm-7 pp-main">
+{%- macro amount_button(field) -%}
+  <button name="{{ form[field].name }}" value="1" type="submit" class="btn btn-primary btn-lg ladda-button pp-amount-bar" data-style="expand-left"><span class="ladda-label">{{ form[field].label.text }}</span></button>
+{%- endmacro -%}
 
-{%- macro donate_button() -%}
-  <div class="row">
-    <div class="pp-vote-detail col-sm-7 col-sm-offset-5">
-      <a href="{{ contestant.format_uri('donate') }}" class="pp-big-button btn btn-primary btn-lg btn-block"><span class="pp-trimmed-text">Donate to {{ contestant.display_name }}</span></a>
-    </div>
+{%- macro amount_bar() -%}
+  <div>
+    <form class="form-inline" method="POST" action="{{ contestant.format_uri('contestant') }}">
+      {{ form.csrf_token() }}
+      {{ amount_button('donate10') }}
+      {{ amount_button('donate25') }}
+      {{ amount_button('donate100') }}
+      <button id="pp-other-button" class="btn btn-primary btn-lg pp-amount-bar
+        {%- if form['amount'].errors %}	disabled
+	{%- endif %}">Other Amount</button>
+
+      <div class="
+      	{%- if not form['amount'].errors -%}
+	pp-hidden-slider
+	{%- endif -%}
+	">
+      <div class="form-group {{ macros.error_class(form, 'amount') }}">
+       	<div class="input-group pp-amount-bar">
+    	  <span class="input-group-addon"><strong>$</strong></span>
+	    {{ form['amount'](class="form-control") }}
+      	</div>
+      	<button type="submit" class="btn btn-primary pp-amount-bar ladda-button" data-style="expand-left"><span class="ladda-label">Submit</span></button>
+      {% if form['amount'].errors %}
+    	<div class="text-danger"><strong>{{ form['amount'].errors[0] }}</strong></div>
+      {% endif %}
+      </div>
+      </div>
+
+    </form>
   </div>
 {%- endmacro -%}
 
+{% block contest_content %}
+{{ amount_bar() }}
+<div class="pp-main">
 <div class="pp-contestant">
-    {{ donate_button() }}
     <div class="pp-title">{{ contestant.display_name }}</div>
     <div class="pp-pitch">
     	<div class="embed-responsive embed-responsive-16by9">
     	    <iframe class="embed-responsive-item"
-	    src="//www.youtube.com/embed/{{ contestant.youtube_code }}" frameborder="0" allowfullscreen></iframe>
+	    src="//www.youtube.com/embed/{{ contestant.youtube_code -}}
+		 {%- if request.args.get('autoplay'): -%}
+		 ?autoplay=1
+		 {%- endif %}" allowfullscreen></iframe>
     	</div>
     </div>
     <div class="pp-abstract">
@@ -36,7 +66,7 @@
     	<div class="embed-responsive embed-responsive-4by3">
     	    <iframe class="embed-responsive-item"
 	    	src="//www.slideshare.net/slideshow/embed_code/{{ contestant.slideshow_code }}"
-	    	frameborder="0" marginwidth="0" marginheight="0" scrolling="no" allowfullscreen></iframe>
+	    	allowfullscreen></iframe>
     	</div>
     </div>
     <div class="pp-founders">
@@ -47,7 +77,7 @@
     	    <div class="pp-item">
 
 	      {% if founder.founder_avatar: %}
-    	    	<img class="pp-thumb" src="{{ founder.format_uri('founder_avatar') }}" alt="{{ founder.display_name }}"/>
+    	    	<img class="pp-thumb" src="{{ founder.format_uri('founder-avatar') }}" alt="{{ founder.display_name }}"/>
 	      {% endif %}
     	    	<span class="pp-name">{{ founder.display_name }}</span>
     	    	<span class="pp-desc">{{ founder.founder_desc }}</span>
@@ -56,7 +86,22 @@
     	{% endfor %}
 
     </div>
-    {{ donate_button() }}
 </div>
 </div>
+{{ amount_bar() }}
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+$("#pp-other-button").click(function() {
+  $(this).addClass("disabled")
+  $(".pp-hidden-slider").slideDown("slow", function() {
+    $("#amount").focus();
+  });
+  return false;
+});
+</script>
+{% endblock %}
+

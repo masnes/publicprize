@@ -7,9 +7,10 @@
 
 import inspect
 
+
 def class_has_method(cls, method):
     """Does cls or its ancestors implement method?"""
-    for c in inspect.getmro(cls):
-        if hasattr(c, method) and inspect.ismethod(getattr(c, method)):
+    for name in inspect.getmro(cls):
+        if hasattr(name, method) and inspect.ismethod(getattr(name, method)):
             return True
     return False

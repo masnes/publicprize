@@ -5,19 +5,23 @@
     :license: Apache, see LICENSE for more details.
 """
 
+from decimal import Decimal
 import flask
-from flask.ext.wtf import Form
+import flask_wtf
 import paypalrestsdk
+import paypalrestsdk.exceptions
 import publicprize.auth.model as pam
 import publicprize.contest.model as pcm
 from publicprize import controller
-import random
 import re
+import socket
+import sys
 import urllib.request
 import wtforms
-from wtforms.validators import DataRequired
+import wtforms.validators as validator
 
-class ContestantForm(Form):
+
+class Contestant(flask_wtf.Form):
     """Project submission form.
 
     Fields:
@@ -29,15 +33,15 @@ class ContestantForm(Form):
         website: project website (optional)
     """
     display_name = wtforms.StringField(
-        'Project Name', validators=[DataRequired()])
+        'Project Name', validators=[validator.DataRequired()])
     contestant_desc = wtforms.TextAreaField(
-        'Project Summary', validators=[DataRequired()])
+        'Project Summary', validators=[validator.DataRequired()])
     youtube_url = wtforms.StringField(
-        'YouTube Video URL', validators=[DataRequired()])
+        'YouTube Video URL', validators=[validator.DataRequired()])
     slideshow_url = wtforms.StringField(
-        'SlideShare Pitch Deck URL', validators=[DataRequired()])
+        'SlideShare Pitch Deck URL', validators=[validator.DataRequired()])
     founder_desc = wtforms.TextAreaField(
-        'Your Short Bio', validators=[DataRequired()])
+        'Your Short Bio', validators=[validator.DataRequired()])
     website = wtforms.StringField('Project Website')
 
     def execute(self, contest):
@@ -45,7 +49,9 @@ class ContestantForm(Form):
         if self.is_submitted() and self.validate():
             contestant = self._update_models(contest)
             if contestant:
-                flask.flash('Thank you for submitting your entry. You will be contacted by email when your entry has been reviewed.')
+                flask.flash(
+                    'Thank you for submitting your entry. You will be '
+                    'contacted by email when your entry has been reviewed.')
                 return flask.redirect(contestant.format_uri('contestant'))
         return flask.render_template(
             'contest/submit.html',
@@ -67,18 +73,20 @@ class ContestantForm(Form):
         """Performs a HTTP GET on the url.
 
         Returns False if the url is invalid or not-found"""
-        rv = None
+        res = None
         if not re.search(r'^http', url):
             url = 'http://' + url
         try:
-            req = urllib.request.urlopen(url, None, 10)
-            rv = req.read().decode("utf-8")
+            req = urllib.request.urlopen(url, None, 30)
+            res = req.read().decode('utf-8')
             req.close()
         except urllib.request.URLError:
             return None
         except ValueError:
             return None
-        return rv
+        except socket.timeout:
+            return None
+        return res
 
     def _slideshare_code(self):
         """Download slideshare url and extract embed code.
@@ -88,14 +96,16 @@ class ContestantForm(Form):
         """
         html = self._get_url_content(self.slideshow_url.data)
         if not html:
-            self.slideshow_url.errors = ['Invalid SideShare URL.']
+            self.slideshow_url.errors = [
+                'SlideShare URL invalid or unavailable.']
             return None
-        m = re.search(r'slideshow/embed_code/(\d+)', html)
-        if m:
-            return m.group(1)
-        self.slideshow_url.errors = ['Embed code not found on SlideShare page.']
+        match = re.search(r'slideshow/embed_code/(\d+)', html)
+        if match:
+            return match.group(1)
+        self.slideshow_url.errors = [
+            'Embed code not found on SlideShare page.']
         return None
-        
+
     def _update_models(self, contest):
         """Creates the Contestant and Founder models
         and adds BivAccess models to join the contest and Founder models"""
@@ -136,14 +146,14 @@ class ContestantForm(Form):
         value = self.youtube_url.data
         # http://youtu.be/a1Y73sPHKxw
         # or https://www.youtube.com/watch?v=a1Y73sPHKxw
-        if re.search('\?', value) and re.search('v\=', value):
-            m = re.search(r'(?:\?|\&)v\=(.*)', value)
-            if m:
-                return m.group(1)
+        if re.search(r'\?', value) and re.search(r'v\=', value):
+            match = re.search(r'(?:\?|\&)v\=(.*)', value)
+            if match:
+                return match.group(1)
         else:
-            m = re.search(r'\/([^\&\?\/]+)$', value)
-            if m:
-                return m.group(1)
+            match = re.search(r'\/([^\&\?\/]+)$', value)
+            if match:
+                return match.group(1)
         return None
 
     def _validate_slideshare(self):
@@ -153,7 +163,7 @@ class ContestantForm(Form):
         code = self._slideshare_code()
         if code:
             if not self._get_url_content(
-                'http://www.slideshare.net/slideshow/embed_code/' + code):
+                    'http://www.slideshare.net/slideshow/embed_code/' + code):
                 self.slideshow_url.errors = [
                     'Unknown SlideShare ID: ' + code + '.']
 
@@ -177,66 +187,160 @@ class ContestantForm(Form):
         else:
             self.youtube_url.errors = ['Invalid YouTube URL.']
 
-class DonateForm(Form):
+
+class Donate(flask_wtf.Form):
     """Donation form.
 
     Fields:
         amount: donation amount
     """
-    amount = wtforms.DecimalField(
-        'Donation Amount', validators=[DataRequired()])
+    # TODO(pjm): DecimalField doesn't accept '' value...
+    amount = wtforms.StringField('Contribution Amount')
+    donate10 = wtforms.SubmitField('$10')
+    donate25 = wtforms.SubmitField('$25')
+    donate100 = wtforms.SubmitField('$100')
+    other_amount = wtforms.SubmitField('Other Amount')
 
     def execute(self, contestant):
-        """Validates and redirects to PayPal"""
+        """Validates and redirects to PayPal
+        For test credit card payments, use card number: 4736656842918643
+        """
         if self.is_submitted() and self.validate():
             url = self._paypal_payment(contestant)
             if url:
                 return flask.redirect(url)
         return flask.render_template(
-            'contest/donate.html',
+            'contest/detail.html',
             contestant=contestant,
             contest=contestant.get_contest(),
-            form=self
+            form=self,
+            founders=pcm.Founder.query.select_from(pam.BivAccess).filter(
+                pam.BivAccess.source_biv_id == contestant.biv_id,
+                pam.BivAccess.target_biv_id == pcm.Founder.biv_id
+            ).all()
         )
 
+    def execute_payment(self, contestant):
+        """Handles return task from paypal. Calls paypal with payment and
+        payer IDs to complete the transaction."""
+        donor = pcm.Donor.unsafe_load_from_session()
+        if not donor:
+            controller.app().logger.warn('missing session donor')
+            flask.flash('The referenced contribution was already processed.')
+            return flask.redirect(contestant.format_uri())
+        self._save_payment_info_to_donor(donor)
+        payment = paypalrestsdk.Payment({
+            'id': donor.paypal_payment_id
+        })
+        donor.remove_from_session()
+        try:
+            if payment.execute({'payer_id': donor.paypal_payer_id}):
+                donor.donor_state = 'executed'
+                controller.db.session.add(donor)
+                flask.flash(
+                    'Thank you for your contribution for {}.'.format(
+                        contestant.display_name)
+                )
+            else:
+                controller.app().logger.warn('payment execute failed')
+        except paypalrestsdk.exceptions.ClientError as err:
+            controller.app().logger.warn(err)
+        except:
+            controller.app().logger.warn(sys.exc_info()[0])
+        return flask.redirect(contestant.format_uri())
+
     def validate(self):
+        """Ensure the amount is present and at least $10"""
         super().validate()
-        if self.amount.data:
-            if float(self.amount.data) < 1:
-                self.amount.errors = ['Amount must be at least $1']
+        amount = None
+
+        if self.donate10.data:
+            amount = 10
+        elif self.donate25.data:
+            amount = 25
+        elif self.donate100.data:
+            amount = 100
+        elif self.amount.data:
+            try:
+              if float(self.amount.data) < 10:
+                  self.amount.errors = ['Amount must be at least $10.']
+            except ValueError:
+                self.amount.errors = ['Please enter an amount.']
         else:
+            self.amount.errors = ['Please enter an amount.']
             self.amount.raw_data = None
+        if amount:
+            self.amount.data = Decimal(amount)
         _log_errors(self)
         return not self.errors
 
+    def _create_donor(self, contestant):
+        """Create a new donor model and link to the parent contestant."""
+        donor = pcm.Donor()
+        self.populate_obj(donor)
+        donor.donor_state = 'submitted'
+        controller.db.session.add(donor)
+        controller.db.session.flush()
+        controller.db.session.add(
+            pam.BivAccess(
+                source_biv_id=contestant.biv_id,
+                target_biv_id=donor.biv_id
+            )
+        )
+        return donor
+
+    def _link_donor_to_user(self, donor):
+        """Link the donor model to a user model. Match the donor email with
+        the user. If no match, use the current user, if present."""
+        if pam.BivAccess.query.select_from(pam.User).filter(
+                pam.BivAccess.source_biv_id == pam.User.biv_id,
+                pam.BivAccess.target_biv_id == donor.biv_id
+        ).count() > 0:
+            return
+        user = pam.User.query.filter_by(user_email=donor.donor_email).first()
+        if not user and flask.session.get('user.is_logged_in'):
+            user = pam.User.query.filter_by(
+                biv_id=flask.session['user.biv_id']
+            ).one()
+        if not user:
+            return
+        controller.db.session.add(
+            pam.BivAccess(
+                source_biv_id=user.biv_id,
+                target_biv_id=donor.biv_id
+            )
+        )
+
     def _paypal_payment(self, contestant):
+        """Call paypal server to create payment record.
+        Returns a redirect link to paypal site or None on error."""
+        donor = self._create_donor(contestant)
+        amount = '%.2f' % float(self.amount.data)
         payment = paypalrestsdk.Payment({
-            "intent": "sale",
-            "payer": {
-                "payment_method": "paypal"
+            'intent': 'sale',
+            'payer': {
+                'payment_method': 'paypal'
             },
-            "redirect_urls": {
-                "return_url": contestant.format_absolute_uri('donate_confirm'),
-                "cancel_url": contestant.format_absolute_uri('donate_cancel'),
+            'redirect_urls': {
+                'return_url': contestant.format_absolute_uri('donate-done'),
+                'cancel_url': contestant.format_absolute_uri('donate-cancel'),
             },
-            "transactions": [
+            'transactions': [
                 {
-                    "amount": {
-                        "total": str(self.amount.data),
-                        "currency": "USD",
+                    'amount': {
+                        'total': amount,
+                        'currency': 'USD',
                     },
-
-                    # TODO(pjm): use donation model biv_id
-                    "invoice_number": int(random.random() * 10000),
-
-                    "item_list": {
-                        "items": [
+                    'item_list': {
+                        'items': [
                             {
-                                "quantity": 1,
-                                "price": str(self.amount.data),
-                                "currency": "USD",
-                                "name": contestant.display_name + " donation, " + contestant.get_contest().display_name,
-                                "tax": 0
+                                'quantity': 1,
+                                'price': amount,
+                                'currency': 'USD',
+                                'name': '{} contribution, {}'.format(
+                                    contestant.display_name,
+                                    contestant.get_contest().display_name),
+                                'tax': 0
                             }
                         ]
                     }
@@ -244,53 +348,44 @@ class DonateForm(Form):
             ]
         })
 
-        if payment.create():
-            controller.app().logger.info(payment)
-            flask.session['paypal.id'] = str(payment.id)
-            for link in payment.links:
-                if link.method == "REDIRECT":
-                    return str(link.href)
-        else:
-            controller.app().logger.warn(payment.error)
-            self.amount.errors = ['There was an error processing your donation.']
+        try:
+            if payment.create():
+                controller.app().logger.info(payment)
+                donor.paypal_payment_id = str(payment.id)
+                donor.add_to_session()
+
+                for link in payment.links:
+                    if link.method == 'REDIRECT':
+                        return str(link.href)
+            else:
+                controller.app().logger.warn(payment.error)
+        except paypalrestsdk.exceptions.ClientError as err:
+            controller.app().logger.warn(err)
+        except:
+            controller.app().logger.warn(sys.exc_info()[0])
+        self.amount.errors = [
+            'There was an error processing your contribution.']
         return None
 
-class DonateConfirmForm(Form):
-    """Confirm donation form."""
-    payer_id = wtforms.HiddenField()
+    def _save_payment_info_to_donor(self, donor):
+        """Get payer info from paypal server, save info to Donor model."""
+        try:
+            payment = paypalrestsdk.Payment.find(donor.paypal_payment_id)
+            info = payment.payer.payer_info
+            donor.donor_email = info.email
+            donor.display_name = info.first_name + ' ' + info.last_name
+        except paypalrestsdk.exceptions.ConnectionError as err:
+            controller.app().logger.warn(err)
+        donor.paypal_payer_id = flask.request.args['PayerID']
+        donor.donor_state = 'pending_confirmation'
+        controller.db.session.add(donor)
+        self._link_donor_to_user(donor)
 
-    def execute(self, contestant):
-        """Shows confirmation page and executes payment at PayPal"""
-        if not flask.session.get('paypal.id'):
-            controller.app().logger.warn('missing paypal.id')
-            flask.flash('The referenced donation was already processed')
-            return flask.redirect(contestant.format_uri())
-        if not self.is_submitted():
-            self.payer_id.data = flask.request.args['PayerID']
-        if self.is_submitted() and self.validate():
-            controller.app().logger.info(flask.session['paypal.id'])
-            payment = paypalrestsdk.Payment({
-                "id": flask.session['paypal.id']
-            })
-            del flask.session['paypal.id']
-            if payment.execute({ "payer_id": str(self.payer_id.data) }):
-                # TODO(pjm): create donation model
-                flask.flash('Thank you for your donation for ' + contestant.display_name)
-                return flask.redirect(contestant.format_uri())
-            controller.app().logger.warn('payment execute failed')
-        return flask.render_template(
-            'contest/donate-confirm.html',
-            contestant=contestant,
-            contest=contestant.get_contest(),
-            form=self
-        )
-    
+
 def _log_errors(form):
     """Put any form errors in logs as warning"""
     if form.errors:
         controller.app().logger.warn({
-            "data": flask.request.form,
-            "errors": form.errors
+            'data': flask.request.form,
+            'errors': form.errors
         })
-
-            

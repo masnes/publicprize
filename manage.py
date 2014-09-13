@@ -5,7 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
-import flask.ext.script as fes
+import flask_script as fes
 import json
 import os
 import publicprize.controller as ppc
@@ -15,18 +15,32 @@ import publicprize.contest.model
 
 # Needs to be explicit
 ppc.init()
-_manager = fes.Manager(ppc.app())
+_MANAGER = fes.Manager(ppc.app())
 
-@_manager.command
+
+@_MANAGER.command
 def create_db():
     """Create the postgres user, database, and publicprize schema"""
     config = ppc.app().config
-    os.system('createuser --user=postgres --no-superuser --no-createdb --no-createrole %s' % config['PP_DATABASE_USER'])
-    os.system('echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql --user=postgres template1' % (config['PP_DATABASE_USER'], config['PP_DATABASE_PASSWORD']))
-    os.system("createdb --encoding='utf8' --locale=en_US.UTF-8 --user=postgres --owner=%s %s" % (config['PP_DATABASE_USER'], config['PP_DATABASE']))
+    os.system(
+        'createuser --user=postgres --no-superuser --no-createdb '
+        ' --no-createrole %s' % config['PP_DATABASE_USER'])
+    os.system(
+        'echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql '
+        '--user=postgres template1' % (
+            config['PP_DATABASE_USER'],
+            config['PP_DATABASE_PASSWORD']
+        ))
+    os.system(
+        'createdb --encoding="utf8" --locale=en_US.UTF-8 '
+        ' --user=postgres --owner=%s %s' % (
+            config['PP_DATABASE_USER'],
+            config['PP_DATABASE']
+        ))
     db.create_all()
 
-@_manager.command
+
+@_MANAGER.command
 def create_test_data():
     """Populate database with contents of data/test_data.json file"""
     data = json.load(open('data/test_data.json', 'r'))
@@ -49,24 +63,32 @@ def create_test_data():
                 _add_owner(contestant_id, founder_id)
 
             for donor in contestant['Donor']:
-                donor_id = _add_model(publicprize.contest.model.Donor())
+                donor_id = _add_model(publicprize.contest.model.Donor(
+                    amount=donor['amount'],
+                    donor_state='executed'
+                ))
                 _add_owner(contestant_id, donor_id)
 
     db.session.commit()
 
-@_manager.command
+
+@_MANAGER.command
 def create_test_db():
-    """Recreates the database and loads the test data from data/test_data.json"""
+    """Recreates the database and loads the test data from
+    data/test_data.json"""
     drop_db()
     create_db()
     create_test_data()
 
-@_manager.command
+
+@_MANAGER.command
 def drop_db():
     """Destroy the database"""
-    if fes.prompt_bool("Drop database?"):
+    if fes.prompt_bool('Drop database?'):
         # db.drop_all()
-        os.system('dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
+        os.system(
+            'dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
+
 
 def _add_model(model):
     """Adds a SQLAlchemy model and returns it's biv_id"""
@@ -74,7 +96,8 @@ def _add_model(model):
     # flush() makes biv_id available (executes the db sequence)
     db.session.flush()
     return model.biv_id
-    
+
+
 def _add_owner(parent_id, child_id):
     """Creates a BivAccess record between the parent and child ids"""
     db.session.add(
@@ -84,6 +107,7 @@ def _add_owner(parent_id, child_id):
         )
     )
 
+
 def _create_contest(contest):
     """Creates a SQLAlchemy model Contest with optional logo file"""
     model = publicprize.contest.model.Contest(
@@ -91,11 +115,12 @@ def _create_contest(contest):
         tag_line=contest['tag_line']
     )
     if 'logo_filename' in contest:
-        f = open(contest['logo_filename'], 'rb')
-        model.contest_logo = f.read()
+        logo_file = open(contest['logo_filename'], 'rb')
+        model.contest_logo = logo_file.read()
         model.logo_type = contest['logo_type']
-        f.close()
+        logo_file.close()
     return model
+
 
 # TODO(pjm): normalize up binary fields, combine with _create_contest()
 def _create_founder(founder):
@@ -105,11 +130,11 @@ def _create_founder(founder):
         founder_desc=founder['founder_desc']
     )
     if 'avatar_filename' in founder:
-        f = open(founder['avatar_filename'], 'rb')
-        model.founder_avatar = f.read()
+        avatar_file = open(founder['avatar_filename'], 'rb')
+        model.founder_avatar = avatar_file.read()
         model.avatar_type = founder['avatar_type']
-        f.close()
+        avatar_file.close()
     return model
-    
-if __name__ == "__main__":
-    _manager.run()
+
+if __name__ == '__main__':
+    _MANAGER.run()

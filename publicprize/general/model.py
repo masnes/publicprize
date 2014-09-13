@@ -1,17 +1,25 @@
-# Copyright (c) 2014 bivio Software, Inc.  All rights reserved.
+# -*- coding: utf-8 -*-
+""" The singleton model which handles global tasks.
+
+    :copyright: Copyright (c) 2014 Bivio Software, Inc.  All Rights Reserved.
+    :license: Apache, see LICENSE for more details.
+"""
 
 from publicprize import biv
 from publicprize import controller
 
 PUB_OBJ = None
 
+
 class General(controller.Model):
+    """Singleton model for global tasks."""
 
     def __init__(self, biv_id):
         super().__init__()
         self.biv_id = biv_id
 
-    def load_biv_obj(biv_id):
+    @classmethod
+    def load_biv_obj(cls, biv_id):
         return General(biv_id)
 
 General.BIV_MARKER = biv.register_marker(1, General)
