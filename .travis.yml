@@ -10,4 +10,4 @@ before_script:
   - python manage.py create_db
   - python manage.py create_test_data
 script:
-  - py.test
+  - python setup.py test
