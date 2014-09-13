@@ -7,7 +7,7 @@
 {% endblock %}
 
 {%- macro amount_button(field) -%}
-  <button name="{{ form[field].name }}" value="1" type="submit" class="btn btn-primary ladda-button pp-amount-bar" data-size="xs" data-style="expand-left"><span class="ladda-label">{{ form[field].label.text }}</span></button>
+  <button name="{{ form[field].name }}" value="1" type="submit" class="btn btn-primary btn-lg ladda-button pp-amount-bar" data-style="expand-left"><span class="ladda-label">{{ form[field].label.text }}</span></button>
 {%- endmacro -%}
 
 {%- macro amount_bar() -%}
@@ -17,21 +17,35 @@
       {{ amount_button('donate10') }}
       {{ amount_button('donate25') }}
       {{ amount_button('donate100') }}
+      <button id="pp-other-button" class="btn btn-primary btn-lg pp-amount-bar
+        {%- if form['amount'].errors %}	disabled
+	{%- endif %}">Other Amount</button>
+
+      <div class="
+      	{%- if not form['amount'].errors -%}
+	pp-hidden-slider
+	{%- endif -%}
+	">
       <div class="form-group {{ macros.error_class(form, 'amount') }}">
        	<div class="input-group pp-amount-bar">
     	  <span class="input-group-addon"><strong>$</strong></span>
-	    {{ form['amount'](class="form-control", size="6") }}
+	    {{ form['amount'](class="form-control") }}
       	</div>
-      	<button type="submit" class="btn btn-primary pp-amount-bar">Back This Contestant</button>
+      	<button type="submit" class="btn btn-primary pp-amount-bar ladda-button" data-style="expand-left"><span class="ladda-label">Submit</span></button>
+      {% if form['amount'].errors %}
+    	<div class="text-danger"><strong>{{ form['amount'].errors[0] }}</strong></div>
+      {% endif %}
       </div>
+      </div>
+
     </form>
   </div>
 {%- endmacro -%}
 
 {% block contest_content %}
+{{ amount_bar() }}
 <div class="pp-main">
 <div class="pp-contestant">
-    {{ amount_bar() }}
     <div class="pp-title">{{ contestant.display_name }}</div>
     <div class="pp-pitch">
     	<div class="embed-responsive embed-responsive-16by9">
@@ -72,7 +86,22 @@
     	{% endfor %}
 
     </div>
-    {{ amount_bar() }}
 </div>
 </div>
+{{ amount_bar() }}
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+$("#pp-other-button").click(function() {
+  $(this).addClass("disabled")
+  $(".pp-hidden-slider").slideDown("slow", function() {
+    $("#amount").focus();
+  });
+  return false;
+});
+</script>
+{% endblock %}
+
