@@ -6,7 +6,7 @@ Public Prize
 First [install Python3 with pyenv](//github.com/biviosoftware/utilities/blob/master/Environment.md), then:
 
 ```
-pip install `cat requirements.txt`
+pip install -r requirements.txt
 pip install -e .
 ```
 
