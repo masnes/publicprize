@@ -69,6 +69,11 @@ class General(controller.Task):
         flask.flash('You have successfully logged out.')
         return flask.redirect('/')
 
+    def action_privacy_policy(biv_obj):
+        return flask.render_template(
+            "general/privacy-policy.html"
+        )
+
     def action_not_found(biv_obj):
         """Not found page"""
         return flask.render_template('general/not-found.html'), 404
@@ -89,6 +94,11 @@ class General(controller.Task):
         )
         General._add_user_to_session(user)
         return flask.redirect('/')
+
+    def action_terms_of_use(biv_obj):
+        return flask.render_template(
+            "general/terms-of-use.html"
+        )
 
     def _add_user_to_session(user):
         """Store user info on session"""
