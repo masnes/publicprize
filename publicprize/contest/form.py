@@ -199,6 +199,7 @@ class Donate(flask_wtf.Form):
     donate10 = wtforms.SubmitField('$10')
     donate25 = wtforms.SubmitField('$25')
     donate100 = wtforms.SubmitField('$100')
+    other_amount = wtforms.SubmitField('Other Amount')
 
     def execute(self, contestant):
         """Validates and redirects to PayPal
@@ -260,8 +261,11 @@ class Donate(flask_wtf.Form):
         elif self.donate100.data:
             amount = 100
         elif self.amount.data:
-            if float(self.amount.data) < 10:
-                self.amount.errors = ['Amount must be at least $10.']
+            try:
+              if float(self.amount.data) < 10:
+                  self.amount.errors = ['Amount must be at least $10.']
+            except ValueError:
+                self.amount.errors = ['Please enter an amount.']
         else:
             self.amount.errors = ['Please enter an amount.']
             self.amount.raw_data = None
