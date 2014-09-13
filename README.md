@@ -63,3 +63,6 @@ logged in.
 py.test
 ```
 
+###### Travis
+
+https://travis-ci.org/profile/biviosoftware
