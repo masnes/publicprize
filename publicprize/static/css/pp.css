@@ -441,3 +441,6 @@ img.pp-video-play:hover {
 .pp-amount-bar {
     margin-top: 15px;
 }
+.pp-hidden-slider {
+    display: none;
+}
