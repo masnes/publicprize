@@ -65,4 +65,5 @@ py.test
 
 ###### Travis
 
-https://travis-ci.org/profile/biviosoftware
+https://travis-ci.org/biviosoftware/publicprize
+
