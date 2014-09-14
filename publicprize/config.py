@@ -13,7 +13,8 @@ class BaseConfig(object):
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     PP_FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID')
     PP_FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET')
-
+    import locale
+    locale.setlocale(locale.LC_ALL, 'en_US.utf8')
 
 class DevConfig(BaseConfig):
     """Development config"""

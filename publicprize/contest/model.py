@@ -68,9 +68,7 @@ class Contest(db.Model, common.ModelWithDates):
         total = Decimal(0)
         for row in rows:
             total += row.amount
-        # TODO(pjm): probably want setlocale in config instead
         # TODO(pjm): use UI widget to do formatting
-        locale.setlocale(locale.LC_ALL, 'en_US.utf8')
         return locale.format('%d', total, grouping=True)
 
     def user_submission_url(self):
