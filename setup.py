@@ -1,31 +1,28 @@
 #!/usr/bin/env python
-from distutils.core import setup
+import distutils.core
+import setuptools.command.test as stct
+import sys
 
-from setuptools.command.test import test as TestCommand
-
-
-class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
-
+class PyTest(stct.test):
     def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = None
+        self.pytest_args = []
 
     def finalize_options(self):
-        TestCommand.finalize_options(self)
         self.test_args = []
         self.test_suite = True
 
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
+        # import here, cause outside the eggs aren't loaded
         import pytest
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-setup(
+distutils.core.setup(
     name='publicprize',
     version='1.0',
     description='Public Prize',
-    author='Bivio',
+    author='Bivio Software, Inc.',
     author_email='software@bivio.biz',
+    tests_require=['pytest'],
+    cmdclass={'test': PyTest}
     )

@@ -15,7 +15,8 @@ class BaseConfig(object):
     PP_FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET')
     PP_GOOGLE_APP_ID = os.environ.get('GOOGLE_APP_ID')
     PP_GOOGLE_APP_SECRET = os.environ.get('GOOGLE_APP_SECRET')
-
+    import locale
+    locale.setlocale(locale.LC_ALL, 'en_US.utf8')
 
 class DevConfig(BaseConfig):
     """Development config"""

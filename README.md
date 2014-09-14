@@ -6,7 +6,7 @@ Public Prize
 First [install Python3 with pyenv](//github.com/biviosoftware/utilities/blob/master/Environment.md), then:
 
 ```
-pip install `cat requirements.txt`
+pip install -r requirements.txt
 pip install -e .
 ```
 
@@ -63,3 +63,12 @@ logged in.
 py.test
 ```
 
+###### Travis
+
+https://travis-ci.org/biviosoftware/publicprize
+
+Click on this:
+
+https://travis-ci.org/biviosoftware/publicprize/builds
+
+Then the number of the build, e.g. 2 or 4, to see the build history
