@@ -5,17 +5,53 @@
     :license: Apache, see LICENSE for more details.
 """
 
+import flask
 import flask_script as fes
+import flask_script.commands
 import json
 import os
 import publicprize.controller as ppc
 from publicprize.controller import db
 import publicprize.auth.model
 import publicprize.contest.model
+from werkzeug.serving import BaseRequestHandler
 
 # Needs to be explicit
 ppc.init()
+
+
+# TODO(pjm): ugly hack to get user.biv_id in log message
+class BetterLogger(BaseRequestHandler):
+
+    _user_state = None
+    app = ppc.app()
+
+    @app.teardown_request
+    def _teardown(response):
+        user_state = '""'
+        if 'user.biv_id' in flask.session:
+            user_state = 'l'
+            if flask.session['user.is_logged_in']:
+                user_state += 'i'
+            else:
+                user_state += 'o'
+            user_state += '-' + str(flask.session['user.biv_id'])
+        BetterLogger._user_state = user_state
+    
+    def log_request(self, code='-', size='-'):
+        self.log('info', '{} "{}" {} {}'.format(
+            BetterLogger._user_state, self.requestline, code, size))
+
+
+class RunServerWithBetterLogger(flask_script.commands.Server):
+
+    def __init__(self, **kwargs):
+        kwargs['request_handler'] = BetterLogger
+        super(RunServerWithBetterLogger, self).__init__(**kwargs)
+
+
 _MANAGER = fes.Manager(ppc.app())
+_MANAGER.add_command('runserver', RunServerWithBetterLogger())
 
 
 @_MANAGER.command
@@ -89,7 +125,7 @@ def drop_db():
         os.system(
             'dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
 
-
+        
 def _add_model(model):
     """Adds a SQLAlchemy model and returns it's biv_id"""
     db.session.add(model)
