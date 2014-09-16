@@ -214,10 +214,7 @@ class Donate(flask_wtf.Form):
             contestant=contestant,
             contest=contestant.get_contest(),
             form=self,
-            founders=pcm.Founder.query.select_from(pam.BivAccess).filter(
-                pam.BivAccess.source_biv_id == contestant.biv_id,
-                pam.BivAccess.target_biv_id == pcm.Founder.biv_id
-            ).all()
+            founders=contestant.get_founders()
         )
 
     def execute_payment(self, contestant):
@@ -237,10 +234,7 @@ class Donate(flask_wtf.Form):
             if payment.execute({'payer_id': donor.paypal_payer_id}):
                 donor.donor_state = 'executed'
                 controller.db.session.add(donor)
-                flask.flash(
-                    'Thank you for your contribution for {}.'.format(
-                        contestant.display_name)
-                )
+                return flask.redirect(contestant.format_uri('thank-you'))
             else:
                 controller.app().logger.warn('payment execute failed')
         except paypalrestsdk.exceptions.ClientError as err:

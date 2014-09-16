@@ -11,6 +11,7 @@ import publicprize.contest.form as pcf
 import publicprize.contest.model as pcm
 import publicprize.controller as ppc
 import publicprize.auth.model as pam
+import random
 
 
 class Contest(ppc.Task):
@@ -21,13 +22,15 @@ class Contest(ppc.Task):
 
     def action_contestants(biv_obj):
         """Public contestant list"""
+        contestants = pcm.Contestant.query.select_from(pam.BivAccess).filter(
+            pam.BivAccess.source_biv_id == biv_obj.biv_id,
+            pam.BivAccess.target_biv_id == pcm.Contestant.biv_id
+        ).filter(pcm.Contestant.is_public == True).all()
+        random.shuffle(contestants)
         return Contest._render_template(
             biv_obj,
             'contestants',
-            contestants=pcm.Contestant.query.select_from(pam.BivAccess).filter(
-                pam.BivAccess.source_biv_id == biv_obj.biv_id,
-                pam.BivAccess.target_biv_id == pcm.Contestant.biv_id
-            ).filter(pcm.Contestant.is_public == True).all()
+            contestants=contestants
         )
 
     def action_donors(biv_obj):
@@ -88,6 +91,16 @@ class Contestant(ppc.Task):
     def action_index(biv_obj):
         """Default to contestant page"""
         return Contestant.action_contestant(biv_obj)
+
+    def action_thank_you(biv_obj):
+        """Show a Thank you page with social media links for contestant."""
+        return flask.render_template(
+            'contest/thank-you.html',
+            contestant=biv_obj,
+            contest=biv_obj.get_contest(),
+            founders=biv_obj.get_founders(),
+            contestant_url=biv_obj.format_absolute_uri()
+        )
 
 
 class Founder(ppc.Task):

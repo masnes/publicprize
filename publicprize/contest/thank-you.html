@@ -1,0 +1,40 @@
+{% extends 'contest/detail.html' %}
+
+{% block title %}
+Thank You -
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+
+  <div class="modal" id="pp-thank-you-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+	  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+	   <h4 class="modal-title">Thank You!</h4>
+	</div>
+        <div class="modal-body">
+    	  <p>Thank you for your contribution for {{ contestant.display_name }}!</p>
+    	  <p>Tell your friends about this contestant:
+    	  <a href="https://facebook.com/sharer.php?u={{ contestant_url }}">Facebook</a>,
+    	  <a href="https://twitter.com/intent/tweet?url={{ contestant_url }}&via=publicprize">Twitter</a>,
+    	  <a href="https://plus.google.com/share?url={{ contestant_url }}">Google+</a>
+	  </p>
+      	</div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+$(function() {
+  $('#pp-thank-you-modal').modal('show');
+});
+</script>
+{% endblock %}
