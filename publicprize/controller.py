@@ -85,7 +85,7 @@ class Model(object):
         assert inspect.isclass(self.__default_task_class)
         return self.__default_task_class
 
-    def format_absolute_uri(self, action):
+    def format_absolute_uri(self, action=None):
         """Create an absolute URI for a model action."""
         return flask.url_for(
             '_route',
