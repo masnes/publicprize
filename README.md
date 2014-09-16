@@ -72,3 +72,5 @@ Click on this:
 https://travis-ci.org/biviosoftware/publicprize/builds
 
 Then the number of the build, e.g. 2 or 4, to see the build history
+
+The control file is .travis.yml
