@@ -130,6 +130,13 @@ class Contestant(db.Model, common.ModelWithDates):
             pam.BivAccess.target_biv_id == self.biv_id
         ).one()
 
+    def get_founders(self):
+        """Return a list of Founder models for this Contestant"""
+        return Founder.query.select_from(pam.BivAccess).filter(
+            pam.BivAccess.source_biv_id == self.biv_id,
+            pam.BivAccess.target_biv_id == Founder.biv_id
+        ).all()
+        
 
 class Donor(db.Model, common.ModelWithDates):
     """donor database model.
