@@ -72,9 +72,12 @@ def add_user_to_session(user):
 
 
 def authorize(oauth_type, callback):
-    """Return to the "next" or referrer page when return from callback"""
+    """Call the OAuth provider's server which returns to the callback
+    on completion or failer.
+    Store the "next" or referrer page to return to after callback."""
     flask.session['oauth.next_uri'] = flask.request.args.get('next') \
         or flask.request.referrer or None
+    # state variable is uri randomizer, verfied in authorize_complete()
     state = werkzeug.security.gen_salt(64)
     flask.session['oauth.state'] = state
     return _OAUTH_PROVIDER[oauth_type].authorize(
@@ -91,15 +94,14 @@ def authorize_complete(oauth_type):
     if 'oauth.next_uri' in flask.session:
         next_uri = flask.session['oauth.next_uri']
         del flask.session['oauth.next_uri']
-    if not _validate_auth(resp, oauth_type):
-        return flask.redirect(next_uri or '/')
-    flask.session['oauth.{}.token'.format(oauth_type)] = (
-        resp['access_token'], '')
-    _user_from_info(
-        oauth_type,
-        _OAUTH_PROVIDER[oauth_type].get(
-            _OAUTH_PROVIDER_DATA_PATH[oauth_type]).data
-    )
+    if _validate_auth(resp, oauth_type):
+        flask.session['oauth.{}.token'.format(oauth_type)] = (
+            resp['access_token'], '')
+        _user_from_info(
+            oauth_type,
+            _OAUTH_PROVIDER[oauth_type].get(
+                _OAUTH_PROVIDER_DATA_PATH[oauth_type]).data
+        )
     return flask.redirect(next_uri or '/')
 
 
@@ -113,6 +115,8 @@ def logout():
 def _clear_session():
     """Clear the login state from the session"""
     flask.session['user.is_logged_in'] = False
+    if 'oauth.state' in flask.session:
+        del flask.session['oauth.state']
     oauth_type = flask.session.get('user.oauth_type')
     if oauth_type:
         key = 'oauth.{}.token'.format(oauth_type)
@@ -121,13 +125,19 @@ def _clear_session():
         del flask.session['user.oauth_type']
 
 
+def _client_error(oauth_type, message=None):
+    _clear_session()
+    flask.flash(message \
+        or '{} has denied access to this App.'.format(oauth_type))
+        
+
 def _user_from_info(oauth_type, info):
     """Saves oauth provider user info to user model.
     info arg contains email, id, name."""
     controller.app().logger.info(info)
     if not info.get('email'):
-        _clear_session()
-        flask.flash('Your email must be provided to this App to login.')
+        _client_error(
+            oauth, 'Your email must be provided to this App to login.')
         return
     user = User.query.filter_by(
         oauth_type=oauth_type,
@@ -150,22 +160,18 @@ def _user_from_info(oauth_type, info):
 
 
 def _validate_auth(resp, oauth_type):
-    """Validates aouth providers's auth response"""
+    """Validates oauth providers's auth response"""
     app = controller.app()
 
-    if resp is None:
-        flask.flash('{} has denied access to this App.'.format(oauth_type))
+    if resp is None or isinstance(resp, flask_oauthlib.client.OAuthException):
+        _client_error(oauth_type)
         app.logger.warn(
-            'Access denied: {}'.format(flask.request.args))
-        return False
-    if isinstance(resp, flask_oauthlib.client.OAuthException):
-        flask.flash('{} has denied access to this App.'.format(oauth_type))
-        app.logger.warn(resp)
+            'Access denied: {}, resp: {}'.format(flask.request.args, resp))
         return False
     state = flask.session['oauth.state']
     del flask.session['oauth.state']
     if state != flask.request.args.get('state'):
-        flask.flash('{} has denied access to this App.'.format(oauth_type))
+        _client_error(oauth_type)
         app.logger.warn(
             'Invalid oauth state, expected: {} response: {}'.format(
                 state,
