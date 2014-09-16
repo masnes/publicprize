@@ -43,7 +43,7 @@
 {%- endmacro -%}
 
 {% block contest_content %}
-{{ amount_bar() }}
+{% if form: %}{{ amount_bar() }}{% endif %}
 <div class="pp-main">
 <div class="pp-contestant">
     <div class="pp-title">{{ contestant.display_name }}</div>
@@ -88,19 +88,21 @@
     </div>
 </div>
 </div>
-{{ amount_bar() }}
+{% if form: %}{{ amount_bar() }}{% endif %}
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 
 <script>
-$("#pp-other-button").click(function() {
-  $(this).addClass("disabled")
-  $(".pp-hidden-slider").slideDown("slow", function() {
-    $("#amount").focus();
+$(function() {
+  $("#pp-other-button").click(function() {
+    $(this).addClass("disabled");
+    $(".pp-hidden-slider").slideDown("slow", function() {
+      $("#amount").focus();
+    });
+    return false;
   });
-  return false;
 });
 </script>
 {% endblock %}
