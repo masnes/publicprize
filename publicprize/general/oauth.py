@@ -112,7 +112,7 @@ def logout():
     return flask.redirect('/')
 
 
-def _clear_session():
+def _clear_session(clear_oauth_type=False):
     """Clear the login state from the session"""
     flask.session['user.is_logged_in'] = False
     if 'oauth.state' in flask.session:
@@ -122,10 +122,12 @@ def _clear_session():
         key = 'oauth.{}.token'.format(oauth_type)
         if flask.session.get(key):
             del flask.session[key]
+        if clear_oauth_type:
+            del flask.session['user.oauth_type']
 
 
 def _client_error(oauth_type, message=None):
-    _clear_session()
+    _clear_session(True)
     flask.flash(message \
         or '{} has denied access to this App.'.format(oauth_type))
         

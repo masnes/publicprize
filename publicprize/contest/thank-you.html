@@ -11,16 +11,17 @@ Thank You -
   <div class="modal" id="pp-thank-you-modal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-success pp-modal-header">
 	  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-	   <h4 class="modal-title">Thank You!</h4>
+	   <h1 class="modal-title text-center">You Did It!</h1>
 	</div>
-        <div class="modal-body">
-    	  <p>Thank you for your contribution for {{ contestant.display_name }}!</p>
-    	  <p>Tell your friends about this contestant:
-    	  <a href="https://facebook.com/sharer.php?u={{ contestant_url }}">Facebook</a>,
-    	  <a href="https://twitter.com/intent/tweet?url={{ contestant_url }}&via=publicprize">Twitter</a>,
-    	  <a href="https://plus.google.com/share?url={{ contestant_url }}">Google+</a>
+        <div class="modal-body pp-large-text">
+	  <p class="text-center"><span class="text-primary"><strong>{{ contestant.display_name }}</strong></span> thanks you for your contribution.</p>
+	  <p class="text-center">Now show the world why Boulder is <span class="text-warning"><strong><em>#1</em></strong></span> in community driven innovation!<p>
+    	  <p class="text-center">
+      	    <a class="pp-social-icon" href="https://facebook.com/sharer.php?u={{ contestant_url }}"><img src="/static/img/facebook39.png" alt="Facebook"></a>
+    	    <a class="pp-social-icon" href="https://twitter.com/intent/tweet?url={{ contestant_url }}&amp;via=publicprize"><img src="/static/img/twitter39.png" alt="Twitter"></a>
+    	    <a class="pp-social-icon" href="https://plus.google.com/share?url={{ contestant_url }}"><img src="/static/img/google39.png" alt="Google+"></a>
 	  </p>
       	</div>
       </div>

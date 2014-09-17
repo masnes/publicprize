@@ -24,7 +24,7 @@ ppc.init()
 
 # TODO(pjm): ugly hack to get user.biv_id in log message
 class BetterLogger(werkzeug.serving.BaseRequestHandler):
-
+    """HTTP access logger which includes user_state."""
     _user_state = None
     app = ppc.app()
 
@@ -39,14 +39,14 @@ class BetterLogger(werkzeug.serving.BaseRequestHandler):
                 user_state += 'o'
             user_state += '-' + str(flask.session['user.biv_id'])
         BetterLogger._user_state = user_state
-    
+
     def log_request(self, code='-', size='-'):
         self.log('info', '%s "%s" %s %s',
-            BetterLogger._user_state, self.requestline, code, size)
+                 BetterLogger._user_state, self.requestline, code, size)
 
 
 class RunServerWithBetterLogger(flask_script.commands.Server):
-
+    """Override default Server command class to add BetterLogger."""
     def __init__(self, **kwargs):
         kwargs['request_handler'] = BetterLogger
         super(RunServerWithBetterLogger, self).__init__(**kwargs)
@@ -63,8 +63,8 @@ def create_db():
     e = os.environ.copy()
     e['PGPASSWORD'] = c['postgres_pass']
     subprocess.call(
-        ['createuser', '--host=' + c['host'], '--user=postgres', '--no-superuser',
-        '--no-createdb', '--no-createrole', c['user']],
+        ['createuser', '--host=' + c['host'], '--user=postgres',
+         '--no-superuser', '--no-createdb', '--no-createrole', c['user']],
         env=e)
     p = subprocess.Popen(
         ['psql', '--host=' + c['host'], '--user=postgres', 'template1'],
@@ -75,10 +75,12 @@ def create_db():
     loc = locale.setlocale(locale.LC_ALL)
     p.communicate(input=bytes(s, enc))
     subprocess.check_call(
-        ['createdb', '--host=' + c['host'], '--encoding=' + enc, '--locale=' + loc,
-        '--user=postgres', '--owner=' + c['user'], c['name']],
+        ['createdb', '--host=' + c['host'], '--encoding=' + enc,
+         '--locale=' + loc, '--user=postgres',
+         '--owner=' + c['user'], c['name']],
         env=e)
     db.create_all()
+
 
 @_MANAGER.command
 def create_test_data():
@@ -130,9 +132,11 @@ def drop_db():
         e = os.environ.copy()
         e['PGPASSWORD'] = c['postgres_pass']
         subprocess.call(
-            ['env', 'dropdb', '--host=' + c['host'], '--user=postgres', c['name']],
+            ['env', 'dropdb', '--host=' + c['host'],
+             '--user=postgres', c['name']],
             env=e)
-        
+
+
 def _add_model(model):
     """Adds a SQLAlchemy model and returns it's biv_id"""
     db.session.add(model)

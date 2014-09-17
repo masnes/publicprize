@@ -56,7 +56,8 @@ class Contestant(flask_wtf.Form):
         return flask.render_template(
             'contest/submit.html',
             contest=contest,
-            form=self
+            form=self,
+            selected='submit-contestant'
         )
 
     def validate(self):

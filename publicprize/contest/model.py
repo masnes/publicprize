@@ -5,7 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
-from decimal import Decimal
+import decimal
 import flask
 import locale
 from publicprize.controller import db
@@ -42,7 +42,8 @@ class Contest(db.Model, common.ModelWithDates):
         return pam.BivAccess.query.select_from(Contestant).filter(
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == Contestant.biv_id,
-            Contestant.is_public == True
+            # not a real ==, Column() overrides __eq__ to generate SQL
+            Contestant.is_public == True  # noqa
         ).count()
 
     def donor_count(self):
@@ -65,7 +66,7 @@ class Contest(db.Model, common.ModelWithDates):
             access_alias.target_biv_id == Donor.biv_id,
             Donor.donor_state == 'executed'
         ).all()
-        total = Decimal(0)
+        total = decimal.Decimal(0)
         for row in rows:
             total += row.amount
         # TODO(pjm): use UI widget to do formatting
@@ -87,8 +88,8 @@ class Contest(db.Model, common.ModelWithDates):
 
         for founder in founders:
             if Founder.query.select_from(pam.BivAccess).filter(
-                pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
-                pam.BivAccess.target_biv_id == founder.biv_id
+                    pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
+                    pam.BivAccess.target_biv_id == founder.biv_id
             ).first():
                 return Contestant.query.select_from(pam.BivAccess).filter(
                     pam.BivAccess.source_biv_id == Contestant.biv_id,
@@ -136,7 +137,7 @@ class Contestant(db.Model, common.ModelWithDates):
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == Founder.biv_id
         ).all()
-        
+
 
 class Donor(db.Model, common.ModelWithDates):
     """donor database model.

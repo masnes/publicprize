@@ -7,7 +7,7 @@
 {% endblock %}
 
 {%- macro amount_button(field) -%}
-  <button name="{{ form[field].name }}" value="1" type="submit" class="btn btn-primary btn-lg ladda-button pp-amount-bar" data-style="expand-left"><span class="ladda-label">{{ form[field].label.text }}</span></button>
+  <button name="{{ form[field].name }}" value="1" type="submit" class="btn btn-primary btn-lg ladda-button pp-amount-bar pp-amount-button" data-style="expand-left"><span class="ladda-label">{{ form[field].label.text }}</span></button>
 {%- endmacro -%}
 
 {%- macro amount_bar() -%}
