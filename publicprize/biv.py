@@ -7,6 +7,7 @@
 
 import numconv
 import publicprize.inspect as ppi
+import werkzeug.exceptions
 
 URI_FOR_GENERAL_TASKS = 'pub'
 URI_FOR_NONE = 'index'
@@ -93,7 +94,8 @@ class URI(str):
         if bu[0] == _ENC_PREFIX:
             self.__id = cls.__decode(bu)
         else:
-            assert bu in _alias_to_id, bu + ': unknown alias'
+            if bu not in _alias_to_id:
+                werkzeug.exceptions.abort(404)
             self.__id = _alias_to_id[bu]
         return self
 
@@ -122,6 +124,8 @@ def load_obj(biv_uri):
     if biv_uri is None or len(biv_uri) == 0:
         biv_uri = URI_FOR_NONE
     bi = URI(biv_uri).biv_id
+    if bi.biv_marker not in _marker_to_class:
+        werkzeug.exceptions.abort(404)
     return _marker_to_class[bi.biv_marker].load_biv_obj(bi)
 
 
