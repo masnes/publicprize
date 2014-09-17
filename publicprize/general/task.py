@@ -64,8 +64,8 @@ class General(controller.Task):
 
     def action_new_test_user(biv_obj):
         """Creates a new test user model and log in."""
-        if not controller.app().config['PP_TEST_USER']:
-            raise Error("PP_TEST_USER not enabled")
+        if not controller.app().config['PUBLICPRIZE']['TEST_USER']:
+            raise Error("TEST_USER not enabled")
         name = 'F{} L{}'.format(
             werkzeug.security.gen_salt(6).lower(),
             werkzeug.security.gen_salt(8).lower())

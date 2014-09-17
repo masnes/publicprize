@@ -10,6 +10,7 @@ import flask
 import flask_script as fes
 import flask_script.commands
 import json
+import locale
 import os
 import publicprize.auth.model
 import publicprize.contest.model
@@ -58,7 +59,7 @@ _MANAGER.add_command('runserver', RunServerWithBetterLogger())
 @_MANAGER.command
 def create_db():
     """Create the postgres user, database, and publicprize schema"""
-    c = ppc.app().config['PP_DATABASE']
+    c = ppc.app().config['PUBLICPRIZE']['DATABASE']
     e = os.environ.copy()
     e['PGPASSWORD'] = c['postgres_pass']
     subprocess.call(
@@ -70,9 +71,11 @@ def create_db():
         env=e,
         stdin=subprocess.PIPE)
     s = u"ALTER USER {user} WITH PASSWORD '{password}'; COMMIT;".format(**c)
-    p.communicate(input=bytes(s, 'UTF8'))
+    enc = locale.getlocale()[1]
+    loc = locale.setlocale(locale.LC_ALL)
+    p.communicate(input=bytes(s, enc))
     subprocess.check_call(
-        ['createdb', '--host=' + c['host'], '--encoding=utf8', '--locale=en_US.UTF-8',
+        ['createdb', '--host=' + c['host'], '--encoding=' + enc, '--locale=' + loc,
         '--user=postgres', '--owner=' + c['user'], c['name']],
         env=e)
     db.create_all()
@@ -123,7 +126,7 @@ def drop_db():
     """Destroy the database"""
     if fes.prompt_bool('Drop database?'):
         # db.drop_all()
-        c = ppc.app().config['PP_DATABASE']
+        c = ppc.app().config['PUBLICPRIZE']['DATABASE']
         e = os.environ.copy()
         e['PGPASSWORD'] = c['postgres_pass']
         subprocess.call(

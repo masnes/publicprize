@@ -7,7 +7,7 @@ Also contains superclasses for Task and Model.
 """
 
 from publicprize import biv
-from publicprize import config
+import publicprize.config
 from beaker.middleware import SessionMiddleware
 import flask
 from functools import wraps
@@ -149,7 +149,7 @@ _TASK_MODULE = 'task'
 _MODEL_MODULE = 'model'
 _MODEL_MODULE_RE = r'(?<=\.)' + _MODEL_MODULE + r'$'
 _app = flask.Flask(__name__, template_folder='.')
-_app.config.from_object(config.DevConfig)
+_app.config.from_object(publicprize.config.Config)
 BeakerSession().init_app()
 db = SQLAlchemy(_app)
 

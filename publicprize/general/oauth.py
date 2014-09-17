@@ -19,18 +19,18 @@ oauth.<oauth_type>.token, user's oauth token, cleared during log out
 
 import flask
 import flask_oauthlib.client
-from publicprize import controller
-from publicprize.auth.model import User
+import publicprize.controller as ppc
+import publicprize.auth.model as ppam
 import werkzeug
 
 
 def _oauth_provider(name, **kwargs):
     """Creates a OAuth client for the named provider."""
-    config = controller.app().config
-    return flask_oauthlib.client.OAuth(controller.app()).remote_app(
+    c = ppc.app().config['PUBLICPRIZE']
+    return flask_oauthlib.client.OAuth(ppc.app()).remote_app(
         name,
-        consumer_key=config['PP_{}_APP_ID'.format(name.upper())],
-        consumer_secret=config['PP_{}_APP_SECRET'.format(name.upper())],
+        consumer_key=c[name.upper() + '_APP_ID'],
+        consumer_secret=c[name.upper() + '_APP_SECRET'],
         request_token_url=None,
         **kwargs
     )
@@ -63,8 +63,8 @@ _OAUTH_PROVIDER_DATA_PATH = {
 
 def add_user_to_session(user):
     """Store user info on session"""
-    controller.db.session.add(user)
-    controller.db.session.flush()
+    ppc.db.session.add(user)
+    ppc.db.session.flush()
     flask.session['user.biv_id'] = user.biv_id
     flask.session['user.oauth_type'] = user.oauth_type
     flask.session['user.is_logged_in'] = True
@@ -133,12 +133,12 @@ def _client_error(oauth_type, message=None):
 def _user_from_info(oauth_type, info):
     """Saves oauth provider user info to user model.
     info arg contains email, id, name."""
-    controller.app().logger.info(info)
+    ppc.app().logger.info(info)
     if not info.get('email'):
         _client_error(
             oauth, 'Your email must be provided to this App to login.')
         return
-    user = User.query.filter_by(
+    user = ppam.User.query.filter_by(
         oauth_type=oauth_type,
         oauth_id=info['id']
     ).first()
@@ -146,7 +146,7 @@ def _user_from_info(oauth_type, info):
         user.display_name = info['name']
         user.user_email = info['email']
     else:
-        user = User(
+        user = ppam.User(
             display_name=info['name'],
             user_email=info['email'],
             oauth_type=oauth_type,
@@ -160,7 +160,7 @@ def _user_from_info(oauth_type, info):
 
 def _validate_auth(resp, oauth_type):
     """Validates oauth providers's auth response"""
-    app = controller.app()
+    app = ppc.app()
 
     if resp is None or isinstance(resp, flask_oauthlib.client.OAuthException):
         _client_error(oauth_type)

@@ -5,21 +5,21 @@
     :license: Apache, see LICENSE for more details.
 """
 
-from decimal import Decimal
+import decimal
 import flask
 import flask_wtf
+import locale
 import paypalrestsdk
 import paypalrestsdk.exceptions
 import publicprize.auth.model as pam
-import publicprize.contest.model as pcm
-from publicprize import controller
+import publicprize.contest.model as ppcm
+import publicprize.controller as ppc
 import re
 import socket
 import sys
 import urllib.request
 import wtforms
-import wtforms.validators as validator
-
+import wtforms.validators as wtfv
 
 class Contestant(flask_wtf.Form):
     """Project submission form.
@@ -33,15 +33,15 @@ class Contestant(flask_wtf.Form):
         website: project website (optional)
     """
     display_name = wtforms.StringField(
-        'Project Name', validators=[validator.DataRequired()])
+        'Project Name', validators=[wtfv.DataRequired()])
     contestant_desc = wtforms.TextAreaField(
-        'Project Summary', validators=[validator.DataRequired()])
+        'Project Summary', validators=[wtfv.DataRequired()])
     youtube_url = wtforms.StringField(
-        'YouTube Video URL', validators=[validator.DataRequired()])
+        'YouTube Video URL', validators=[wtfv.DataRequired()])
     slideshow_url = wtforms.StringField(
-        'SlideShare Pitch Deck URL', validators=[validator.DataRequired()])
+        'SlideShare Pitch Deck URL', validators=[wtfv.DataRequired()])
     founder_desc = wtforms.TextAreaField(
-        'Your Short Bio', validators=[validator.DataRequired()])
+        'Your Short Bio', validators=[wtfv.DataRequired()])
     website = wtforms.StringField('Project Website')
 
     def execute(self, contest):
@@ -78,7 +78,7 @@ class Contestant(flask_wtf.Form):
             url = 'http://' + url
         try:
             req = urllib.request.urlopen(url, None, 30)
-            res = req.read().decode('utf-8')
+            res = req.read().decode(locale.getlocale()[1])
             req.close()
         except urllib.request.URLError:
             return None
@@ -109,31 +109,30 @@ class Contestant(flask_wtf.Form):
     def _update_models(self, contest):
         """Creates the Contestant and Founder models
         and adds BivAccess models to join the contest and Founder models"""
-        contestant = pcm.Contestant()
+        contestant = ppcm.Contestant()
         self.populate_obj(contestant)
         contestant.youtube_code = self._youtube_code()
         contestant.slideshow_code = self._slideshare_code()
-        contestant.is_public = controller.app().config[
-            'PP_ALL_PUBLIC_CONTESTANTS']
-        founder = pcm.Founder()
+        contestant.is_public = ppc.app().config['PUBLICPRIZE']['ALL_PUBLIC_CONTESTANTS']
+        founder = ppcm.Founder()
         self.populate_obj(founder)
         founder.display_name = flask.session['user.display_name']
-        controller.db.session.add(contestant)
-        controller.db.session.add(founder)
-        controller.db.session.flush()
-        controller.db.session.add(
+        ppc.db.session.add(contestant)
+        ppc.db.session.add(founder)
+        ppc.db.session.flush()
+        ppc.db.session.add(
             pam.BivAccess(
                 source_biv_id=contest.biv_id,
                 target_biv_id=contestant.biv_id
             )
         )
-        controller.db.session.add(
+        ppc.db.session.add(
             pam.BivAccess(
                 source_biv_id=contestant.biv_id,
                 target_biv_id=founder.biv_id
             )
         )
-        controller.db.session.add(
+        ppc.db.session.add(
             pam.BivAccess(
                 source_biv_id=flask.session['user.biv_id'],
                 target_biv_id=founder.biv_id
@@ -220,9 +219,9 @@ class Donate(flask_wtf.Form):
     def execute_payment(self, contestant):
         """Handles return task from paypal. Calls paypal with payment and
         payer IDs to complete the transaction."""
-        donor = pcm.Donor.unsafe_load_from_session()
+        donor = ppcm.Donor.unsafe_load_from_session()
         if not donor:
-            controller.app().logger.warn('missing session donor')
+            ppc.app().logger.warn('missing session donor')
             flask.flash('The referenced contribution was already processed.')
             return flask.redirect(contestant.format_uri())
         self._save_payment_info_to_donor(donor)
@@ -233,14 +232,14 @@ class Donate(flask_wtf.Form):
         try:
             if payment.execute({'payer_id': donor.paypal_payer_id}):
                 donor.donor_state = 'executed'
-                controller.db.session.add(donor)
+                ppc.db.session.add(donor)
                 return flask.redirect(contestant.format_uri('thank-you'))
             else:
-                controller.app().logger.warn('payment execute failed')
+                ppc.app().logger.warn('payment execute failed')
         except paypalrestsdk.exceptions.ClientError as err:
-            controller.app().logger.warn(err)
+            ppc.app().logger.warn(err)
         except:
-            controller.app().logger.warn(sys.exc_info()[0])
+            ppc.app().logger.warn(sys.exc_info()[0])
         return flask.redirect(contestant.format_uri())
 
     def validate(self):
@@ -264,18 +263,18 @@ class Donate(flask_wtf.Form):
             self.amount.errors = ['Please enter an amount.']
             self.amount.raw_data = None
         if amount:
-            self.amount.data = Decimal(amount)
+            self.amount.data = decimal.Decimal(amount)
         _log_errors(self)
         return not self.errors
 
     def _create_donor(self, contestant):
         """Create a new donor model and link to the parent contestant."""
-        donor = pcm.Donor()
+        donor = ppcm.Donor()
         self.populate_obj(donor)
         donor.donor_state = 'submitted'
-        controller.db.session.add(donor)
-        controller.db.session.flush()
-        controller.db.session.add(
+        ppc.db.session.add(donor)
+        ppc.db.session.flush()
+        ppc.db.session.add(
             pam.BivAccess(
                 source_biv_id=contestant.biv_id,
                 target_biv_id=donor.biv_id
@@ -298,7 +297,7 @@ class Donate(flask_wtf.Form):
             ).one()
         if not user:
             return
-        controller.db.session.add(
+        ppc.db.session.add(
             pam.BivAccess(
                 source_biv_id=user.biv_id,
                 target_biv_id=donor.biv_id
@@ -344,7 +343,7 @@ class Donate(flask_wtf.Form):
 
         try:
             if payment.create():
-                controller.app().logger.info(payment)
+                ppc.app().logger.info(payment)
                 donor.paypal_payment_id = str(payment.id)
                 donor.add_to_session()
 
@@ -352,11 +351,11 @@ class Donate(flask_wtf.Form):
                     if link.method == 'REDIRECT':
                         return str(link.href)
             else:
-                controller.app().logger.warn(payment.error)
+                ppc.app().logger.warn(payment.error)
         except paypalrestsdk.exceptions.ClientError as err:
-            controller.app().logger.warn(err)
+            ppc.app().logger.warn(err)
         except:
-            controller.app().logger.warn(sys.exc_info()[0])
+            ppc.app().logger.warn(sys.exc_info()[0])
         self.amount.errors = [
             'There was an error processing your contribution.']
         return None
@@ -369,17 +368,17 @@ class Donate(flask_wtf.Form):
             donor.donor_email = info.email
             donor.display_name = info.first_name + ' ' + info.last_name
         except paypalrestsdk.exceptions.ConnectionError as err:
-            controller.app().logger.warn(err)
+            ppc.app().logger.warn(err)
         donor.paypal_payer_id = flask.request.args['PayerID']
         donor.donor_state = 'pending_confirmation'
-        controller.db.session.add(donor)
+        ppc.db.session.add(donor)
         self._link_donor_to_user(donor)
 
 
 def _log_errors(form):
     """Put any form errors in logs as warning"""
     if form.errors:
-        controller.app().logger.warn({
+        ppc.app().logger.warn({
             'data': flask.request.form,
             'errors': form.errors
         })
