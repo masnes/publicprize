@@ -5,7 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
-from decimal import Decimal
+import decimal
 import flask
 import locale
 from publicprize.controller import db
@@ -65,7 +65,7 @@ class Contest(db.Model, common.ModelWithDates):
             access_alias.target_biv_id == Donor.biv_id,
             Donor.donor_state == 'executed'
         ).all()
-        total = Decimal(0)
+        total = decimal.Decimal(0)
         for row in rows:
             total += row.amount
         # TODO(pjm): use UI widget to do formatting
