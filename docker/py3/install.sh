@@ -2,9 +2,10 @@
 export HOME=/root
 cd $HOME
 rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-yum install -y git gcc zlib-devel bzip2-devel readline-devel sqlite-devel openssl-devel tar
+yum install -y git gcc zlib-devel bzip2-devel readline-devel sqlite-devel openssl-devel tar postgresql-devel
 curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 cat >> ~/.bashrc <<'EOF'
+export LANG=en_US.UTF-8
 function reset_ps1 {
     export PS1='\W$ '
 }
