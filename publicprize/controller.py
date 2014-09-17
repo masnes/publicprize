@@ -130,7 +130,8 @@ class BeakerSession(flask.sessions.SessionInterface):
                 'session.url': app().config['SQLALCHEMY_DATABASE_URI'],
                 'session.lock_dir': '/tmp/cache/lock',
                 # the cookie key
-                'session.key': 'pp'
+                'session.key': 'pp',
+                'session.cookie_expires': False
             }
         )
         app().session_interface = self
