@@ -2,6 +2,7 @@
 import distutils.core
 import setuptools.command.test as stct
 import sys
+import pip.req
 
 class PyTest(stct.test):
     def initialize_options(self):
@@ -17,12 +18,15 @@ class PyTest(stct.test):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
+
+install_requires = [str(i.req) for i in pip.req.parse_requirements('requirements.txt')]
 distutils.core.setup(
     name='publicprize',
     version='1.0',
     description='Public Prize',
     author='Bivio Software, Inc.',
     author_email='software@bivio.biz',
+    install_requires=install_requires,
     tests_require=['pytest'],
     cmdclass={'test': PyTest}
     )
