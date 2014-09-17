@@ -445,6 +445,23 @@ img.pp-video-play:hover {
 .pp-amount-bar {
     margin-top: 15px;
 }
+.pp-amount-button {
+    margin-right: 0.5em;
+    min-width: 4em;
+    width: 20%;
+}
 .pp-hidden-slider {
     display: none;
+}
+.pp-large-text {
+  font-size: 18px;
+  line-height: 1.5;
+}
+.pp-social-icon img {
+  margin: 1ex 0.5em;
+  border-radius: 6px;
+}
+.pp-modal-header {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
