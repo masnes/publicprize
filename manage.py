@@ -39,8 +39,8 @@ class BetterLogger(BaseRequestHandler):
         BetterLogger._user_state = user_state
     
     def log_request(self, code='-', size='-'):
-        self.log('info', '{} "{}" {} {}'.format(
-            BetterLogger._user_state, self.requestline, code, size))
+        self.log('info', '%s "%s" %s %s',
+            BetterLogger._user_state, self.requestline, code, size)
 
 
 class RunServerWithBetterLogger(flask_script.commands.Server):
