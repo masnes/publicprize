@@ -7,14 +7,12 @@
 {% block logged_in_nav %}
   {% if contest.user_submission_url() %}
     <a class="pp-nav-item" href="{{ contest.user_submission_url() }}">My Entry</a>
-  {% else %}
-    <a class="pp-nav-item" href="{{ contest.format_uri('submit-contestant') }}">Submit an Entry</a>
   {% endif %}
 {% endblock %}
 
 {% block content %}
 
-<div class="col-sm-7">
+<div class="col-sm-8">
     <div>
         {% if contest.logo_type %}
     	    <img class="pp-logo hidden-xs" src="{{ contest.format_uri('logo') }}" alt="{{ contest.display_name }}">
@@ -26,7 +24,7 @@
     </div>
 </div>
 
-<div class="col-sm-4 col-sm-offset-1 pp-sidebar">
+<div class="col-sm-3 col-sm-offset-1 pp-sidebar">
     <div class="sidebar-module sidebar-module-inset pp-summary">
 	<span class="pp-summary-money">${{ contest.donor_executed_amount() }}</span>
 	<span class="pp-summary-name">Raised</span>
@@ -46,9 +44,9 @@
 	</option>
     {%- endmacro -%}
     <select class="pp-menu-xs form-control visible-xs" onchange="window.location = this.options[this.selectedIndex].value;">
-      	{{ option('contestants', 'Contestants', contest.contestant_count()) }}
 	{{ option('about', 'About') }}
-	{{ option('how-to-enter', 'How to Enter') }}
+      	{{ option('contestants', 'Contestants', contest.contestant_count()) }}
+	{{ option('submit-contestant', 'How to Enter') }}
     </select>
     {% macro menu_link(value, text, count=0) -%}
     	<a href="{{ contest.format_uri(value) }}" class="btn btn-default pp-button {% if selected == value %}pp-selected-button{% endif %}">{{ text }}
@@ -56,17 +54,17 @@
 	</a>
     {%- endmacro -%}
     <div class="btn-group pp-menu hidden-xs">
-        {{ menu_link('contestants', 'Contestants', contest.contestant_count()) }}
 	{{ menu_link('about', 'About') }}
-	{{ menu_link('how-to-enter', 'How to Enter') }}
+        {{ menu_link('contestants', 'Contestants', contest.contestant_count()) }}
+	{{ menu_link('submit-contestant', 'How to Enter') }}
   </div>
 </div>
 
-<div class="col-sm-7">
+<div class="col-sm-8">
   {% block contest_content %}{% endblock %}
 </div>
 
-<div class="col-sm-4 col-sm-offset-1 col-xs-8 col-xs-offset-2 pp-sidebar">
+<div class="col-sm-3 col-sm-offset-1 col-xs-8 col-xs-offset-2 pp-sidebar">
   <h2 style="text-align: center">Sponsors</h2>
     <div class="sidebar-module sidebar-module-inset pp-donate-sidebar">
       <img style="width: 100%" src="/static/img/logoBoulderChamber.png" alt="Boulder Chamber" />
