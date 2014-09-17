@@ -221,7 +221,7 @@ border-bottom: 1px solid #e5e5e5;
  */
 
 .pp-footer {
-  padding: 40px 0;
+  padding: 2ex 0;
   color: #999;
   text-align: center;
   background-color: #f9f9f9;
@@ -404,7 +404,11 @@ img.pp-fb-tray {
   margin-bottom: 5px;
 }
 .pp-login-body {
-  margin: 6ex 0;
+  margin-top: 1ex;
+  margin-bottom: 6ex;
+}
+.pp-login-body img {
+  margin-right: 0.5em;
 }
 .pp-cancel-link {
     margin-left: 1em;
