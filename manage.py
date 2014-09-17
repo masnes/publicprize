@@ -5,23 +5,24 @@
     :license: Apache, see LICENSE for more details.
 """
 
+from publicprize.controller import db
 import flask
 import flask_script as fes
 import flask_script.commands
 import json
 import os
-import publicprize.controller as ppc
-from publicprize.controller import db
 import publicprize.auth.model
 import publicprize.contest.model
-from werkzeug.serving import BaseRequestHandler
+import publicprize.controller as ppc
+import subprocess
+import werkzeug.serving
 
 # Needs to be explicit
 ppc.init()
 
 
 # TODO(pjm): ugly hack to get user.biv_id in log message
-class BetterLogger(BaseRequestHandler):
+class BetterLogger(werkzeug.serving.BaseRequestHandler):
 
     _user_state = None
     app = ppc.app()
@@ -57,24 +58,24 @@ _MANAGER.add_command('runserver', RunServerWithBetterLogger())
 @_MANAGER.command
 def create_db():
     """Create the postgres user, database, and publicprize schema"""
-    config = ppc.app().config
-    os.system(
-        'createuser --user=postgres --no-superuser --no-createdb '
-        ' --no-createrole %s' % config['PP_DATABASE_USER'])
-    os.system(
-        'echo "ALTER USER %s WITH PASSWORD \'%s\'; COMMIT;" | psql '
-        '--user=postgres template1' % (
-            config['PP_DATABASE_USER'],
-            config['PP_DATABASE_PASSWORD']
-        ))
-    os.system(
-        'createdb --encoding="utf8" --locale=en_US.UTF-8 '
-        ' --user=postgres --owner=%s %s' % (
-            config['PP_DATABASE_USER'],
-            config['PP_DATABASE']
-        ))
+    c = ppc.app().config['PP_DATABASE']
+    e = os.environ.copy()
+    e['PGPASSWORD'] = c['postgres_pass']
+    subprocess.call(
+        ['createuser', '--host=' + c['host'], '--user=postgres', '--no-superuser',
+        '--no-createdb', '--no-createrole', c['user']],
+        env=e)
+    p = subprocess.Popen(
+        ['psql', '--host=' + c['host'], '--user=postgres', 'template1'],
+        env=e,
+        stdin=subprocess.PIPE)
+    s = u"ALTER USER {user} WITH PASSWORD '{password}'; COMMIT;".format(**c)
+    p.communicate(input=bytes(s, 'UTF8'))
+    subprocess.check_call(
+        ['createdb', '--host=' + c['host'], '--encoding=utf8', '--locale=en_US.UTF-8',
+        '--user=postgres', '--owner=' + c['user'], c['name']],
+        env=e)
     db.create_all()
-
 
 @_MANAGER.command
 def create_test_data():
@@ -122,9 +123,12 @@ def drop_db():
     """Destroy the database"""
     if fes.prompt_bool('Drop database?'):
         # db.drop_all()
-        os.system(
-            'dropdb --user=postgres %s' % ppc.app().config['PP_DATABASE'])
-
+        c = ppc.app().config['PP_DATABASE']
+        e = os.environ.copy()
+        e['PGPASSWORD'] = c['postgres_pass']
+        subprocess.call(
+            ['env', 'dropdb', '--host=' + c['host'], '--user=postgres', c['name']],
+            env=e)
         
 def _add_model(model):
     """Adds a SQLAlchemy model and returns it's biv_id"""
