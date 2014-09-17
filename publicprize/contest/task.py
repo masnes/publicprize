@@ -37,10 +37,6 @@ class Contest(ppc.Task):
         """Donors page"""
         return Contest._render_template(biv_obj, 'donors')
 
-    def action_how_to_enter(biv_obj):
-        """How-to-Enter page"""
-        return Contest._render_template(biv_obj, 'how-to-enter')
-
     def action_index(biv_obj):
         """Default to contestant list"""
         return Contest.action_contestants(biv_obj)
