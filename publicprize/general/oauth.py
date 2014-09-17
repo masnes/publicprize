@@ -4,7 +4,7 @@
 Session variables:
 
 user.biv_id: User's id, survives after log out
-user.oauth_type, User's oauth_type, cleared during log out
+user.oauth_type, User's oauth_type, survives after log out
 user.is_logged_in, User's logged in status
 user.display_name, User's full name
 
@@ -122,7 +122,6 @@ def _clear_session():
         key = 'oauth.{}.token'.format(oauth_type)
         if flask.session.get(key):
             del flask.session[key]
-        del flask.session['user.oauth_type']
 
 
 def _client_error(oauth_type, message=None):
