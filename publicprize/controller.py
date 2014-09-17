@@ -47,14 +47,9 @@ def login_required(func):
     def decorated_function(*args, **kwargs):
         """If user is not logged in, redirects to the appropriate oauth task"""
         if not flask.session.get('user.is_logged_in'):
-            url = None
-
-            if 'user.oauth_type' in flask.session:
-                url = flask.session['user.oauth_type'] + '-login'
-            else:
-                url = 'login'
+            uri = flask.g.pub_obj.get_login_uri()
             return flask.redirect(
-                '/pub/' + url + '?' + urllib.parse.urlencode({
+                uri + '?' + urllib.parse.urlencode({
                     'next': flask.request.url
                 })
             )
