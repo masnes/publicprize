@@ -19,6 +19,7 @@ import os
 import re
 import sys
 import urllib.parse
+import werkzeug.exceptions
 
 db = None
 
@@ -46,11 +47,14 @@ def login_required(func):
     def decorated_function(*args, **kwargs):
         """If user is not logged in, redirects to the appropriate oauth task"""
         if not flask.session.get('user.is_logged_in'):
-            # TODO(pjm): determine url from general.task
-            # TODO(pjm): redirect to /pub/login which determines which
-            # oauth provider based on logged-out user's session
+            url = None
+
+            if 'user.oauth_type' in flask.session:
+                url = flask.session['user.oauth_type'] + '-login'
+            else:
+                url = 'login'
             return flask.redirect(
-                '/pub/facebook-login?' + urllib.parse.urlencode({
+                '/pub/' + url + '?' + urllib.parse.urlencode({
                     'next': flask.request.url
                 })
             )
@@ -93,7 +97,7 @@ class Model(object):
             _external=True
         )
 
-    def format_uri(self, action=None, path_info=None, query=None):
+    def format_uri(self, action=None, path_info=None, query=None, preserve_next=False):
         """Creates a URI for this biv_obj appending action and path_info"""
         biv_id = biv.Id(self.biv_id)
         uri = '/' + biv_id.to_biv_uri()
@@ -104,6 +108,10 @@ class Model(object):
             assert action is not None, path_info \
                 + ': path_info requires an action'
             uri += '/' + path_info
+        if preserve_next and 'next' in flask.request.args:
+            if not query:
+                query = {}
+            query['next'] = flask.request.args['next']
         if query:
             uri += '?' + urllib.parse.urlencode(query)
         return uri
@@ -150,6 +158,8 @@ def _action_uri_to_function(name, biv_obj):
     """Returns the task function for the uri."""
     name = re.sub(r'\W', '_', name)
     name = _ACTION_METHOD_PREFIX + name
+    if not hasattr(biv_obj.task_class, name):
+        werkzeug.exceptions.abort(404)
     func = getattr(biv_obj.task_class, name)
     assert inspect.isfunction(func), name + ': no action for ' + biv_obj.biv_id
     return func
@@ -172,10 +182,18 @@ def _parse_path(path):
     return biv.load_obj(biv_uri), action, path_info
 
 
+def _register_globals():
+    """Load globals onto flask's 'g' variable"""
+    import publicprize.general.model
+    flask.g.pub_obj = publicprize.general.model.General.load_biv_obj(
+        publicprize.general.model.PUB_OBJ)
+
+
 @_app.route("/<path:path>", methods=('GET', 'POST'))
 def _route(path):
     """Routes the uri to the appropriate biv_obj"""
     biv_obj, action, path_info = _parse_path(path)
+    _register_globals()
     return _dispatch_action(action, biv_obj)
 
 
