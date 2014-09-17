@@ -5,8 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="Public Prize, crowdfunded contests.">
     <link rel="icon" type="image/png" href="/static/img/favicon.png">
     <title>{% block title %}{% endblock %} - Public Prize</title>
     <link href="/static/css/bootstrap-3.2.0.min.css" rel="stylesheet">
@@ -37,7 +36,7 @@
 
 	    {%- elif session.get('user.oauth_type') -%}
 
-            <a class="pp-nav-item" data-toggle="modal" data-target="#loginModal" href="#">Log in</a>
+            <a class="pp-nav-item" href="{{ g.pub_obj.get_login_uri() }}">Log in</a>
 
 	    {% else -%}
 
