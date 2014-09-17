@@ -26,6 +26,14 @@ class PublicPrizeTestCase(unittest.TestCase):
         self._verify_text('Empty Contest')
         self._follow_link('Empty Contest')
 
+    def test_not_found(self):
+        self._visit_uri('/x')
+        self._verify_text('Page Not Found')
+        self._visit_uri('/_102/x');
+        self._verify_text('Page Not Found')
+        self._visit_uri('/_10299/');
+        self._verify_text('Page Not Found')
+
     def test_submit_entry(self):
         self._visit_uri('/')
         self._visit_uri('/pub/new-test-user')
