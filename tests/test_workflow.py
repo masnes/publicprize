@@ -31,7 +31,7 @@ class PublicPrizeTestCase(unittest.TestCase):
         self._visit_uri('/pub/new-test-user')
         self._verify_text('Log out')
         self._follow_link('Esprit Venture Prize 2014')
-        self._follow_link('Submit an Entry')
+        self._follow_link('How to Enter')
         num = int(random.random() * 10000)
         name = 'Test Entry {}'.format(num)
         self._submit_form({
