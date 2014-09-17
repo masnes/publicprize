@@ -465,3 +465,22 @@ img.pp-video-play:hover {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
 }
+.pp-contest-title {
+  font-weight: 500;
+  line-height: 1.1;
+  font-size: 33px;
+}
+.pp-contest-desc:hover {
+  color: #068587;
+}
+.pp-contest-desc {
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: bold;
+}
+.pp-tag-title {
+  color: #FCB03C;
+}
+a.pp-title-link:hover {
+  color: #068587;
+}
