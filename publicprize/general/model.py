@@ -5,6 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
+import flask
 from publicprize import biv
 from publicprize import controller
 
@@ -17,6 +18,17 @@ class General(controller.Model):
     def __init__(self, biv_id):
         super().__init__()
         self.biv_id = biv_id
+
+    def get_login_uri(self):
+        """Returns the appropriate login uri, depending on if the
+        user.oauth_type is present in the session"""
+        task = None
+
+        if 'user.oauth_type' in flask.session:
+            task = flask.session['user.oauth_type'] + '-login'
+        else:
+            task = 'login'
+        return self.format_uri(task)
 
     @classmethod
     def load_biv_obj(cls, biv_id):
