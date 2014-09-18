@@ -16,7 +16,7 @@
 
   <a class="pp-title-link" href="{{ contest.format_uri('about') }}">
   <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-4 hidden-xs">
       <img style="width:100%; margin-bottom:1ex" src="/static/img/weCanDoIt.jpg" alt="We Can Do It!">
     </div>
     <div class="col-sm-8">
@@ -37,7 +37,7 @@
 
 <div class="col-sm-3 pp-sidebar">
     <div class="pp-summary">
-      	<img class="pp-esprit-logo" src="/static/img/esprit255.png" alt="Esprit Venture Prize 2014" />
+      	<img class="pp-esprit-logo hidden-xs" src="/static/img/esprit255.png" alt="Esprit Venture Prize 2014" />
 	<span class="pp-summary-number">${{ contest.donor_executed_amount() }}</span>
 	<span class="pp-summary-name">Raised</span>
 	<span class="pp-summary-number">{{ contest.donor_count() }}</span>
