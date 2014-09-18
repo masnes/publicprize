@@ -6,6 +6,57 @@
       "logo_filename": "data/esprit-logo.gif",
       "logo_type": "gif",
 
+      "Sponsor": [
+        {
+	  "display_name": "Casanova Ventures",
+	  "website": "http://casanovaventures.com/",
+	  "logo_filename": "data/casanova-255x178.png",
+	  "logo_type": "png"
+	},
+        {
+	  "display_name": "Faegre Baker Daniels LLP",
+	  "website": "http://www.faegrebd.com",
+	  "logo_filename": "data/faegrebd-255x178.png",
+	  "logo_type": "png"
+	},
+        {
+	  "display_name": "Eli Bates",
+	  "website": "http://bateseli.virb.com/",
+	  "logo_filename": "data/elibates-255x178.png",
+	  "logo_type": "png"
+	},
+        {
+	  "display_name": "Impact Hub Boulder",
+	  "website": "http://www.impacthubboulder.com/",
+	  "logo_filename": "data/impacthub-255x178.png",
+	  "logo_type": "png"
+	},
+        {
+	  "display_name": "Fuse at The Riverside",
+	  "website": "http://boulderfuse.com/",
+	  "logo_filename": "data/fuse-255x178.png",
+	  "logo_type": "png"
+	},
+        {
+	  "display_name": "Boulder Business Advisors CPA, PC",
+	  "website": "http://www.bbacpa.com/",
+	  "logo_filename": "data/bbacpa-255x178.png",
+	  "logo_type": "png"
+	},
+        {
+	  "display_name": "Galvanize",
+	  "website": "http://www.galvanize.it/",
+	  "logo_filename": "data/galvanize-255x178.png",
+	  "logo_type": "png"
+	},
+        {
+	  "display_name": "Bivio Software",
+	  "website": "http://www.bivio.biz",
+	  "logo_filename": "data/bivio-255x178.png",
+	  "logo_type": "png"
+	}
+      ],
+
       "Contestant": [
 	{
 	  "display_name": "Culture Kitchen",
@@ -62,6 +113,7 @@
     {
       "display_name": "Empty Contest",
       "tag_line": "",
+      "Sponsor": [],
       "Contestant": []
     }
   ]
