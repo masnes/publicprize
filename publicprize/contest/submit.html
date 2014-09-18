@@ -12,13 +12,21 @@ Submit Contest Entry
   <form method="POST" action="{{ contest.format_uri('submit-contestant') }}">
     {{ form.csrf_token() }}
     {{ macros.field(form, 'display_name') }}
-    <div class="form-group {{ macros.error_class(form, 'contestant_desc') }}">
+    <div class="form-group has-feedback {{ macros.error_class(form, 'contestant_desc') }}">
       {{ form.contestant_desc.label }}
       {{ macros.errors(form, 'contestant_desc') }}
-      {{ form.contestant_desc(rows=5, class="form-control") }}
+      <div class="input-group">
+        {{ form.contestant_desc(rows=5, class="form-control") }}
+        <span class="input-group-addon"><span class= "pp-tooltip" data-toggle="tooltip" title="The summary should be catchy to entice the public to read more."><span class="glyphicon glyphicon-info-sign text-primary"></span></span></span>
+      </div>
     </div>
-    {{ macros.field(form, 'youtube_url') }}
-    {{ macros.field(form, 'slideshow_url') }}
+    {{ macros.field(form, 'youtube_url', 'The video should appeal to
+      the general public, similar to what might
+      be done for Kickstarter.') }}
+    {{ macros.field(form, 'slideshow_url', 'The slides should be a
+      standard pitch deck without a lot of detail.  You may narrate
+      the slides if you like, but don\'t duplicate what\'s in the pitch
+      video.  The slides are from the  business perspective.') }}
     <div class="form-group {{ macros.error_class(form, 'website') }}">
       <label for="website">Project Website <span class="text-muted"><small>(Optional)</small></span></label>
       {{ macros.errors(form, 'website') }}
@@ -29,6 +37,9 @@ Submit Contest Entry
       {{ macros.errors(form, 'founder_desc') }}
       {{ form.founder_desc(class="form-control") }}
     </div>
+    {{ macros.field(form, 'tax_id') }}
+    {{ macros.field(form, 'business_phone') }}
+    {{ macros.field(form, 'business_address') }}
     {{ macros.submit_button('Submit Entry') }}
     <a class="pp-cancel-link" href="{{ contest.format_uri('contestants') }}">Cancel</a>
   </form>
