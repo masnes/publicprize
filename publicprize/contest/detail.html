@@ -11,6 +11,7 @@
 {%- endmacro -%}
 
 {%- macro amount_bar() -%}
+  {% if form and contestant.is_public %}
   <div>
     <form class="form-inline" method="POST" action="{{ contestant.format_uri('contestant') }}">
       {{ form.csrf_token() }}
@@ -40,10 +41,14 @@
 
     </form>
   </div>
+  {% endif %}
 {%- endmacro -%}
 
 {% block contest_content %}
-{% if form: %}{{ amount_bar() }}{% endif %}
+{% if not contestant.is_public %}
+  <p class="bg-success pp-pending-review">This entry is pending review.</p>
+{% endif %}
+{{ amount_bar() }}
 <div class="pp-main">
 <div class="pp-contestant">
     <div class="pp-title">{{ contestant.display_name }}</div>
@@ -51,7 +56,7 @@
     	<div class="embed-responsive embed-responsive-16by9">
     	    <iframe class="embed-responsive-item"
 	    src="//www.youtube.com/embed/{{ contestant.youtube_code -}}
-		 {%- if request.args.get('autoplay'): -%}
+		 {%- if request.args.get('autoplay') -%}
 		 ?autoplay=1
 		 {%- endif %}" allowfullscreen></iframe>
     	</div>
@@ -76,10 +81,11 @@
 
     	    <div class="pp-item">
 
-	      {% if founder.founder_avatar: %}
+	      {% if founder.founder_avatar %}
     	    	<img class="pp-thumb" src="{{ founder.format_uri('founder-avatar') }}" alt="{{ founder.display_name }}"/>
 	      {% endif %}
     	    	<span class="pp-name">{{ founder.display_name }}</span>
+		&ndash;
     	    	<span class="pp-desc">{{ founder.founder_desc }}</span>
     	    </div>
 
@@ -88,7 +94,7 @@
     </div>
 </div>
 </div>
-{% if form: %}{{ amount_bar() }}{% endif %}
+{{ amount_bar() }}
 {% endblock %}
 
 {% block scripts %}
