@@ -48,7 +48,10 @@ class PublicPrizeTestCase(unittest.TestCase):
             'youtube_url': 'https://www.youtube.com/watch?v=K5pZlBgXBu0',
             'slideshow_url': 'http://www.slideshare.net/Experian_US/how-to-juggle-debt-retirement',
             'website': 'www.google.com',
-            'founder_desc': 'Founder bio for entry {}'.format(num)
+            'founder_desc': 'Founder bio for entry {}'.format(num),
+            'tax_id': '22-7777777',
+            'business_phone': '303-123-4567',
+            'business_address': '123 Pearl St\nBoulder CO 80303'
         })
         self._verify_text('Thank you for submitting your entry')
         self._verify_text(name)
