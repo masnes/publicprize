@@ -109,6 +109,8 @@ class Contestant(db.Model, common.ModelWithDates):
         contestant_desc: project description
         tax_id: project EIN
         website: project website
+        business_phone: contact by phone
+        business_address: contact by mail
         is_public: is the project to be shown on the public contestant list?
     """
     biv_id = db.Column(
@@ -120,8 +122,10 @@ class Contestant(db.Model, common.ModelWithDates):
     youtube_code = db.Column(db.String(500))
     slideshow_code = db.Column(db.String(500))
     contestant_desc = db.Column(db.String)
-    tax_id = db.Column(db.Numeric(9))
+    tax_id = db.Column(db.String(30))
     website = db.Column(db.String(100))
+    business_phone = db.Column(db.String(100))
+    business_address = db.Column(db.String(500))
     is_public = db.Column(db.Boolean, nullable=False)
 
     def get_contest(self):
