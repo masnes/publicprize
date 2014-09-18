@@ -35,6 +35,11 @@ body {
   border-color: #179698;
   background-color: #179698;
 }
+.input-group-addon {
+  background-color: #fafafa;
+  vertical-align: top;
+  padding-top: 1ex;
+}
 
 .pp-nav-logo {
   line-height: 80%;
@@ -130,12 +135,12 @@ border-bottom: 1px solid #e5e5e5;
 }
 
 .pp-form {
-  background-color: #fff7f0;
+!  background-color: #fff7f0;
+  background-color: #f5f5f5;
   border-radius: 8px;
   margin-left: 15px;
   padding: 2ex;
-  border: 1px solid #ccc;
-  
+!  border: 1px solid #ccc;
 }
 
 /* Sidebar modules for boxing content */
@@ -483,4 +488,7 @@ img.pp-video-play:hover {
 }
 a.pp-title-link:hover {
   color: #068587;
+}
+.pp-pending-review {
+  padding: 15px;
 }
