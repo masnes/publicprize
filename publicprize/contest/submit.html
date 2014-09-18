@@ -28,12 +28,12 @@ Submit Contest Entry
       the slides if you like, but don\'t duplicate what\'s in the pitch
       video.  The slides are from the  business perspective.') }}
     <div class="form-group {{ macros.error_class(form, 'website') }}">
-      <label for="website">Project Website <span class="text-muted"><small>(Optional)</small></span></label>
+      <label for="website">{{ form.website.label.text }} <span class="text-muted"><small>(Optional)</small></span></label>
       {{ macros.errors(form, 'website') }}
       {{ form.website(class="form-control") }}
     </div>
     <div class="form-group {{ macros.error_class(form, 'founder_desc') }}">
-      <label for="founder_desc">Your Bio <span class="text-muted"><small>(100 words or less)</small></span></label>
+      <label for="founder_desc">{{ form.founder_desc.label.text }} <span class="text-muted"><small>(100 words or less)</small></span></label>
       {{ macros.errors(form, 'founder_desc') }}
       {{ form.founder_desc(class="form-control") }}
     </div>
