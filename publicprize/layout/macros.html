@@ -9,11 +9,18 @@
   {% endif %}
 {%- endmacro -%}
 
-{%- macro field(form, field) -%}
+{%- macro field(form, field, help_text=None) -%}
   <div class="form-group {{ error_class(form, field) }}">
     {{ form[field].label }}
     {{ errors(form, field) }}
-    {{ form[field](class="form-control") }}
+    {%- if help_text -%}
+      <div class="input-group">
+        {{ form[field](class="form-control") }}
+        <span class="input-group-addon"><span class= "pp-tooltip" data-toggle="tooltip" title="{{ help_text }}"><span class="glyphicon glyphicon-info-sign text-primary"></span></span></span>
+      </div>
+    {% else %}
+      {{ form[field](class="form-control") }}
+    {% endif %}
   </div>
 {%- endmacro -%}
 
