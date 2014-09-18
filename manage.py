@@ -89,6 +89,17 @@ def create_test_data():
 
     for contest in data['Contest']:
         contest_id = _add_model(_create_contest(contest))
+
+        for sponsor in contest['Sponsor']:
+            logo_file = open(sponsor['logo_filename'], 'rb')
+            sponsor_id = _add_model(publicprize.contest.model.Sponsor(
+                display_name=sponsor['display_name'],
+                website=sponsor['website'],
+                sponsor_logo=logo_file.read(),
+                logo_type=sponsor['logo_type']
+            ))
+            _add_owner(contest_id, sponsor_id)
+            
         for contestant in contest['Contestant']:
             contestant_id = _add_model(publicprize.contest.model.Contestant(
                 # TODO(pjm): there must be a way to do this in a map()
