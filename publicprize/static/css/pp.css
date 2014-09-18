@@ -145,13 +145,13 @@ border-bottom: 1px solid #e5e5e5;
 
 /* Sidebar modules for boxing content */
 .sidebar-module {
-  padding: 15px;
   margin: 0 -15px 15px;
 }
 .sidebar-module-inset {
-  padding: 15px;
-  background-color: #f5f5f5;
+  padding: 0 15px;
+!  background-color: #f5f5f5;
   border-radius: 8px;
+  border: 8px solid #f5f5f5; 
 }
 .sidebar-module-inset p:last-child,
 .sidebar-module-inset ul:last-child,
@@ -159,33 +159,27 @@ border-bottom: 1px solid #e5e5e5;
   margin-bottom: 0;
 }
 
+.pp-esprit-logo {
+  width: 100%;
+  padding-bottom: 2ex;
+}
 .pp-summary {
   background-color: transparent;
   border-left: 1px solid #e5e5e5;
   border-radius: none;
+  padding-left: 1em;
 }
-
-.pp-summary-money {
-  font-weight: bold;
-  display: block;
-  font-size: 48px;
-  line-height: 48px;
-  margin-bottom: 5px;
-}
-
 .pp-summary-name {
   font-size: 14px;
   display: block;
   margin-bottom: 7px;
 }
-
 .pp-summary-number {
   font-size: 24px;
   font-weight: bold;
   display: block;
   line-height: 30px;
 }
-
 .pp-summary-undertitle {
   font-size: 14px;
   display: block;
