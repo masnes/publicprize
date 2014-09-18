@@ -11,7 +11,6 @@ import publicprize.contest.form as pcf
 import publicprize.contest.model as pcm
 import publicprize.controller as ppc
 import publicprize.auth.model as pam
-import random
 
 
 class Contest(ppc.Task):
@@ -22,15 +21,9 @@ class Contest(ppc.Task):
 
     def action_contestants(biv_obj):
         """Public contestant list"""
-        contestants = pcm.Contestant.query.select_from(pam.BivAccess).filter(
-            pam.BivAccess.source_biv_id == biv_obj.biv_id,
-            pam.BivAccess.target_biv_id == pcm.Contestant.biv_id
-        ).filter(pcm.Contestant.is_public == True).all()
-        random.shuffle(contestants)
         return Contest._render_template(
             biv_obj,
             'contestants',
-            contestants=contestants
         )
 
     def action_donors(biv_obj):
@@ -107,3 +100,14 @@ class Founder(ppc.Task):
             io.BytesIO(biv_obj.founder_avatar),
             'image/{}'.format(biv_obj.avatar_type)
         )
+
+
+class Sponsor(ppc.Task):
+    """Sponsor actions"""
+    def action_sponsor_logo(biv_obj):
+        """Sponsor logo image"""
+        return flask.send_file(
+            io.BytesIO(biv_obj.sponsor_logo),
+            'image/{}'.format(biv_obj.logo_type)
+        )
+    
