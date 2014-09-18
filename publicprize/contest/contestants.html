@@ -8,7 +8,7 @@ Contestants
 {% block contest_content %}
 <div class="pp-main">
 
-{% for contestant in contestants %}
+{% for contestant in contest.get_public_contestants(randomize=True) %}
 
 <div class="pp-contestant-entry clearfix">
     <div class="col-sm-7 pull-left">
