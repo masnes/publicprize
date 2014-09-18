@@ -33,16 +33,23 @@ class Contestant(flask_wtf.Form):
         website: project website (optional)
     """
     display_name = wtforms.StringField(
-        'Project Name', validators=[wtfv.DataRequired()])
+        'Legal Name of Business', validators=[wtfv.DataRequired()])
     contestant_desc = wtforms.TextAreaField(
-        'Project Summary', validators=[wtfv.DataRequired()])
+        'Summary of Business, Product and/or Service',
+        validators=[wtfv.DataRequired()])
     youtube_url = wtforms.StringField(
         'YouTube Video URL', validators=[wtfv.DataRequired()])
     slideshow_url = wtforms.StringField(
         'SlideShare Pitch Deck URL', validators=[wtfv.DataRequired()])
     founder_desc = wtforms.TextAreaField(
         'Your Short Bio', validators=[wtfv.DataRequired()])
-    website = wtforms.StringField('Project Website')
+    website = wtforms.StringField('Business Website')
+    tax_id = wtforms.StringField(
+        'Business US Tax Id', validators=[wtfv.DataRequired()])
+    business_phone = wtforms.StringField(
+        'Business Phone', validators=[wtfv.DataRequired()])
+    business_address = wtforms.TextAreaField(
+        'Business Mailing Address', validators=[wtfv.DataRequired()])
 
     def execute(self, contest):
         """Validates and creates the contestant model"""
