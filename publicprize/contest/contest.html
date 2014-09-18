@@ -36,8 +36,9 @@
 </div>
 
 <div class="col-sm-3 pp-sidebar">
-    <div class="sidebar-module sidebar-module-inset pp-summary">
-	<span class="pp-summary-money">${{ contest.donor_executed_amount() }}</span>
+    <div class="pp-summary">
+      	<img class="pp-esprit-logo" src="/static/img/esprit255.png" alt="Esprit Venture Prize 2014" />
+	<span class="pp-summary-number">${{ contest.donor_executed_amount() }}</span>
 	<span class="pp-summary-name">Raised</span>
 	<span class="pp-summary-number">{{ contest.donor_count() }}</span>
 	<span class="pp-summary-name">Contributors</span>
@@ -76,22 +77,16 @@
 </div>
 
 <div class="col-sm-3 col-sm-offset-1 col-xs-8 col-xs-offset-2 pp-sidebar">
-    <div class="sidebar-module sidebar-module-inset pp-donate-sidebar">
-      <img style="width: 100%" src="/static/img/Esprit30thAnnual2014Logo.jpg" alt="Esprit Venture Prize 2014" />
-    </div>
-    <div class="sidebar-module sidebar-module-inset pp-donate-sidebar">
       <img style="width: 100%" src="/static/img/logoBoulderChamber.png" alt="Boulder Chamber" />
-    </div>
+
   <h2 style="text-align: center">Sponsors</h2>
+
+  {% for sponsor in contest.get_sponsors(randomize=True) %}
     <div class="sidebar-module sidebar-module-inset pp-donate-sidebar">
-      <img style="width: 100%" src="/static/img/galvanize_logo.jpg" alt="Galvanize" />
+      <a href="{{ sponsor.website }}">
+        <img style="width: 100%" src="{{ sponsor.format_uri('sponsor_logo') }}" alt="{{ sponsor.display_name }}" /></a>
     </div>
-    <div class="sidebar-module sidebar-module-inset pp-donate-sidebar">
-      <img style="width: 100%" src="/static/img/bivio-logo.png" alt="Bivio SOftware" />
-    </div>
-    <div class="sidebar-module sidebar-module-inset pp-donate-sidebar">
-      <img style="width: 100%" src="/static/img/data-law-group.jpg" alt="Data Law Group" />
-    </div>
+  {% endfor %}
 </div>  
 
 {% endblock %}
