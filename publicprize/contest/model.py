@@ -13,6 +13,7 @@ from publicprize import common
 from publicprize import controller
 from publicprize import biv
 import publicprize.auth.model as pam
+import random
 import sqlalchemy.orm
 
 
@@ -71,6 +72,25 @@ class Contest(db.Model, common.ModelWithDates):
             total += row.amount
         # TODO(pjm): use UI widget to do formatting
         return locale.format('%d', total, grouping=True)
+
+    def get_sponsors(self, randomize=False):
+        """Return a list of Sponsor models for this Contest"""
+        sponsors = Sponsor.query.select_from(pam.BivAccess).filter(
+            pam.BivAccess.source_biv_id == self.biv_id,
+            pam.BivAccess.target_biv_id == Sponsor.biv_id
+        ).all()
+        if randomize:
+            random.shuffle(sponsors)
+        return sponsors
+
+    def get_public_contestants(self, randomize=False):
+        contestants = Contestant.query.select_from(pam.BivAccess).filter(
+            pam.BivAccess.source_biv_id == self.biv_id,
+            pam.BivAccess.target_biv_id == Contestant.biv_id
+        ).filter(Contestant.is_public == True).all()
+        if randomize:
+            random.shuffle(contestants)
+        return contestants
 
     def user_submission_url(self):
         """Returns the current user's submission url or None.
@@ -142,7 +162,6 @@ class Contestant(db.Model, common.ModelWithDates):
             pam.BivAccess.target_biv_id == Founder.biv_id
         ).all()
 
-
 class Donor(db.Model, common.ModelWithDates):
     """donor database model.
 
@@ -212,7 +231,30 @@ class Founder(db.Model, common.ModelWithDates):
     founder_avatar = db.Column(db.LargeBinary)
     avatar_type = db.Column(db.Enum('gif', 'png', 'jpeg', name='avatar_type'))
 
+
+class Sponsor(db.Model, common.ModelWithDates):
+    """sponsor database model.
+
+    Fields:
+        biv_id: primary ID
+        display_name: sponsor name
+        website: sponsor website
+        sponsor_logo: logo image blob
+        logo_type: image type (gif, png, jpeg)
+    """
+    biv_id = db.Column(
+        db.Numeric(18),
+        db.Sequence('sponsor_s', start=1008, increment=1000),
+        primary_key=True
+    )
+    display_name = db.Column(db.String(100), nullable=False)
+    website = db.Column(db.String(100))
+    sponsor_logo = db.Column(db.LargeBinary)
+    logo_type = db.Column(db.Enum('gif', 'png', 'jpeg', name='logo_type'))
+    
+
 Contest.BIV_MARKER = biv.register_marker(2, Contest)
 Contestant.BIV_MARKER = biv.register_marker(3, Contestant)
 Donor.BIV_MARKER = biv.register_marker(7, Donor)
 Founder.BIV_MARKER = biv.register_marker(4, Founder)
+Sponsor.BIV_MARKER = biv.register_marker(8, Sponsor)
