@@ -54,9 +54,7 @@ class General(controller.Task):
         return oauth.logout()
 
     def action_privacy_policy(biv_obj):
-        return flask.render_template(
-            "general/privacy-policy.html"
-        )
+        return flask.redirect('/static/pdf/privacy-policy.pdf')
 
     def action_not_found(biv_obj):
         """Not found page"""
@@ -79,6 +77,4 @@ class General(controller.Task):
         return flask.redirect('/')
 
     def action_terms_of_use(biv_obj):
-        return flask.render_template(
-            "general/terms-of-use.html"
-        )
+        return flask.redirect('/static/pdf/terms-of-use.pdf')
