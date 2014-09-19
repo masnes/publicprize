@@ -12,7 +12,8 @@
 
 {%- macro amount_bar() -%}
   {% if form and contestant.is_public %}
-  <div>
+  <div class="pp-back-this-startup">
+    <div class="text-primary"><strong>Back this Boulder startup</strong></div>
     <form class="form-inline" method="POST" action="{{ contestant.format_uri('contestant') }}">
       {{ form.csrf_token() }}
       {{ amount_button('donate10') }}
@@ -51,7 +52,7 @@
 {{ amount_bar() }}
 <div class="pp-main">
 <div class="pp-contestant">
-    <div class="pp-title">{{ contestant.display_name }}</div>
+    <div id="title" class="pp-title">{{ contestant.display_name }}</div>
     <div class="pp-pitch">
     	<div class="embed-responsive embed-responsive-16by9">
     	    <iframe class="embed-responsive-item"
@@ -63,9 +64,7 @@
     </div>
     <div class="pp-abstract">
     	<h3 class="pp-heading">Summary</h3>
-    	<p class="pp-contestant-desc">
-   	    {{ contestant.contestant_desc }}
-    	</p>
+    	<p class="pp-contestant-desc">{{ contestant.contestant_desc }}</p>
     </div>
     <div class="pp-slides">
     	<div class="embed-responsive embed-responsive-4by3">
