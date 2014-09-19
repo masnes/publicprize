@@ -339,3 +339,27 @@ a.pp-title-link:hover {
 .pp-pending-review {
   padding: 15px;
 }
+.pp-share-text:before {
+  background-color: #ffffff;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+  border-right: 2px solid rgba(0, 0, 0, 0.3);
+  content: "";
+  height: 10px;
+  position: absolute;
+  right: -7px;
+  top: 13px;
+  transform: rotate(-45deg);
+  width: 10px;
+}
+.pp-share-text {
+  background-color: #ffffff;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  display: inline-block;
+  height: 39px;
+  top: 4px;
+  left: -10px;
+  padding: 5px 7px;
+  position: relative;
+  text-align: center;
+}
