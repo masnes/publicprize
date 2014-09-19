@@ -24,37 +24,6 @@ import publicprize.auth.model as ppam
 import werkzeug
 
 
-def _oauth_provider(name, **kwargs):
-    """Creates a OAuth client for the named provider."""
-    c = ppc.app().config['PUBLICPRIZE']
-    return flask_oauthlib.client.OAuth(ppc.app()).remote_app(
-        name,
-        consumer_key=c[name.upper() + '_APP_ID'],
-        consumer_secret=c[name.upper() + '_APP_SECRET'],
-        request_token_url=None,
-        **kwargs
-    )
-
-_OAUTH_PROVIDER = {
-    'facebook': _oauth_provider(
-        'facebook',
-        request_token_params={'scope': 'email'},
-        base_url='https://graph.facebook.com',
-        access_token_url='/oauth/access_token',
-        authorize_url='https://www.facebook.com/dialog/oauth'
-    ),
-    'google': _oauth_provider(
-        'google',
-        request_token_params={
-            'scope': 'https://www.googleapis.com/auth/userinfo.email'
-        },
-        base_url='https://www.googleapis.com/oauth2/v1/',
-        access_token_method='POST',
-        access_token_url='https://accounts.google.com/o/oauth2/token',
-        authorize_url='https://accounts.google.com/o/oauth2/auth',
-    )
-}
-
 _OAUTH_PROVIDER_DATA_PATH = {
     'facebook': 'me',
     'google': 'userinfo',
@@ -80,7 +49,7 @@ def authorize(oauth_type, callback):
     # state variable is uri randomizer, verfied in authorize_complete()
     state = werkzeug.security.gen_salt(64)
     flask.session['oauth.state'] = state
-    return _OAUTH_PROVIDER[oauth_type].authorize(
+    return _oauth_provider(oauth_type).authorize(
         callback=callback,
         state=state
     )
@@ -89,7 +58,8 @@ def authorize(oauth_type, callback):
 def authorize_complete(oauth_type):
     """Handle oauth callback, validate the response and update the user
     model."""
-    resp = _OAUTH_PROVIDER[oauth_type].authorized_response()
+    oauth = _oauth_provider(oauth_type)
+    resp = oauth.authorized_response()
     next_uri = None
     if 'oauth.next_uri' in flask.session:
         next_uri = flask.session['oauth.next_uri']
@@ -99,8 +69,7 @@ def authorize_complete(oauth_type):
             resp['access_token'], '')
         _user_from_info(
             oauth_type,
-            _OAUTH_PROVIDER[oauth_type].get(
-                _OAUTH_PROVIDER_DATA_PATH[oauth_type]).data
+            oauth.get(_OAUTH_PROVIDER_DATA_PATH[oauth_type]).data
         )
     return flask.redirect(next_uri or '/')
 
@@ -131,6 +100,52 @@ def _client_error(oauth_type, message=None):
     flask.flash(message \
         or '{} has denied access to this App.'.format(oauth_type))
         
+
+def _get_facebook_oauth_token():
+    """Callback for facebook auth"""
+    return flask.session.get('oauth.facebook.token')
+
+
+def _get_google_access_token():
+    """Callback for google auth"""
+    return flask.session.get('oauth.google.token')
+
+
+def _oauth_provider(name):
+    """Creates a OAuth client for the named provider."""
+    attributes = None
+    if name == 'facebook':
+        attributes = {
+            'request_token_params': {'scope': 'email'},
+            'base_url': 'https://graph.facebook.com',
+            'access_token_url': '/oauth/access_token',
+            'authorize_url': 'https://www.facebook.com/dialog/oauth'
+        }
+        tokengetter = _get_facebook_oauth_token
+    elif name == 'google':
+        attributes = {
+            'request_token_params': {
+                'scope': 'https://www.googleapis.com/auth/userinfo.email'
+                },
+            'base_url': 'https://www.googleapis.com/oauth2/v1/',
+            'access_token_method': 'POST',
+            'access_token_url': 'https://accounts.google.com/o/oauth2/token',
+            'authorize_url': 'https://accounts.google.com/o/oauth2/auth'
+        }
+        tokengetter = _get_google_access_token
+    else:
+        raise Error('Unknown oauth provider name: {}'.format(name))
+    c = ppc.app().config['PUBLICPRIZE']
+    oauth = flask_oauthlib.client.OAuth(ppc.app()).remote_app(
+        name,
+        consumer_key=c[name.upper() + '_APP_ID'],
+        consumer_secret=c[name.upper() + '_APP_SECRET'],
+        request_token_url=None,
+        **attributes
+    )
+    oauth.tokengetter(tokengetter)
+    return oauth
+
 
 def _user_from_info(oauth_type, info):
     """Saves oauth provider user info to user model.
@@ -180,19 +195,3 @@ def _validate_auth(resp, oauth_type):
         )
         return False
     return True
-
-
-_FACEBOOK = _OAUTH_PROVIDER['facebook']
-_GOOGLE = _OAUTH_PROVIDER['google']
-
-
-@_FACEBOOK.tokengetter
-def _get_facebook_oauth_token():
-    """Callback for facebook auth"""
-    return flask.session.get('oauth.facebook.token')
-
-
-@_GOOGLE.tokengetter
-def _get_google_access_token():
-    """Callback for google auth"""
-    return flask.session.get('oauth.google.token')
