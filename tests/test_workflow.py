@@ -38,7 +38,7 @@ class PublicPrizeTestCase(unittest.TestCase):
         self._visit_uri('/')
         self._visit_uri('/pub/new-test-user')
         self._verify_text('Log out')
-        self._follow_link('Esprit Venture Prize 2014')
+        self._follow_link('Esprit Venture Challenge 2014')
         self._follow_link('How to Enter')
         num = int(random.random() * 10000)
         name = 'Test Entry {}'.format(num)
@@ -51,11 +51,10 @@ class PublicPrizeTestCase(unittest.TestCase):
             'founder_desc': 'Founder bio for entry {}'.format(num),
             'tax_id': '22-7777777',
             'business_phone': '303-123-4567',
-            'business_address': '123 Pearl St\nBoulder CO 80303'
+            'business_address': '123 Pearl St\nBoulder CO 80303',
+            'agree_to_terms': True
         })
         self._verify_text('Thank you for submitting your entry')
-        self._verify_text(name)
-        self._follow_link('My Entry')
         self._verify_text(name)
 
     def _follow_link(self, link_text):
