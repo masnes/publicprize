@@ -6,6 +6,7 @@
 """
 
 from publicprize.controller import db
+import datetime
 import flask
 import flask_script as fes
 import flask_script.commands
@@ -131,7 +132,9 @@ def _create_contest(contest):
     """Creates a SQLAlchemy model Contest with optional logo file"""
     model = publicprize.contest.model.Contest(
         display_name=contest['display_name'],
-        tag_line=contest['tag_line']
+        tag_line=contest['tag_line'],
+        end_date=datetime.datetime.strptime(
+            contest['end_date'], '%m/%d/%Y').date()
     )
     if 'logo_filename' in contest:
         logo_file = open(contest['logo_filename'], 'rb')
@@ -170,7 +173,8 @@ def _create_database(is_production=False):
                 youtube_code=contestant['youtube_code'],
                 slideshow_code=contestant['slideshow_code'],
                 contestant_desc=contestant['contestant_desc'],
-                is_public=True
+                is_public=True,
+                is_under_review=False
             ))
             _add_owner(contest_id, contestant_id)
 
