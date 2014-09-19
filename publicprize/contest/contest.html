@@ -43,12 +43,12 @@
 
 <div class="col-sm-3">
     <div class="pp-summary">
-      	<a href="http://cm.boulderchamber.com/events/details/esprit-entrepreneur-2014-4819"><img class="pp-esprit-logo hidden-xs" src="/static/img/esprit255.png" alt="Esprit Venture Prize 2014" /></a>
+      	<a href="http://cm.boulderchamber.com/events/details/esprit-entrepreneur-2014-4819"><img class="pp-esprit-logo hidden-xs" src="/static/img/esprit255.png" alt="Esprit Venture Challege 2014" /></a>
 	<span class="pp-summary-number">${{ contest.donor_executed_amount() }}</span>
 	<span class="pp-summary-name">Raised</span>
 	<span class="pp-summary-number">{{ contest.donor_count() }}</span>
-	<span class="pp-summary-name">Contributors</span>
-	<span class="pp-summary-number">XXX</span>
+	<span class="pp-summary-name">Contributions</span>
+	<span class="pp-summary-number">{{ contest.days_remaining() }}</span>
 	<span class="pp-summary-undertitle">days to go</span>
     </div>
 </div>
@@ -83,10 +83,7 @@
 </div>
 
 <div class="col-sm-3 col-sm-offset-1 col-xs-8 col-xs-offset-2 pp-sidebar">
-      <a href="http://boulderchamber.com/"><img style="width: 100%" src="/static/img/logoBoulderChamber.png" alt="Boulder Chamber" /></a>
-
-  <h2 style="text-align: center">Sponsors</h2>
-
+  <a class="pp-chamber-link" href="http://boulderchamber.com/"><img style="width: 100%" src="/static/img/logoBoulderChamber.png" alt="Boulder Chamber" /></a>
   {% for sponsor in contest.get_sponsors(randomize=True) %}
     <div class="pp-sidebar-module pp-sidebar-module-inset pp-sponsor-sidebar">
       <a href="{{ sponsor.website }}">
