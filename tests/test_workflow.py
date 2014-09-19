@@ -56,6 +56,8 @@ class PublicPrizeTestCase(unittest.TestCase):
         })
         self._verify_text('Thank you for submitting your entry')
         self._verify_text(name)
+        self._follow_link('My Entry')
+        self._verify_text(name)
 
     def _follow_link(self, link_text):
         url = None
