@@ -5,6 +5,7 @@
     :license: Apache, see LICENSE for more details.
 """
 
+import datetime
 import decimal
 import flask
 import locale
@@ -37,6 +38,7 @@ class Contest(db.Model, common.ModelWithDates):
     # TODO(pjm): move logo and founder_avatar to separate model BivImage
     contest_logo = db.Column(db.LargeBinary)
     logo_type = db.Column(db.Enum('gif', 'png', 'jpeg', name='logo_type'))
+    end_date = db.Column(db.Date, nullable=False)
 
     def contestant_count(self):
         """Returns the number of contestants for the current contest"""
@@ -46,6 +48,9 @@ class Contest(db.Model, common.ModelWithDates):
             # not a real ==, Column() overrides __eq__ to generate SQL
             Contestant.is_public == True  # noqa
         ).count()
+
+    def days_remaining(self):
+        return (self.end_date - datetime.date.today()).days
 
     def donor_count(self):
         """Returns the total donor count across all the contestants"""
@@ -113,7 +118,8 @@ class Contest(db.Model, common.ModelWithDates):
             ).first():
                 return Contestant.query.select_from(pam.BivAccess).filter(
                     pam.BivAccess.source_biv_id == Contestant.biv_id,
-                    pam.BivAccess.target_biv_id == founder.biv_id
+                    pam.BivAccess.target_biv_id == founder.biv_id,
+                    Contestant.is_public == True
                 ).one().format_uri('contestant')
         return None
 
@@ -132,6 +138,7 @@ class Contestant(db.Model, common.ModelWithDates):
         business_phone: contact by phone
         business_address: contact by mail
         is_public: is the project to be shown on the public contestant list?
+        is_under_review: enables review of a non-public submission
     """
     biv_id = db.Column(
         db.Numeric(18),
@@ -147,6 +154,7 @@ class Contestant(db.Model, common.ModelWithDates):
     business_phone = db.Column(db.String(100))
     business_address = db.Column(db.String(500))
     is_public = db.Column(db.Boolean, nullable=False)
+    is_under_review = db.Column(db.Boolean, nullable=False)
 
     def get_contest(self):
         """Returns the Contest model which owns this Contestant"""
