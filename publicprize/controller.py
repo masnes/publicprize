@@ -11,6 +11,7 @@ import publicprize.config
 from beaker.middleware import SessionMiddleware
 import flask
 from functools import wraps
+import flask_mobility
 from flask_sqlalchemy import SQLAlchemy
 import flask.sessions
 import importlib
@@ -116,26 +117,32 @@ class BeakerSession(flask.sessions.SessionInterface):
     """Session management replacement for standard flask session.
     Stores session info in the application database in the beaker_cache
     table."""
-    def init_app(self):
+    def __init__(self, app=None):
+        if app is not None:
+            self.init_app(app)
+        else:
+            self.app = None
+
+    def init_app(self, app):
         """Register the session manager with flask."""
-        app().wsgi_app = SessionMiddleware(
-            app().wsgi_app,
+        app.wsgi_app = SessionMiddleware(
+            app.wsgi_app,
             {
                 'session.type': 'ext:database',
-                'session.url': app().config['SQLALCHEMY_DATABASE_URI'],
+                'session.url': app.config['SQLALCHEMY_DATABASE_URI'],
                 'session.lock_dir': '/tmp/cache/lock',
                 # the cookie key
                 'session.key': 'pp',
                 'session.cookie_expires': False
             }
         )
-        app().session_interface = self
+        app.session_interface = self
 
-    def open_session(self, flask_app, request):
+    def open_session(self, app, request):
         """Called by flask to create the session"""
         return request.environ.get('beaker.session')
 
-    def save_session(self, flask_app, session, response):
+    def save_session(self, app, session, response):
         """Called by flask to save the session"""
         session.save()
 
@@ -146,7 +153,8 @@ _MODEL_MODULE = 'model'
 _MODEL_MODULE_RE = r'(?<=\.)' + _MODEL_MODULE + r'$'
 _app = flask.Flask(__name__, template_folder='.')
 _app.config.from_object(publicprize.config.Config)
-BeakerSession().init_app()
+BeakerSession(_app)
+flask_mobility.Mobility(_app)
 db = SQLAlchemy(_app)
 
 
