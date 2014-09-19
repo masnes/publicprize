@@ -1,10 +1,11 @@
 {
   "Contest": [
     {
-      "display_name": "Esprit Venture Prize 2014",
+      "display_name": "Esprit Venture Challenge 2014",
       "tag_line": "Join us October 23, 2014",
       "logo_filename": "data/esprit-logo.gif",
       "logo_type": "gif",
+      "end_date": "10/21/2014",
 
       "Sponsor": [
         {
@@ -119,6 +120,7 @@
     {
       "display_name": "Empty Contest",
       "tag_line": "",
+      "end_date": "12/31/2030",
       "Sponsor": [],
       "Contestant": []
     }
