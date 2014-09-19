@@ -1,4 +1,5 @@
 {% extends 'contest/contest.html' %}
+{% import "layout/macros.html" as macros %}
 
 {% block title %}
 Contestants
@@ -22,7 +23,7 @@ Contestants
 	  <img class="pp-video-play" src="/static/img/play.png" alt="Play">
 	</a>
     </div>
-    <h3 class="media-heading"><a href="{{ contestant.format_uri('contestant') }}">{{ contestant.display_name }}</a></h3>
+    <h3 class="media-heading"><a href="{{ contestant.format_uri('contestant') }}{{ macros.mobile_tag('title') }}">{{ contestant.display_name }}</a></h3>
     <p class="pp-contestant-desc">{{ contestant.contestant_desc }}
     	<a href="{{ contestant.format_uri('contestant') }}" class="pp-read-more">[learn more]</a>
     </p>
