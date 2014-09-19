@@ -14,30 +14,36 @@
 
 <div class="col-sm-9">
 
-  <a class="pp-title-link" href="{{ contest.format_uri('about') }}">
   <div class="row">
     <div class="col-sm-4 hidden-xs">
-      <img style="width:100%; margin-bottom:1ex" src="/static/img/weCanDoIt.jpg" alt="We Can Do It!">
+      <a class="pp-title-link" href="{{ contest.format_uri('about') }}">
+        <img style="width:100%; margin-bottom:1ex" src="/static/img/weCanDoIt.jpg" alt="We Can Do It!">
+      </a>
     </div>
     <div class="col-sm-8">
       <p class="text-primary pp-contest-title">
-    	Hey, Boulder!  We are the Startup Capital of the US.
-    	Show them why we are #1!
+        <a class="pp-title-link" href="{{ contest.format_uri('about') }}">
+        Hey, Boulder!  We are the Startup Capital of the US.
+        Show them why we are #1!
+	</a>
       </p>
       <p class="pp-contest-desc">
-    	YOU make Boulder’s startup culture the best.  The
-    	<span class="pp-tag-title">Esprit Venture Challenge</span> celebrates our collaborative
-    	culture with a friendly crowdfunding contest.  Vote
-    	with your dollars for the best Boulder venture.
+        <a class="pp-title-link" href="{{ contest.format_uri('about') }}">
+	Vote with your dollars for the best Boulder startup.
+	The <span class="pp-tag-title">Esprit Venture Challenge</span>
+	is the Boulder Chamber’s
+	friendly crowdfunding contest.  Promote innovation
+	in Boulder. Let’s keep our community #1!
+	<span class="pp-contest-more">[more]</span>
+	</a>
       </p>
     </div>
   </div>
-  </a>
 </div>
 
 <div class="col-sm-3 pp-sidebar">
     <div class="pp-summary">
-      	<img class="pp-esprit-logo hidden-xs" src="/static/img/esprit255.png" alt="Esprit Venture Prize 2014" />
+      	<a href="http://cm.boulderchamber.com/events/details/esprit-entrepreneur-2014-4819"><img class="pp-esprit-logo hidden-xs" src="/static/img/esprit255.png" alt="Esprit Venture Prize 2014" /></a>
 	<span class="pp-summary-number">${{ contest.donor_executed_amount() }}</span>
 	<span class="pp-summary-name">Raised</span>
 	<span class="pp-summary-number">{{ contest.donor_count() }}</span>
@@ -77,7 +83,7 @@
 </div>
 
 <div class="col-sm-3 col-sm-offset-1 col-xs-8 col-xs-offset-2 pp-sidebar">
-      <img style="width: 100%" src="/static/img/logoBoulderChamber.png" alt="Boulder Chamber" />
+      <a href="http://boulderchamber.com/"><img style="width: 100%" src="/static/img/logoBoulderChamber.png" alt="Boulder Chamber" /></a>
 
   <h2 style="text-align: center">Sponsors</h2>
 

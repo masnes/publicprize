@@ -467,20 +467,29 @@ img.pp-video-play:hover {
   border-top-right-radius: 6px;
 }
 .pp-contest-title {
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.1;
   font-size: 33px;
 }
 .pp-contest-desc:hover {
   color: #068587;
 }
+.pp-contest-more,
 .pp-contest-desc {
-  font-size: 17px;
-  line-height: 1.5;
-  font-weight: bold;
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: normal;
 }
+.pp-contest-desc .pp-title-link:hover,
+.pp-contest-desc .pp-title-link {
+  color: #444;
+}
+.pp-contest-more,
 .pp-tag-title {
   color: #FCB03C;
+}
+.pp-contest-more {
+  margin-left: 10px;
 }
 a.pp-title-link:hover {
   color: #068587;
