@@ -17,16 +17,21 @@ http://www.colourlovers.com/op/copaso/open/947527
 body {
   color: #555;
 }
+a {
+  color: #068587;
+}
+a:hover {
+  color: #FCB03C;
+  text-decoration: none;
+}
 
 
-/* Override Bootstrap's default container. */
+/* Bootstrap overrides. */
 @media (min-width: 1200px) {
   .container {
     width: 970px;
   }
 }
-
-/* Override Bootstrap's primary button border and active colors *//
 .btn-primary {
   border-color: #068587;
   background-color: #068587;
@@ -41,6 +46,9 @@ body {
   padding-top: 1ex;
 }
 
+/* Common page elements */
+
+/* Nav */
 .pp-nav-logo {
   line-height: 80%;
   font-family: Arial Black;
@@ -50,31 +58,24 @@ body {
   display: inline-block;
   position: relative;
 }
-
+a.pp-nav-logo:hover {
+  color: #068587;
+  text-decoration: none;
+}
 .pp-nav-tag {
   font-size: 78%;
   font-family: Arial;
   color: #FCB03C;
 }
-
-/*
- * Masthead for nav
- */
-
-.pp-masthead {
-!  background-color: #fff;
-border-bottom: 1px solid #e5e5e5;
-/*  -webkit-box-shadow: inset 0 -2px 5px rgba(0,0,0,.1);
-          box-shadow: inset 0 -2px 5px rgba(0,0,0,.1); */
+.pp-nav-masthead {
+  border-bottom: 1px solid #e5e5e5;
 }
-
 /* Nav links */
 .pp-nav-item {
   position: relative;
   display: inline-block;
   padding: 10px;
   font-weight: 500;
-!  background-color: #ccc;
 }
 .pp-nav-item:hover,
 .pp-nav-item:focus {
@@ -87,7 +88,6 @@ border-bottom: 1px solid #e5e5e5;
 .pp-nav-menu .pp-nav-item:focus {
   background-color: #f7fafa;
 }
-
 /* Active state gets a caret at the bottom */
 .pp-nav .active {
   color: #fff;
@@ -106,60 +106,79 @@ border-bottom: 1px solid #e5e5e5;
   border-left: 5px solid transparent;
 }
 
-/*
- * Page name and description
- */
-
-.pp-header {
-  padding-top: 20px;
-  padding-bottom: 20px;
+.pp-content {
+  padding-top: 1em;
+  min-height: 370px;
 }
+.pp-heading h1 {
+  margin-top: 0;
+}
+
+.pp-modal-header {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+.pp-login-body {
+  margin-top: 1ex;
+  margin-bottom: 6ex;
+}
+.pp-login-body img {
+  margin-right: 0.5em;
+}
+
+.pp-footer {
+  padding: 2ex 0;
+  color: #999;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-top: 1px solid #e5e5e5;
+  margin-top: 3ex;
+}
+.pp-footer p:last-child {
+  margin-bottom: 0;
+}
+.pp-footer-item {
+  padding: 10px;
+}
+
+
+/* Contest styles */
+
 .pp-title {
-!  margin-top: 30px;
   margin-bottom: 0;
   font-size: 60px;
   font-weight: normal;
 }
-.pp-description {
-  font-size: 20px;
-  color: #999;
-}
-
-
-/*
- * Main column and sidebar layout
- */
-
 .pp-main {
   font-size: 18px;
   line-height: 1.5;
 }
 
 .pp-form {
-!  background-color: #fff7f0;
   background-color: #f5f5f5;
   border-radius: 8px;
   margin-left: 15px;
   padding: 2ex;
-!  border: 1px solid #ccc;
 }
 
 /* Sidebar modules for boxing content */
-.sidebar-module {
+.pp-sidebar-module {
   margin: 0 -15px 15px;
 }
-.sidebar-module-inset {
+.pp-sidebar-module-inset {
   padding: 0 15px;
-!  background-color: #f5f5f5;
   border-radius: 8px;
   border: 8px solid #f5f5f5; 
 }
-.sidebar-module-inset p:last-child,
-.sidebar-module-inset ul:last-child,
-.sidebar-module-inset ol:last-child {
+.pp-sidebar-module-inset p:last-child,
+.pp-sidebar-module-inset ul:last-child,
+.pp-sidebar-module-inset ol:last-child {
   margin-bottom: 0;
 }
-
+.pp-sponsor-sidebar {
+  color: #333;
+  display: block;
+}
 .pp-esprit-logo {
   width: 100%;
   padding-bottom: 2ex;
@@ -186,77 +205,6 @@ border-bottom: 1px solid #e5e5e5;
   display: block;
 }
 
-/* Pagination */
-.pager {
-  margin-bottom: 60px;
-  text-align: left;
-}
-.pager > li > a {
-  width: 140px;
-  padding: 10px 20px;
-  text-align: center;
-  border-radius: 30px;
-}
-
-
-/*
- * Page posts
- */
-
-.pp-post {
-  margin-bottom: 60px;
-}
-.pp-post-title {
-  margin-bottom: 5px;
-  font-size: 40px;
-}
-.pp-post-meta {
-  margin-bottom: 20px;
-  color: #999;
-}
-
-
-/*
- * Footer
- */
-
-.pp-footer {
-  padding: 2ex 0;
-  color: #999;
-  text-align: center;
-  background-color: #f9f9f9;
-  border-top: 1px solid #e5e5e5;
-  margin-top: 3ex;
-}
-.pp-footer p:last-child {
-  margin-bottom: 0;
-}
-.pp-footer-item {
-  padding: 10px;
-}
-
-
-.pp-content {
-  padding-top: 1em;
-  min-height: 370px;
-}
-
-.pp-heading {
-!  display: inline-block;
-!  vertical-align: middle;
-}
-.pp-heading h1 {
-  margin-top: 0;
-}
-
-.pp-logo {
-  padding-right: 1em;
-  padding-bottom: 1ex;
-}
-
-.pp-nowrap {
-  white-space: nowrap;
-}
 
 .pp-menu {
   width: 100%;
@@ -270,16 +218,6 @@ border-bottom: 1px solid #e5e5e5;
 
 .pp-button {
   margin-bottom: 3px;
-}
-.pp-selected-button, a.pp-selected-button:hover {
-  min-width: 7em;
-  border-bottom: 3px solid #FCB03C;
-  font-weight: bold;
-  width: 33%;
-  margin-bottom: 0px;
-}
-
-.pp-button {
   font-weight: bold;
   width: 33%;
 }
@@ -287,68 +225,13 @@ border-bottom: 1px solid #e5e5e5;
   background-color: transparent;
   border: 1px solid #FCB03C;
 }
-
-a {
-  color: #068587;
-}
-a:hover {
-  color: #FCB03C;
-  text-decoration: none;
-}
-a.pp-nav-logo:hover {
-  color: #068587;
-  text-decoration: none;
-}
-
-.pp-donate-sidebar {
-  color: #333;
-  display: block;
-}
-
-a .pp-donate-click  {
-  display: none;
-  float: right;
-  font-size: 20px;
-  margin-bottom: 8px;
-}
-
-a:hover .pp-donate-click,
-a:hover .pp-donate-sidebar {
-  background-color: #179698;
-  color: white;
-  display: block;
-}
-
-.pp-donate-amount {
-  display: block;
+.pp-selected-button,
+a.pp-selected-button:hover {
+  min-width: 7em;
+  border-bottom: 3px solid #FCB03C;
   font-weight: bold;
-  font-size: 20px;
-  margin-bottom: 8px;
-}
-
-.pp-donate-name {
-  display: block;
-  font-weight: bold;
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-.pp-donate-desc {
-  display: block;
-  color: #444;
-  margin-bottom: 5px;
-  font-size: 16px;
-}
-.pp-donate-item .pp-donors {
-   display: block;
-   color: #444;
-   font-size: 14px;
-}
-.pp-donate-item .pp-donor-number {
-  font-weight: bold;
-}
-
-img.pp-fb-tray {
-  cursor: pointer;
+  width: 33%;
+  margin-bottom: 0px;
 }
 
 .pp-founders .pp-slideshare {
@@ -367,49 +250,12 @@ img.pp-fb-tray {
   margin-right: 10px;
 }
 
-.pp-contestant-entry, .pp-about-page {
+.pp-contestant-entry,
+.pp-about-page {
   margin-top: 20px;
 }
 .pp-contestant-desc {
   white-space: pre-line;
-}
-.pp-rules-list dt {
-  margin: 5px 0 3px 0;
-}
-.pp-donor-list table {
-  width: 100%;
-  margin-bottom: 50px;
-}
-.pp-donor-page h3 {
-  font-size: 200%;
-  color: #FCB03C;
-}
-.pp-donor-list td {
-  vertical-align: top;
-  text-align: center;
-  width: 33%;
-}
-.pp-donor-list img {
-  margin: 15px 20px 5px 20px;
-  border-radius: 10px;
-}
-.pp-donor-list span {
-  display: block;
-  text-align: center;
-}
-.pp-vote-detail {
-  padding-top: 15px;
-}
-.pp-vote-main {
-  padding: 15px;
-  margin-bottom: 5px;
-}
-.pp-login-body {
-  margin-top: 1ex;
-  margin-bottom: 6ex;
-}
-.pp-login-body img {
-  margin-right: 0.5em;
 }
 .pp-cancel-link {
     margin-left: 1em;
@@ -461,10 +307,6 @@ img.pp-video-play:hover {
 .pp-social-icon img {
   margin: 1ex 0.5em;
   border-radius: 6px;
-}
-.pp-modal-header {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
 }
 .pp-contest-title {
   font-weight: 600;
