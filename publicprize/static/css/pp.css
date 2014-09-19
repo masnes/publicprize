@@ -127,12 +127,13 @@ a.pp-nav-logo:hover {
 }
 
 .pp-footer {
-  padding: 2ex 0;
+  padding: 0.5ex 0;
   color: #999;
   text-align: center;
   background-color: #f9f9f9;
   border-top: 1px solid #e5e5e5;
   margin-top: 3ex;
+  line-height: 40px;
 }
 .pp-footer p:last-child {
   margin-bottom: 0;
@@ -146,7 +147,7 @@ a.pp-nav-logo:hover {
 
 .pp-title {
   margin-bottom: 0;
-  font-size: 60px;
+  font-size: 33px;
   font-weight: normal;
 }
 .pp-main {
@@ -159,6 +160,9 @@ a.pp-nav-logo:hover {
   border-radius: 8px;
   margin-left: 15px;
   padding: 2ex;
+}
+.pp-form h1 {
+  margin-top: 0;
 }
 
 /* Sidebar modules for boxing content */
@@ -354,7 +358,7 @@ a.pp-title-link:hover {
 .pp-share-text {
   background-color: #ffffff;
   border: 2px solid rgba(0, 0, 0, 0.3);
-  border-radius: 3px;
+  border-radius: 4px;
   display: inline-block;
   height: 39px;
   top: 4px;
@@ -362,4 +366,18 @@ a.pp-title-link:hover {
   padding: 5px 7px;
   position: relative;
   text-align: center;
+}
+input.pp-agree-checkbox {
+  position: relative;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+}
+.pp-chamber-link img {
+  margin-bottom: 15px;
+}
+.pp-back-this-startup {
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  padding: 1ex;
 }
