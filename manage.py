@@ -83,55 +83,16 @@ def create_db():
 
 
 @_MANAGER.command
-def create_test_data():
-    """Populate database with contents of data/test_data.json file"""
-    data = json.load(open('data/test_data.json', 'r'))
-
-    for contest in data['Contest']:
-        contest_id = _add_model(_create_contest(contest))
-
-        for sponsor in contest['Sponsor']:
-            logo_file = open(sponsor['logo_filename'], 'rb')
-            sponsor_id = _add_model(publicprize.contest.model.Sponsor(
-                display_name=sponsor['display_name'],
-                website=sponsor['website'],
-                sponsor_logo=logo_file.read(),
-                logo_type=sponsor['logo_type']
-            ))
-            _add_owner(contest_id, sponsor_id)
-            
-        for contestant in contest['Contestant']:
-            contestant_id = _add_model(publicprize.contest.model.Contestant(
-                # TODO(pjm): there must be a way to do this in a map()
-                display_name=contestant['display_name'],
-                youtube_code=contestant['youtube_code'],
-                slideshow_code=contestant['slideshow_code'],
-                contestant_desc=contestant['contestant_desc'],
-                is_public=True
-            ))
-            _add_owner(contest_id, contestant_id)
-
-            for founder in contestant['Founder']:
-                founder_id = _add_model(_create_founder(founder))
-                _add_owner(contestant_id, founder_id)
-
-            for donor in contestant['Donor']:
-                donor_id = _add_model(publicprize.contest.model.Donor(
-                    amount=donor['amount'],
-                    donor_state='executed'
-                ))
-                _add_owner(contestant_id, donor_id)
-
-    db.session.commit()
+def create_prod_db():
+    """Populate prod database with subset of data/test_data.json file"""
+    _create_database(is_production=True)
 
 
 @_MANAGER.command
 def create_test_db():
     """Recreates the database and loads the test data from
     data/test_data.json"""
-    drop_db()
-    create_db()
-    create_test_data()
+    _create_database()
 
 
 @_MANAGER.command
@@ -179,6 +140,53 @@ def _create_contest(contest):
         logo_file.close()
     return model
 
+
+def _create_database(is_production=False):
+    """Recreate the database and import data from json data file."""
+    drop_db()
+    create_db()
+    data = json.load(open('data/test_data.json', 'r'))
+
+    for contest in data['Contest']:
+        contest_id = _add_model(_create_contest(contest))
+
+        for sponsor in contest['Sponsor']:
+            logo_file = open(sponsor['logo_filename'], 'rb')
+            sponsor_id = _add_model(publicprize.contest.model.Sponsor(
+                display_name=sponsor['display_name'],
+                website=sponsor['website'],
+                sponsor_logo=logo_file.read(),
+                logo_type=sponsor['logo_type']
+            ))
+            _add_owner(contest_id, sponsor_id)
+
+        if is_production:
+            break
+            
+        for contestant in contest['Contestant']:
+            contestant_id = _add_model(publicprize.contest.model.Contestant(
+                # TODO(pjm): there must be a way to do this in a map()
+                display_name=contestant['display_name'],
+                youtube_code=contestant['youtube_code'],
+                slideshow_code=contestant['slideshow_code'],
+                contestant_desc=contestant['contestant_desc'],
+                is_public=True
+            ))
+            _add_owner(contest_id, contestant_id)
+
+            for founder in contestant['Founder']:
+                founder_id = _add_model(_create_founder(founder))
+                _add_owner(contestant_id, founder_id)
+
+            for donor in contestant['Donor']:
+                donor_id = _add_model(publicprize.contest.model.Donor(
+                    amount=donor['amount'],
+                    donor_state='executed'
+                ))
+                _add_owner(contestant_id, donor_id)
+
+    db.session.commit()
+    
 
 # TODO(pjm): normalize up binary fields, combine with _create_contest()
 def _create_founder(founder):
