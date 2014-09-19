@@ -2,14 +2,29 @@
 chmod -R a+rX /cfg
 export HOME=/root
 cd $HOME
+. ~/.bash_profile
+
 rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-yum install -y git gcc zlib-devel bzip2-devel readline-devel sqlite-devel openssl-devel tar postgresql-devel emacs-nox
-# need bivio emacs from github and .emacs personally(?) add to skel
-# listen_addresses = '*'
-#host    all         all         0.0.0.0/0               password
-#(py3) -bash-4.1$ python manage.py runserver -h 0.0.0.0 -p 8000
+yum install -y \
+    bzip2-devel \
+    emacs-nox \
+    gcc \
+    git \
+    openssl-devel \
+    postgresql-devel \
+    readline-devel \
+    sqlite-devel \
+    tar \
+    zlib-devel \
+
+cat > /etc/skel/.psqlrc <<'EOF'
+\pset pager
+\set AUTOCOMMIT off
+EOF
+chmod 644 /etc/skel/.psqlrc
 cat > /etc/profile.d/publicprize.sh <<'EOF'
-expr "x$PS1" : 'x\[' > /dev/null && export PS1='\W$ '
+export PS1='\W$ '
+test "x$(id -u)" == x0 && export PS1='\W# '
 export WORKON_HOME=$HOME/Envs
 export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV=true
 export PATH="$HOME/.pyenv/bin:$PATH"
@@ -19,6 +34,7 @@ test -d $WORKON_HOME && {
     pyenv virtualenvwrapper
     workon py3
 }
+export PGDATA=/var/lib/pgsql/data
 EOF
 chmod 644 /etc/profile.d/publicprize.sh
 

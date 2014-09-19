@@ -1,6 +1,7 @@
 #!/bin/sh
 cp /etc/skel/.??* $HOME
 git clone https://github.com/biviosoftware/emacs.git
+rm -f ~/.emacs
 ln -s ~/emacs/b-dot-emacs.el ~/.emacs
 curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 export WORKON_HOME=$HOME/Envs

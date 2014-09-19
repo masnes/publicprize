@@ -1,4 +1,4 @@
 #!/bin/sh
-IMAGE=biviosoftware/publicprize-py3
+IMAGE=biviosoftware/publicprize-uwsgi
 docker rmi $IMAGE
 docker build --tag=$IMAGE .
