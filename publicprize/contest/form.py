@@ -50,6 +50,8 @@ class Contestant(flask_wtf.Form):
         'Business Phone', validators=[wtfv.DataRequired()])
     business_address = wtforms.TextAreaField(
         'Business Mailing Address', validators=[wtfv.DataRequired()])
+    agree_to_terms = wtforms.BooleanField(
+        'Agree to Terms of Service', validators=[wtfv.DataRequired()])
 
     def execute(self, contest):
         """Validates and creates the contestant model"""
@@ -59,7 +61,7 @@ class Contestant(flask_wtf.Form):
                 flask.flash(
                     'Thank you for submitting your entry. You will be '
                     'contacted by email when your entry has been reviewed.')
-                return flask.redirect(contestant.format_uri('contestant'))
+                return flask.redirect(contest.format_uri('contestants'))
         return flask.render_template(
             'contest/submit.html',
             contest=contest,
@@ -122,6 +124,7 @@ class Contestant(flask_wtf.Form):
         contestant.youtube_code = self._youtube_code()
         contestant.slideshow_code = self._slideshare_code()
         contestant.is_public = ppc.app().config['PUBLICPRIZE']['ALL_PUBLIC_CONTESTANTS']
+        contestant.is_under_review = False
         founder = ppcm.Founder()
         self.populate_obj(founder)
         founder.display_name = flask.session['user.display_name']
