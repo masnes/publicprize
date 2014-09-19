@@ -11,6 +11,7 @@ import publicprize.contest.form as pcf
 import publicprize.contest.model as pcm
 import publicprize.controller as ppc
 import publicprize.auth.model as pam
+import werkzeug.exceptions
 
 
 class Contest(ppc.Task):
@@ -41,6 +42,9 @@ class Contest(ppc.Task):
             'image/{}'.format(biv_obj.logo_type)
         )
 
+    def action_rules(biv_obj):
+        return flask.redirect('/static/pdf/rules.pdf')
+    
     @ppc.login_required
     def action_submit_contestant(biv_obj):
         """Submit project page"""
@@ -60,7 +64,9 @@ class Contestant(ppc.Task):
     """Contestant actions"""
     def action_contestant(biv_obj):
         """Project detail page, loads contest owner and project founders"""
-        return pcf.Donate().execute(biv_obj)
+        if biv_obj.is_public or biv_obj.is_under_review:
+            return pcf.Donate().execute(biv_obj)
+        werkzeug.exceptions.abort(404)
 
     def action_donate_cancel(biv_obj):
         """Return from cancelled payment on paypal site"""
