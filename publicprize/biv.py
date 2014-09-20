@@ -95,7 +95,11 @@ class URI(str):
             self.__id = cls.__decode(bu)
         else:
             if bu not in _alias_to_id:
-                werkzeug.exceptions.abort(404)
+                import publicprize.auth.model
+                alias = publicprize.auth.model.BivAlias.query.filter_by(
+                    alias_name=bu
+                ).first_or_404()
+                register_alias(bu, alias.biv_id)
             self.__id = _alias_to_id[bu]
         return self
 
