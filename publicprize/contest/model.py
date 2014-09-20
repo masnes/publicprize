@@ -92,7 +92,7 @@ class Contest(db.Model, common.ModelWithDates):
         contestants = Contestant.query.select_from(pam.BivAccess).filter(
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == Contestant.biv_id
-        ).filter(Contestant.is_public == True).all()
+        ).filter(Contestant.is_public == True).all()  # noqa
         if randomize:
             random.shuffle(contestants)
         return contestants
@@ -116,11 +116,12 @@ class Contest(db.Model, common.ModelWithDates):
                     pam.BivAccess.source_biv_id == flask.session['user.biv_id'],
                     pam.BivAccess.target_biv_id == founder.biv_id
             ).first():
-                return Contestant.query.select_from(pam.BivAccess).filter(
+                res = Contestant.query.select_from(pam.BivAccess).filter(
                     pam.BivAccess.source_biv_id == Contestant.biv_id,
                     pam.BivAccess.target_biv_id == founder.biv_id,
-                    Contestant.is_public == True
-                ).one().format_uri('contestant')
+                ).one()
+                if res.is_public:
+                    return res.format_uri('contestant')
         return None
 
 
@@ -169,6 +170,7 @@ class Contestant(db.Model, common.ModelWithDates):
             pam.BivAccess.source_biv_id == self.biv_id,
             pam.BivAccess.target_biv_id == Founder.biv_id
         ).all()
+
 
 class Donor(db.Model, common.ModelWithDates):
     """donor database model.
@@ -259,7 +261,7 @@ class Sponsor(db.Model, common.ModelWithDates):
     website = db.Column(db.String(100))
     sponsor_logo = db.Column(db.LargeBinary)
     logo_type = db.Column(db.Enum('gif', 'png', 'jpeg', name='logo_type'))
-    
+
 
 Contest.BIV_MARKER = biv.register_marker(2, Contest)
 Contestant.BIV_MARKER = biv.register_marker(3, Contestant)
