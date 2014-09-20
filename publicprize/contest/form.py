@@ -7,6 +7,7 @@
 
 import decimal
 import flask
+import flask_mail
 import flask_wtf
 import locale
 import paypalrestsdk
@@ -58,6 +59,7 @@ class Contestant(flask_wtf.Form):
         if self.is_submitted() and self.validate():
             contestant = self._update_models(contest)
             if contestant:
+                self._send_mail_to_support(contestant)
                 flask.flash(
                     'Thank you for submitting your entry. You will be '
                     'contacted by email when your entry has been reviewed.')
@@ -98,6 +100,18 @@ class Contestant(flask_wtf.Form):
             return None
         return res
 
+    def _send_mail_to_support(self, contestant):
+        """Send a notification to support for a new entry"""
+        ppc.mail().send(flask_mail.Message(
+            'New Entry Submitted: {}'.format(contestant.biv_id),
+            recipients=[ppc.app().config['PUBLICPRIZE']['SUPPORT_EMAIL']],
+            body='Submitted by: {}\nTitle: {}\nReview URL: {}'.format(
+                flask.session['user.display_name'],
+                contestant.display_name,
+                contestant.format_absolute_uri()
+            )
+        ))
+        
     def _slideshare_code(self):
         """Download slideshare url and extract embed code.
         The original url may not have the code.
