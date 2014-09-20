@@ -45,7 +45,7 @@ Submit Contest Entry
       {{ macros.errors(form, 'agree_to_terms') }}
       {{ form['agree_to_terms'](class="pp-agree-checkbox") }}
       <label for="{{ form.agree_to_terms.name }}">I Agree to the
-	<a href="{{ g.pub_obj.format_uri('terms-of-use') }}">Terms of Use</a>
+	<a href="{{ g.pub_obj.format_uri('terms') }}">Terms of Use</a>
       	and the
 	<a href="{{ contest.format_uri('rules') }}">Contest Rules</a>.
       </label>
