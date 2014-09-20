@@ -27,10 +27,6 @@ class Contest(ppc.Task):
             'contestants',
         )
 
-    def action_donors(biv_obj):
-        """Donors page"""
-        return Contest._render_template(biv_obj, 'donors')
-
     def action_index(biv_obj):
         """Default to contestant list"""
         return Contest.action_contestants(biv_obj)
