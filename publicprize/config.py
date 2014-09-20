@@ -38,3 +38,6 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = \
         'postgresql://{user}:{password}@{host}/{name}'.format(**PUBLICPRIZE['DATABASE'])
 #    SQLALCHEMY_ECHO = True
+    PUBLICPRIZE['SUPPORT_EMAIL'] = 'vagrant@localhost.localdomain'
+    MAIL_DEFAULT_SENDER = PUBLICPRIZE['SUPPORT_EMAIL']
+    MAIL_DEBUG = False
