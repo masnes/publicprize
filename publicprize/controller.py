@@ -11,6 +11,7 @@ import publicprize.config
 from beaker.middleware import SessionMiddleware
 import flask
 from functools import wraps
+import flask_mail
 import flask_mobility
 from flask_sqlalchemy import SQLAlchemy
 import flask.sessions
@@ -56,6 +57,11 @@ def login_required(func):
             )
         return func(*args, **kwargs)
     return decorated_function
+
+
+def mail():
+    """Singleton mail instance."""
+    return _mail
 
 
 class Task(object):
@@ -154,6 +160,7 @@ _MODEL_MODULE_RE = r'(?<=\.)' + _MODEL_MODULE + r'$'
 _app = flask.Flask(__name__, template_folder='.')
 _app.config.from_object(publicprize.config.Config)
 BeakerSession(_app)
+_mail = flask_mail.Mail(_app)
 flask_mobility.Mobility(_app)
 db = SQLAlchemy(_app)
 
