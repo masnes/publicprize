@@ -53,8 +53,8 @@ class General(controller.Task):
         """Logout"""
         return oauth.logout()
 
-    def action_privacy_policy(biv_obj):
-        return flask.redirect('/static/pdf/privacy-policy.pdf')
+    def action_privacy(biv_obj):
+        return flask.redirect('/static/pdf/privacy.pdf')
 
     def action_not_found(biv_obj):
         """Not found page"""
@@ -76,5 +76,5 @@ class General(controller.Task):
         oauth.add_user_to_session(user)
         return flask.redirect('/')
 
-    def action_terms_of_use(biv_obj):
-        return flask.redirect('/static/pdf/terms-of-use.pdf')
+    def action_terms(biv_obj):
+        return flask.redirect('/static/pdf/terms.pdf')
