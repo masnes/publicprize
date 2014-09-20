@@ -22,6 +22,17 @@ class BivAccess(db.Model, controller.Model):
     target_biv_id = db.Column(db.Numeric(18), primary_key=True)
 
 
+class BivAlias(db.Model, controller.Model):
+    """URI Alias for biv_obj.
+    Fields:
+        biv_id: primary ID
+        alias_name: alias name
+    """
+    biv_id = db.Column(db.Numeric(18), primary_key=True)
+    alias_name = db.Column(db.String(100), nullable=False)
+    __table_args__ = (sqlalchemy.UniqueConstraint('alias_name'),)
+
+
 class User(db.Model, common.ModelWithDates):
     """Logged-in User model.
     Fields:
