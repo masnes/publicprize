@@ -152,6 +152,11 @@ def _create_database(is_production=False):
 
     for contest in data['Contest']:
         contest_id = _add_model(_create_contest(contest))
+        if 'Alias' in contest:
+            _add_model(publicprize.auth.model.BivAlias(
+                biv_id=contest_id,
+                alias_name=contest['Alias']['name']
+            ))
 
         for sponsor in contest['Sponsor']:
             logo_file = open(sponsor['logo_filename'], 'rb')
