@@ -21,6 +21,6 @@
     "host": "localhost",
     "postgres_pass": "postpass"
   },
-  "SUPPORT_EMAIL": "'vagrant@localhost.localdomain",
+  "SUPPORT_EMAIL": "vagrant@localhost.localdomain",
   "MAIL_DEBUG": false
 }
