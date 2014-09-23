@@ -22,5 +22,6 @@
     "postgres_pass": "postpass"
   },
   "SUPPORT_EMAIL": "vagrant@localhost.localdomain",
-  "MAIL_DEBUG": false
+  "MAIL_DEBUG": false,
+  "WTF_CSRF_ENABLED": false
 }
