@@ -27,5 +27,6 @@
   },
   "SUPPORT_EMAIL": "vagrant@localhost.localdomain",
   "MAIL_DEBUG": false,
-  "WTF_CSRF_ENABLED": false
+  "WTF_CSRF_ENABLED": false,
+  "INDEX_URI": ""
 }
