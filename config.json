@@ -9,6 +9,10 @@
     "app_id": "52174292586-2m801c1cb6rrir017uskgak8uhrit7gq.apps.googleusercontent.com",
     "app_secret": "6GP79ee_YgrTScaGIqsIdlue"
   },
+  "LINKEDIN": {
+    "app_id": "78dcx7bm73b9jk",
+    "app_secret": "4zwLycn5xApevfIz"
+  },
   "PAYPAL": {
     "mode": "sandbox",
     "client_id": "AX4PLRDhLD9Vfw-Nofq5cl9pJ00Db8m_gLoXWSPLcrsNLz3xFr1HBefnhZ9W",
@@ -23,5 +27,6 @@
   },
   "SUPPORT_EMAIL": "vagrant@localhost.localdomain",
   "MAIL_DEBUG": false,
-  "WTF_CSRF_ENABLED": false
+  "WTF_CSRF_ENABLED": false,
+  "INDEX_URI": ""
 }
