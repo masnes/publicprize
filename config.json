@@ -22,7 +22,7 @@
     "name": "pp",
     "user": "ppuser",
     "password": "pppass",
-    "host": "localhost",
+    "host": "",
     "postgres_pass": "postpass"
   },
   "SUPPORT_EMAIL": "vagrant@localhost.localdomain",
