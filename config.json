@@ -28,5 +28,6 @@
   "SUPPORT_EMAIL": "vagrant@localhost.localdomain",
   "MAIL_DEBUG": false,
   "WTF_CSRF_ENABLED": false,
-  "INDEX_URI": ""
+  "INDEX_URI": "",
+  "ADMIN_EMAIL": "vagrant@localhost.localdomain"
 }
